@@ -2131,19 +2131,22 @@
         new Sortable(builder, {
             animation: 150, group: 'exercises', ghostClass: 'ghost',
             onAdd: function(evt) {
-                // J3: Transform cloned exercise into workout item with sets/reps/rest
                 const item = evt.item;
                 const name = item.dataset.name || item.querySelector('[style*="color:var(--text-primary)"]')?.textContent?.trim() || item.textContent.trim();
                 item.dataset.name = name;
+                // Preserve original stage color from exercise library
+                const ex = S.exercises.find(e => (e.name||'') === name);
+                const sc = ex ? (exStageColors[ex.stage] || '#888') : '#888';
                 item.innerHTML = `
                     <div style="display:flex;align-items:center;gap:8px;width:100%">
+                        <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${sc};flex-shrink:0"></span>
                         <span style="flex:1;color:var(--text-primary);font-size:11px">${name}</span>
                         <input type="number" class="wo-sets" placeholder="Sets" style="width:48px;padding:4px;font-size:10px" value="3">
                         <input type="number" class="wo-reps" placeholder="Reps" style="width:48px;padding:4px;font-size:10px" value="10">
                         <input type="number" class="wo-rest" placeholder="Rest(s)" style="width:52px;padding:4px;font-size:10px" value="60">
                         <button class="btn btn-sm" onclick="this.closest('.exercise-item').remove()" style="color:var(--accent-danger);padding:2px 6px">×</button>
                     </div>`;
-                item.style.borderLeft = '3px solid var(--accent-gold)';
+                item.style.borderLeft = '3px solid ' + sc;
             }
         });
     }
@@ -2229,6 +2232,10 @@
             (S.savedWorkouts||[]).map((w,i) => `<option value="${i}">${w.name}</option>`).join('');
     }
 
+    function getExStageColor(name) {
+        const ex = S.exercises.find(e => (e.name||'') === name);
+        return ex ? (exStageColors[ex.stage] || '#888') : '#888';
+    }
     function loadSavedWorkout() {
         const sel = document.getElementById('saved-workouts-select');
         if (!sel || sel.value === '') return;
@@ -2236,14 +2243,18 @@
         if (!w) return;
         document.getElementById('workout-name').value = w.name;
         const builder = document.getElementById('workout-builder');
-        builder.innerHTML = w.items.map(i => `
-            <div class="exercise-item" data-name="${(i.name||'').replace(/"/g,'&quot;')}" style="display:flex;align-items:center;gap:8px;padding:8px 10px">
+        builder.innerHTML = w.items.map(i => {
+            const sc = getExStageColor(i.name);
+            return `
+            <div class="exercise-item" data-name="${(i.name||'').replace(/"/g,'&quot;')}" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border-left:3px solid ${sc}">
+                <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${sc};flex-shrink:0"></span>
                 <span style="flex:1;color:var(--text-primary)">${i.name}</span>
                 <input type="number" class="wo-sets" value="${i.sets}" placeholder="Sets" style="width:48px;padding:4px;font-size:10px">
                 <input type="number" class="wo-reps" value="${i.reps}" placeholder="Reps" style="width:48px;padding:4px;font-size:10px">
                 <input type="number" class="wo-rest" value="${i.rest}" placeholder="Rest" style="width:48px;padding:4px;font-size:10px">
-                <button class="btn btn-sm" onclick="this.parentElement.remove()" style="color:var(--accent-danger)">×</button>
-            </div>`).join('');
+                <button class="btn btn-sm" onclick="this.closest('.exercise-item').remove()" style="color:var(--accent-danger)">×</button>
+            </div>`;
+        }).join('');
     }
 
     // MINDMAP
@@ -2643,16 +2654,21 @@
         if (!t) return;
         document.getElementById('workout-name').value = t.name;
         const builder = document.getElementById('workout-builder');
-        builder.innerHTML = t.items.map(i => `
-            <div class="exercise-item wo-card" data-name="${i.name}" style="border-left:3px solid var(--accent-gold)">
+        builder.innerHTML = t.items.map(i => {
+            const sc = getExStageColor(i.name);
+            return `
+            <div class="exercise-item wo-card" data-name="${i.name}" style="border-left:3px solid ${sc}">
                 <div style="display:flex;align-items:center;gap:8px;width:100%">
+                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${sc};flex-shrink:0"></span>
                     <span style="flex:1;color:var(--text-primary);font-size:11px;font-weight:500">${i.name}</span>
                     <input type="number" class="wo-sets" value="${i.sets}" style="width:48px;padding:4px;font-size:10px">
                     <input type="number" class="wo-reps" value="${i.reps}" style="width:48px;padding:4px;font-size:10px">
                     <input type="number" class="wo-rest" value="${i.rest}" style="width:52px;padding:4px;font-size:10px">
                     <button class="btn btn-sm" onclick="this.closest('.exercise-item').remove()" style="color:var(--accent-danger);padding:2px 6px">x</button>
                 </div>
-            </div>`).join('');
+            </div>`;
+        }).join('');
+        updateWorkoutAnalytics();
     }
 
     // O3: Workout analytics
