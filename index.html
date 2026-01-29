@@ -475,40 +475,27 @@
         <!-- === HTMLS TAB === -->
         <section id="sec-htmls" class="section">
             <div class="sidebar sidebar-wide">
-                <div class="sidebar-label">HTML Collection</div>
-                <!-- V1: Upload zone -->
+                <div class="sidebar-label">Visual Gallery</div>
                 <div style="border:2px dashed #27272a;border-radius:8px;padding:16px;text-align:center;margin-bottom:10px;cursor:pointer" onclick="document.getElementById('html-file-upload').click()" id="html-drop-zone">
-                    <input type="file" id="html-file-upload" accept=".html,.htm" multiple style="display:none" onchange="handleHTMLUpload(event)">
-                    <div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:4px">Upload HTMLs</div>
-                    <div style="font-size:9px;color:var(--text-tertiary)">Click or drag .html files</div>
+                    <input type="file" id="html-file-upload" accept=".html,.htm,.png,.jpg,.jpeg,.gif,.svg,.webp" multiple style="display:none" onchange="handleHTMLUpload(event)">
+                    <div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:4px">Upload Files</div>
+                    <div style="font-size:9px;color:var(--text-tertiary)">HTML or images · drag &amp; drop</div>
                 </div>
-                <input type="text" id="html-search" placeholder="Search..." oninput="filterHTMLs()" style="margin-bottom:8px">
+                <input type="text" id="html-search" placeholder="Search gallery..." oninput="filterHTMLs()" style="margin-bottom:8px">
                 <select id="html-tag-filter" onchange="filterHTMLs()" style="margin-bottom:8px;font-size:10px">
                     <option value="all">All Tags</option>
+                </select>
+                <select id="html-type-filter" onchange="filterHTMLs()" style="margin-bottom:8px;font-size:10px">
+                    <option value="all">All Types</option>
+                    <option value="HTML">HTML</option>
+                    <option value="PNG">PNG / Image</option>
                 </select>
                 <div id="html-tag-counts" style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-bottom:6px"></div>
                 <div id="html-list" class="space-y" style="overflow-y:auto;flex:1"></div>
                 <button class="btn w-full" style="margin-top:8px" onclick="addHTML()">+ Add URL</button>
             </div>
-            <div class="content-split">
-                <div class="content-half" style="padding:8px">
-                    <div class="flex items-center justify-between" style="padding:8px 8px 0">
-                        <span class="sidebar-label" style="margin:0">Preview 1</span>
-                        <button class="btn btn-sm" onclick="openIframe(1)">Open</button>
-                    </div>
-                    <div style="background:#fff;border-radius:var(--radius-md);height:calc(100% - 32px);margin-top:8px;overflow:hidden">
-                        <iframe id="html-iframe-1" style="width:100%;height:100%;border:none" srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Select an HTML to preview</body></html>"></iframe>
-                    </div>
-                </div>
-                <div class="content-half" style="padding:8px">
-                    <div class="flex items-center justify-between" style="padding:8px 8px 0">
-                        <span class="sidebar-label" style="margin:0">Preview 2 (Compare)</span>
-                        <button class="btn btn-sm" onclick="openIframe(2)">Open</button>
-                    </div>
-                    <div style="background:#fff;border-radius:var(--radius-md);height:calc(100% - 32px);margin-top:8px;overflow:hidden">
-                        <iframe id="html-iframe-2" style="width:100%;height:100%;border:none" srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Select an HTML to compare</body></html>"></iframe>
-                    </div>
-                </div>
+            <div class="content" style="flex:1;overflow-y:auto;padding:16px" id="gallery-content">
+                <div id="gallery-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px"></div>
             </div>
         </section>
 
@@ -963,6 +950,23 @@
                 <button class="btn btn-primary" style="flex:1" onclick="saveNewEdge()">Create Edge</button>
                 <button class="btn" style="flex:1" onclick="closeEdgeModal()">Cancel</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Gallery Preview Modal -->
+    <div class="modal-overlay" id="gallery-preview-modal">
+        <div style="position:relative;width:92vw;height:90vh;display:flex;flex-direction:column">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--bg-surface);border-radius:var(--radius-lg) var(--radius-lg) 0 0;border:1px solid var(--border-subtle);border-bottom:none">
+                <div>
+                    <span id="gallery-preview-title" style="font-size:13px;font-weight:600;color:var(--text-primary)"></span>
+                    <span id="gallery-preview-type" class="badge" style="margin-left:8px"></span>
+                </div>
+                <div style="display:flex;align-items:center;gap:6px">
+                    <button class="btn btn-sm" onclick="openGalleryExternal()">Open External</button>
+                    <button class="btn btn-sm" style="font-size:14px;padding:4px 10px" onclick="closeGalleryPreview()">&times;</button>
+                </div>
+            </div>
+            <div id="gallery-preview-body" style="flex:1;background:#fff;border-radius:0 0 var(--radius-lg) var(--radius-lg);border:1px solid var(--border-subtle);border-top:none;overflow:hidden;position:relative"></div>
         </div>
     </div>
 
@@ -1514,8 +1518,19 @@
         }
     }
 
-    // HTMLS
+    // HTMLS / VISUAL GALLERY
+    const tagColors = { Deployed:'var(--accent-success)', Visual:'var(--accent-blue)', Framework:'var(--accent-purple)', Map:'var(--accent-warning)', Exercise:'var(--accent-gold)', TOC:'var(--accent-blue)', Uploaded:'#ff6b35', Infographic:'#00cfff', Custom:'var(--text-tertiary)' };
+    let _galleryPreviewFile = null;
+
+    function getFileType(f) {
+        if (f.fileType) return f.fileType;
+        if (f.path && /\.(png|jpe?g|gif|svg|webp)$/i.test(f.path)) return 'PNG';
+        if (f.content && f.content.startsWith('data:image')) return 'PNG';
+        return 'HTML';
+    }
+
     function initHTMLs() { buildHTMLTagFilter(); filterHTMLs(); }
+
     function buildHTMLTagFilter() {
         const tags = [...new Set(S.htmlFiles.map(f => f.tag))].sort();
         const sel = document.getElementById('html-tag-filter');
@@ -1523,47 +1538,137 @@
         const counts = document.getElementById('html-tag-counts');
         if (counts) counts.textContent = S.htmlFiles.length + ' files · ' + tags.length + ' tags';
     }
-    function renderHTMLList(files) {
-        const tagColors = { Deployed:'var(--accent-success)', Visual:'var(--accent-blue)', Framework:'var(--accent-purple)', Map:'var(--accent-warning)', Exercise:'var(--accent-gold)', TOC:'var(--accent-blue)', Uploaded:'#ff6b35', Infographic:'#00cfff', Custom:'var(--text-tertiary)' };
-        document.getElementById('html-list').innerHTML=files.map(f=>`
-            <div class="card" style="padding:10px;cursor:pointer;border-left:3px solid ${tagColors[f.tag]||'var(--border-subtle)'}" onclick="previewHTML(${JSON.stringify(f.id).replace(/"/g,'&quot;')},event)">
-                <div style="font-size:12px;color:var(--text-primary);margin-bottom:4px">${f.name}</div>
-                <span class="badge" style="background:${tagColors[f.tag]?tagColors[f.tag]+'22':'var(--accent-glow)'};color:${tagColors[f.tag]||'var(--accent-gold)'}">${f.tag}</span>
-            </div>`).join('');
-    }
+
     function filterHTMLs() {
         const q = (document.getElementById('html-search')?.value || '').toLowerCase();
         const tag = document.getElementById('html-tag-filter')?.value || 'all';
+        const type = document.getElementById('html-type-filter')?.value || 'all';
         let files = S.htmlFiles;
-        if (q) files = files.filter(f => f.name.toLowerCase().includes(q));
+        if (q) files = files.filter(f => f.name.toLowerCase().includes(q) || (f.desc||'').toLowerCase().includes(q));
         if (tag !== 'all') files = files.filter(f => f.tag === tag);
+        if (type !== 'all') files = files.filter(f => getFileType(f) === type);
+        renderGalleryGrid(files);
         renderHTMLList(files);
     }
-    function previewHTML(id,e) {
-        const f=S.htmlFiles.find(x=>x.id===id), panel=e?.shiftKey?2:1, iframe=document.getElementById('html-iframe-'+panel);
-        if(f.path) { iframe.removeAttribute('srcdoc'); iframe.src=f.path; }
-        else if(f.content) { iframe.removeAttribute('src'); iframe.srcdoc=f.content; }
-        else iframe.srcdoc=`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif"><div style="text-align:center"><h2>${f.name}</h2><p style="font-size:12px;opacity:.6">${f.tag} | No URL set</p></div></body></html>`;
+
+    function renderHTMLList(files) {
+        document.getElementById('html-list').innerHTML = files.map(f => {
+            const ft = getFileType(f);
+            const tc = tagColors[f.tag] || 'var(--border-subtle)';
+            return `<div class="card" style="padding:8px;cursor:pointer;border-left:3px solid ${tc}" onclick="openGalleryModal(${JSON.stringify(f.id).replace(/"/g,'&quot;')})">
+                <div style="font-size:11px;color:var(--text-primary);margin-bottom:2px">${f.name}</div>
+                <div style="display:flex;gap:4px;align-items:center">
+                    <span class="badge" style="background:${tc}22;color:${tc}">${f.tag}</span>
+                    <span style="font-family:var(--font-mono);font-size:8px;color:var(--text-tertiary)">${ft}</span>
+                </div>
+            </div>`;
+        }).join('');
     }
-    function openIframe(n) { const f=document.getElementById('html-iframe-'+n); if(f.src) window.open(f.src,'_blank'); }
+
+    function renderGalleryGrid(files) {
+        const grid = document.getElementById('gallery-grid');
+        if (!grid) return;
+        if (!files.length) { grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-tertiary);font-size:12px">No files match your filters</div>'; return; }
+        grid.innerHTML = files.map(f => {
+            const ft = getFileType(f);
+            const tc = tagColors[f.tag] || 'var(--accent-gold)';
+            const isImage = ft === 'PNG';
+            const dateStr = f.date || '';
+            const desc = f.desc || '';
+            // Thumbnail area
+            let thumb;
+            if (isImage && f.content && f.content.startsWith('data:image')) {
+                thumb = `<div style="height:130px;background:#111;border-radius:var(--radius-sm);overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="${f.content}" style="max-width:100%;max-height:130px;object-fit:contain"></div>`;
+            } else if (isImage && f.path) {
+                thumb = `<div style="height:130px;background:#111;border-radius:var(--radius-sm);overflow:hidden;display:flex;align-items:center;justify-content:center"><img src="${f.path}" style="max-width:100%;max-height:130px;object-fit:contain" onerror="this.outerHTML='<div style=\\'padding:20px;color:var(--text-tertiary);font-size:10px\\'>Image unavailable</div>'"></div>`;
+            } else {
+                thumb = `<div style="height:130px;background:linear-gradient(135deg,#0f1014 0%,#1a1a1f 100%);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="${tc}" stroke-width="1.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg></div>`;
+            }
+            return `<div class="panel" style="cursor:pointer;overflow:hidden;transition:all 0.2s;border-color:transparent" onclick="openGalleryModal(${JSON.stringify(f.id).replace(/"/g,'&quot;')})" onmouseenter="this.style.borderColor='${tc}'" onmouseleave="this.style.borderColor='transparent'">
+                ${thumb}
+                <div style="padding:10px 12px">
+                    <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                        <span style="font-family:var(--font-mono);font-size:8px;padding:2px 5px;border-radius:3px;background:${isImage?'rgba(0,207,255,0.12)':'rgba(168,85,247,0.12)'};color:${isImage?'var(--accent-blue)':'var(--accent-purple)'};text-transform:uppercase;letter-spacing:0.5px">${ft}</span>
+                        <span class="badge" style="background:${tc}22;color:${tc}">${f.tag}</span>
+                    </div>
+                    <div style="font-size:12px;font-weight:500;color:var(--text-primary);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${f.name}</div>
+                    ${desc ? `<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${desc}</div>` : ''}
+                    ${dateStr ? `<div style="font-family:var(--font-mono);font-size:8px;color:var(--text-tertiary)">${dateStr}</div>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    function openGalleryModal(id) {
+        const f = S.htmlFiles.find(x => x.id === id);
+        if (!f) return;
+        _galleryPreviewFile = f;
+        const ft = getFileType(f);
+        const isImage = ft === 'PNG';
+        document.getElementById('gallery-preview-title').textContent = f.name;
+        const typeBadge = document.getElementById('gallery-preview-type');
+        typeBadge.textContent = ft;
+        typeBadge.style.background = isImage ? 'rgba(0,207,255,0.12)' : 'rgba(168,85,247,0.12)';
+        typeBadge.style.color = isImage ? 'var(--accent-blue)' : 'var(--accent-purple)';
+        const body = document.getElementById('gallery-preview-body');
+        if (isImage) {
+            const src = (f.content && f.content.startsWith('data:image')) ? f.content : (f.path || '');
+            body.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#0a0a0c;overflow:auto"><img src="${src}" style="max-width:100%;max-height:100%;object-fit:contain"></div>`;
+        } else if (f.path) {
+            body.innerHTML = `<iframe src="${f.path}" style="width:100%;height:100%;border:none"></iframe>`;
+        } else if (f.content) {
+            body.innerHTML = `<iframe srcdoc="${f.content.replace(/"/g,'&quot;')}" style="width:100%;height:100%;border:none"></iframe>`;
+        } else {
+            body.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#666;font-family:sans-serif"><div style="text-align:center"><h2>${f.name}</h2><p style="font-size:12px;opacity:.6">${f.tag} | No preview available</p></div></div>`;
+        }
+        document.getElementById('gallery-preview-modal').classList.add('open');
+    }
+
+    function closeGalleryPreview() {
+        document.getElementById('gallery-preview-modal').classList.remove('open');
+        document.getElementById('gallery-preview-body').innerHTML = '';
+        _galleryPreviewFile = null;
+    }
+
+    function openGalleryExternal() {
+        if (!_galleryPreviewFile) return;
+        const f = _galleryPreviewFile;
+        if (f.path) { window.open(f.path, '_blank'); return; }
+        if (f.content) {
+            const isImg = f.content.startsWith('data:image');
+            const blob = isImg ? null : new Blob([f.content], { type: 'text/html' });
+            if (isImg) { const w = window.open(); w.document.write(`<img src="${f.content}" style="max-width:100%">`); }
+            else { const url = URL.createObjectURL(blob); window.open(url, '_blank'); }
+        }
+    }
+
     function addHTML() {
-        const name=prompt('HTML name:'); if(!name) return;
-        const tag=prompt('Tag (e.g. Deployed, Reference):')||'Custom';
-        const path=prompt('URL (leave empty for local):')||'';
-        S.htmlFiles.push({id:Date.now(),name,tag,path}); initHTMLs(); save();
+        const name = prompt('File name:'); if (!name) return;
+        const tag = prompt('Tag (e.g. Deployed, Visual, Exercise):') || 'Custom';
+        const path = prompt('URL or path (leave empty for local):') || '';
+        const desc = prompt('Short description (optional):') || '';
+        const now = new Date().toISOString().slice(0, 10);
+        S.htmlFiles.push({ id: Date.now(), name, tag, path, desc, date: now });
+        initHTMLs(); save();
     }
+
     function handleHTMLUpload(event) {
         const files = event.target.files;
         if (!files || !files.length) return;
+        const now = new Date().toISOString().slice(0, 10);
         Array.from(files).forEach(file => {
+            const isImage = /\.(png|jpe?g|gif|svg|webp)$/i.test(file.name);
             const reader = new FileReader();
             reader.onload = function(ev) {
-                const htmlContent = ev.target.result;
-                const name = file.name.replace(/\.(html?|htm)$/i, '');
-                S.htmlFiles.push({ id: Date.now() + Math.random(), name, tag: 'Uploaded', path: '', content: htmlContent });
+                const content = ev.target.result;
+                const name = file.name.replace(/\.\w+$/, '');
+                const tag = isImage ? 'Infographic' : 'Uploaded';
+                const fileType = isImage ? 'PNG' : 'HTML';
+                S.htmlFiles.push({ id: Date.now() + Math.random(), name, tag, path: '', content, desc: '', date: now, fileType });
                 initHTMLs(); save();
             };
-            reader.readAsText(file);
+            if (isImage) reader.readAsDataURL(file);
+            else reader.readAsText(file);
         });
         event.target.value = '';
     }
@@ -3323,6 +3428,14 @@
                 if (dt.files.length) { document.getElementById('html-file-upload').files = dt.files; handleHTMLUpload({ target: { files: dt.files, value: '' } }); }
             });
         }
+
+        // Escape key closes gallery preview
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                const gm = document.getElementById('gallery-preview-modal');
+                if (gm && gm.classList.contains('open')) closeGalleryPreview();
+            }
+        });
 
         // D2: doc-title change syncs to TOC + writing sidebar
         const docTitle = document.getElementById('doc-title');
