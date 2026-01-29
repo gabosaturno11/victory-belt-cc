@@ -1,0 +1,13 @@
+chapter_id,chapter_title,linked_movement_ids,act,part
+CH-01,The Philosophy,None,Literacy,Begin
+CH-02,Primary Patterns,MOV-P1-01;MOV-P2-02;MOV-P6-01,Literacy,Begin
+CH-03,Scapular Mastery,INF-SC-01;INF-SC-02;INF-SC-03,Literacy,Begin
+CH-04,Core Foundation,INF-CR-01;INF-CR-02;INF-CR-03,Literacy,Begin
+CH-05,The Handstand,MOV-P5-03;INF-SC-03,Synthesis,Build
+CH-06,The Muscle Up,MOV-P4-08;MOV-P4-09,Synthesis,Build
+CH-07,Static Strength,MOV-P1-11;MOV-P3-07,Synthesis,Choose
+CH-08,Legs & Mobility,MOV-P6-04;MOB-01;MOB-04,Synthesis,Choose
+CH-09,Freestyle Flow,MOV-P3-09;MOV-P2-09,Emergence,Deepen
+CH-10,Program Design,None,Emergence,Design
+CH-11,Longevity,MOB-09;MOB-10,Emergence,Endure
+CH-12,The Embodied Master,None,Emergence,Become

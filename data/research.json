@@ -1,0 +1,144 @@
+{
+  "meta": {
+    "title": "Research Cards — The Art of Calisthenics",
+    "version": "1.0.0",
+    "blockTypes": {
+      "A": { "label": "Core Concept", "color": "#74b9ff" },
+      "B": { "label": "Supporting Evidence", "color": "#55efc4" },
+      "C": { "label": "Application", "color": "#ffeaa7" },
+      "D": { "label": "Contradictions", "color": "#ff7675" }
+    }
+  },
+  "cards": [
+    {
+      "id": "RC-001",
+      "title": "Progressive Overload in Bodyweight Training",
+      "category": "Training Science",
+      "tags": ["foundation", "programming"],
+      "blocks": {
+        "A": "Progressive overload is the gradual increase of stress placed upon the body during training. In calisthenics, this is achieved through leverage changes, tempo manipulation, range of motion increases, and volume/density progression rather than simply adding weight.",
+        "B": "Kraemer & Ratamess (2004) established progressive overload as the fundamental principle of resistance training adaptation. Bodyweight-specific research by Harrison (2010) confirmed that leverage manipulation produces equivalent hypertrophic responses to load-based progression.",
+        "C": "Apply the SAID principle through the Saturno Progression Model: Master current variation (3x8-12 clean reps) before advancing. Use tempo (3-1-2-0) as intermediate progression. Decrease leverage advantage as primary overload mechanism.",
+        "D": "Linear periodization models from barbell training do not directly translate. Bodyweight progressions follow skill-acquisition curves rather than linear strength curves. Some movements (planche, lever) require neurological adaptation periods with no visible progress."
+      },
+      "used": false
+    },
+    {
+      "id": "RC-002",
+      "title": "The Mobility-Strength Continuum",
+      "category": "Mobility",
+      "tags": ["mobility", "big-7"],
+      "blocks": {
+        "A": "Mobility and strength exist on a continuum, not as separate qualities. Functional mobility requires strength at end ranges. The Mobility Big 7 positions represent fundamental human movement capacities that unlock all pattern progressions.",
+        "B": "FRC (Functional Range Conditioning) research demonstrates that passive range without active control is both non-functional and injury-prone. Andreo Spina's work shows controlled articular rotations (CARs) maintain joint health through active end-range loading.",
+        "C": "Stage 0 (Mobility & Preparation) is mandatory before Stage 1. Each of the Big 7 positions directly unlocks a movement pattern: Resting Squat unlocks Knee-Dominant, Forward Fold unlocks Hip-Dominant, German Hang unlocks Downward Press, Bridge unlocks Overhead Press.",
+        "D": "Hypermobility without strength is a risk factor. Static stretching pre-workout can temporarily decrease force output (Simic et al., 2013). Dynamic mobility work is preferred pre-training; static holds are best post-training or in dedicated sessions."
+      },
+      "used": false
+    },
+    {
+      "id": "RC-003",
+      "title": "Scapular Control as Movement Foundation",
+      "category": "Anatomy & Biomechanics",
+      "tags": ["scapular", "infrastructure"],
+      "blocks": {
+        "A": "The scapula is the foundation of upper body movement. Without proper scapular control (protraction, retraction, elevation, depression), all upper body patterns are compromised. The 4 scapular positions map directly to the 4 upper body push/pull patterns.",
+        "B": "Kibler et al. (2013) identified scapular dyskinesis as a primary contributor to shoulder pathology in overhead athletes. Cressey & Reinold's research on baseball players demonstrated that scapular stabilization programs reduced shoulder injuries by 68%.",
+        "C": "The Infrastructure layer (INF-SC-01 through INF-SC-05) must be established before loading patterns. Scapular Push Up (protraction) supports Horizontal Push. Scapular Row (retraction) supports Horizontal Pull. Active Hang (elevation) supports Vertical Pull. Support Hold (depression) supports Downward Press.",
+        "D": "Over-cuing scapular retraction during pushing movements (a common coaching error) can limit serratus anterior function and reduce push-up force output. The scapula should move freely through range during dynamic movements, not be 'locked' in position."
+      },
+      "used": false
+    },
+    {
+      "id": "RC-004",
+      "title": "The Six Disciplines Framework",
+      "category": "Training Philosophy",
+      "tags": ["disciplines", "specialization"],
+      "blocks": {
+        "A": "Calisthenics encompasses six distinct disciplines: Bodybuilding (hypertrophy), Power-Free/Statics (isometric strength), Freestyle (dynamic skills), Street Lifting (weighted basics), Hand-Balancing (inverted skills), and Mobility (range of motion). Stage 3 is where practitioners choose their path.",
+        "B": "The concept of training specialization follows the SAID principle (Specific Adaptation to Imposed Demands). Bompa's periodization research shows that generalist training produces diminishing returns after 2-3 years, while specialization continues to drive adaptation.",
+        "C": "Stages 1-2 build the universal foundation across all patterns. At Stage 3, the practitioner selects 1-2 primary disciplines while maintaining baseline competency in others. The Movement Matrix maps which Stage 2 skills feed into which discipline pathways.",
+        "D": "Early specialization (before completing Stage 2) leads to imbalances and plateaus. The 'generalist vs specialist' debate is resolved by the Three Stages model: be general first, then specialize. Hybrid paths (combining 2 disciplines) are viable but require longer timelines."
+      },
+      "used": false
+    },
+    {
+      "id": "RC-005",
+      "title": "Excellence Technique Paradigm",
+      "category": "Training Philosophy",
+      "tags": ["technique", "mastering"],
+      "blocks": {
+        "A": "The Excellence Technique Paradigm replaces perfectionism with a process-oriented framework. Six pillars define technical excellence: Injury Prevention, Effectiveness, Efficiency, Replicability, Transferability, and Aesthetics. Excellence is a direction, not a destination.",
+        "B": "Ericsson's deliberate practice research (2006) shows that expertise develops through focused practice with clear standards, not through repetition alone. Motor learning literature (Schmidt & Lee, 2011) confirms that variable practice with consistent intent produces more robust skill acquisition.",
+        "C": "Each movement in the taxonomy is evaluated against all six pillars. A 'technically excellent' Push Up scores high on all six: safe joint alignment (Injury), full ROM (Effectiveness), no wasted energy (Efficiency), same quality every rep (Replicability), transfers to harder variations (Transferability), and looks clean (Aesthetics).",
+        "D": "Perfectionism creates paralysis. Waiting for 'perfect form' before progressing is counterproductive. The standard is 'excellent enough to progress safely.' Some technique breakdown at maximal effort is expected and acceptable in strength-focused training."
+      },
+      "used": false
+    },
+    {
+      "id": "RC-006",
+      "title": "Core as Anti-Movement System",
+      "category": "Anatomy & Biomechanics",
+      "tags": ["core", "infrastructure"],
+      "blocks": {
+        "A": "The core's primary function is resisting movement (anti-extension, anti-rotation, anti-lateral flexion), not creating it. The Infrastructure Core layer (INF-CR) trains these anti-movement patterns progressively, from Plank through Dragon Flag.",
+        "B": "McGill (2010) established the 'Big Three' stabilization exercises and demonstrated that spinal stability, not mobility, is the primary core function for injury prevention. Behm et al. (2010) meta-analysis confirmed that instability training (anti-movement) produces greater core activation than traditional crunches.",
+        "C": "The core infrastructure progression: Plank (anti-extension) and Side Plank (anti-lateral flexion) at Stage 1. Hollow Body Hold (active anti-extension) feeds into L-Sit and front lever prerequisites. Dragon Flag and Windshield Wiper represent Stage 3 mastery of anti-extension and rotation respectively.",
+        "D": "Traditional 'ab training' (crunches, sit-ups) is not contraindicated but is less functional for calisthenics skill development. Spinal flexion exercises have a role in bodybuilding-focused training but are not in the core infrastructure pathway."
+      },
+      "used": false
+    },
+    {
+      "id": "RC-007",
+      "title": "The Three Stages Development Model",
+      "category": "Training Philosophy",
+      "tags": ["stages", "progression"],
+      "blocks": {
+        "A": "The Three Stages model provides a clear developmental framework: Stage 1 (Creating the Base) establishes fundamental patterns and infrastructure. Stage 2 (Building the Structure) develops the Big Seven compound skills. Stage 3 (Continuous Mastering) is discipline-specific specialization.",
+        "B": "Fitts & Posner's (1967) three-stage motor learning model (cognitive, associative, autonomous) maps directly to this framework. Stage 1 is cognitive (learning patterns), Stage 2 is associative (refining complex skills), Stage 3 is autonomous (sport-specific mastery).",
+        "C": "Stage 1 criteria: All 7 fundamental patterns at baseline (Push Up, Inverted Row, Dip, Pull Up, Pike Push Up, Squat, Bridge). All infrastructure elements (scapular + core) established. Stage 2 criteria: Muscle Up, Handstand Hold, Pistol Squat, Front Lever progression, Planche progression. Stage 3: Discipline-specific goals.",
+        "D": "Stage transitions are not time-based. Some practitioners spend 2+ years in Stage 1. Attempting Stage 2 skills without Stage 1 completion is the primary cause of plateaus and injuries in calisthenics training."
+      },
+      "used": false
+    },
+    {
+      "id": "RC-008",
+      "title": "Movement as Humanity's First Language",
+      "category": "Philosophy",
+      "tags": ["philosophy", "introduction"],
+      "blocks": {
+        "A": "Before spoken language, humans communicated through movement. Dance, gesture, physical play, and combat were the original forms of expression. Calisthenics reconnects practitioners to this primal language through deliberate, skilled bodyweight movement.",
+        "B": "Evolutionary biology research (Lieberman, 2013) demonstrates that Homo sapiens evolved as endurance movement specialists. Anthropological evidence shows that physical skill displays served social bonding, mate selection, and tribal hierarchy functions across all human cultures.",
+        "C": "This philosophical framework elevates calisthenics from 'exercise' to 'practice.' The book's Introduction establishes this context to shift the reader's mindset from fitness-as-punishment to movement-as-expression. Every chapter thereafter builds on this foundation.",
+        "D": "The 'noble savage' fallacy: romanticizing ancestral movement patterns ignores that modern humans have different biomechanical needs (desk work, screen time). The philosophy inspires, but the programming must be evidence-based and practical."
+      },
+      "used": false
+    },
+    {
+      "id": "RC-009",
+      "title": "Transfer Value Between Movement Patterns",
+      "category": "Training Science",
+      "tags": ["transfer", "matrix"],
+      "blocks": {
+        "A": "Not all movement skill transfers equally. The Movement Matrix quantifies transfer value on a 4-point scale: Strong Positive (direct prerequisite), Moderate Positive (supporting skill), Weak Positive (indirect benefit), Context Dependent (conditional transfer). This drives intelligent program design.",
+        "B": "Motor learning research on transfer of training (Magill & Anderson, 2017) shows that transfer is highest when movements share similar coordination patterns, force vectors, and joint angles. Cross-education effects (contralateral transfer) are well-documented for unilateral training.",
+        "C": "The Matrix edges encode transfer values: Push Up to Pseudo Planche Push Up (STRONG: same pattern, harder leverage). Push Up to Dip (MODERATE: both pushing but different vector). Pull Up to Front Lever (STRONG: both vertical pull, lever adds anti-extension). Muscle Up requires both Pull Up AND Dip (convergent prerequisites).",
+        "D": "Transfer is not always bidirectional. A strong Front Lever practitioner doesn't automatically have a strong Pull Up (they likely do, but the reverse prerequisite chain is more reliable). The Matrix edges are directional for this reason."
+      },
+      "used": false
+    },
+    {
+      "id": "RC-010",
+      "title": "Equipment Minimalism in Calisthenics",
+      "category": "Practical",
+      "tags": ["equipment", "getting-started"],
+      "blocks": {
+        "A": "Calisthenics requires minimal equipment. The essential setup is: a pull-up bar and floor space. Optional additions (rings, parallettes, dip station) expand exercise variety but are not required for Stage 1 completion. This accessibility is a core advantage of the discipline.",
+        "B": "Research on gym accessibility and exercise adherence (Sallis et al., 1990) shows that equipment requirements are inversely correlated with long-term training consistency. Home-based bodyweight programs show higher 12-month adherence rates than gym-based programs.",
+        "C": "Equipment tiers: Tier 0 (None/Floor): 40% of taxonomy accessible. Tier 1 (+ Bar): 75% accessible. Tier 2 (+ Rings + Parallettes): 95% accessible. Tier 3 (+ Bands + Weights): 100%. The book's equipment guide maps each tier to achievable movements.",
+        "D": "Equipment minimalism can become dogmatic. Some movements genuinely benefit from equipment (rings for muscle-up progression, parallettes for L-sit comfort). The goal is minimal necessary equipment, not zero equipment as an ideology."
+      },
+      "used": false
+    }
+  ]
+}

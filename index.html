@@ -3,325 +3,725 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SATURNO COMMAND CENTER | Victory Belt</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>SATURNO COMMAND CENTER V3 | Victory Belt</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/kjua/0.9.0/kjua.min.js"></script>
     <style>
-        * { box-sizing: border-box; }
-        body { background: #0a0a0a; color: #a1a1aa; font-family: 'Monaco', 'Menlo', monospace; }
-        .tab-active { background: #18181b; border-bottom: 2px solid #fff; color: #fff; }
-        .panel { border: 1px solid #27272a; background: #0f0f0f; }
-        .panel-header { background: #18181b; border-bottom: 1px solid #27272a; cursor: move; }
-        .toc-item { border: 1px solid #27272a; cursor: grab; transition: all 0.2s; }
-        .toc-item:hover { border-color: #52525b; background: #18181b; }
-        .toc-item.dragging { opacity: 0.5; border-color: #fff; }
-        .ghost { opacity: 0.4; background: #27272a !important; }
-        .ql-toolbar { background: #18181b !important; border-color: #27272a !important; }
-        .ql-container { border-color: #27272a !important; background: #0f0f0f !important; color: #e4e4e7 !important; min-height: 300px; }
+        :root {
+            --bg-void: #0a0a0c;
+            --bg-deep: #0f1014;
+            --bg-surface: #151519;
+            --bg-elevated: #1a1a1f;
+            --border-subtle: rgba(255,255,255,0.06);
+            --border-hover: rgba(255,255,255,0.12);
+            --border-active: rgba(255,170,0,0.4);
+            --accent-gold: #ffaa00;
+            --accent-glow: rgba(255,170,0,0.12);
+            --accent-success: #00ff88;
+            --accent-warning: #ff6b35;
+            --accent-danger: #ff4466;
+            --accent-blue: #00cfff;
+            --accent-purple: #a855f7;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.6);
+            --text-tertiary: rgba(255,255,255,0.3);
+            --font-display: 'Sora', -apple-system, sans-serif;
+            --font-mono: 'JetBrains Mono', 'Monaco', monospace;
+            --radius-sm: 6px;
+            --radius-md: 10px;
+            --radius-lg: 14px;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: var(--font-display); background: var(--bg-void); color: var(--text-secondary); min-height: 100vh; -webkit-font-smoothing: antialiased; display: flex; flex-direction: column; overflow: hidden; height: 100vh; }
+
+        .glaze { background: linear-gradient(135deg, rgba(255,255,255,0.015) 0%, rgba(255,255,255,0.005) 100%); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+        .panel { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); transition: border-color 0.25s; }
+        .panel:hover { border-color: var(--border-hover); }
+
+        .header { height: 52px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; background: linear-gradient(135deg, var(--bg-void) 0%, #12100a 50%, var(--bg-void) 100%); flex-shrink: 0; }
+        .logo { display: flex; align-items: center; gap: 10px; }
+        .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, var(--accent-gold), #cc8800); border-radius: 8px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 16px rgba(255,170,0,0.2); flex-shrink: 0; }
+        .logo-title { font-size: 14px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.5px; }
+        .logo-sub { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); letter-spacing: 0.5px; }
+
+        .tabs { display: flex; gap: 2px; flex-wrap: wrap; }
+        .tab { padding: 8px 10px; border: none; background: transparent; color: var(--text-tertiary); font-family: var(--font-display); font-size: 10px; font-weight: 500; cursor: pointer; border-radius: var(--radius-sm); transition: all 0.2s; letter-spacing: 0.3px; white-space: nowrap; }
+        .tab:hover { color: var(--text-secondary); background: var(--bg-surface); }
+        .tab.active { background: var(--accent-glow); color: var(--accent-gold); }
+
+        .kernel { height: 40px; border-bottom: 1px solid var(--border-subtle); display: flex; align-items: center; justify-content: center; gap: 28px; flex-shrink: 0; }
+        .kernel-item { display: flex; align-items: center; gap: 6px; font-size: 11px; }
+        .kernel-dot { width: 6px; height: 6px; border-radius: 50%; }
+        .kernel-label { color: var(--text-tertiary); font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kernel-value { color: var(--text-primary); font-weight: 600; }
+
+        .main { flex: 1; overflow: hidden; display: flex; }
+        .section { width: 100%; height: 100%; display: none; }
+        .section.active { display: flex; }
+
+        .sidebar { width: 200px; border-right: 1px solid var(--border-subtle); padding: 14px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-deep); overflow-y: auto; flex-shrink: 0; }
+        .sidebar-label { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-tertiary); margin-bottom: 4px; }
+        .sidebar-wide { width: 260px; }
+
+        .content { flex: 1; overflow-y: auto; padding: 16px; }
+        .content-split { flex: 1; display: flex; overflow: hidden; }
+        .content-half { flex: 1; overflow-y: auto; padding: 16px; }
+        .content-half + .content-half { border-left: 1px solid var(--border-subtle); }
+
+        .btn { padding: 7px 12px; border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-secondary); font-family: var(--font-display); font-size: 10px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px; }
+        .btn:hover { border-color: var(--border-active); color: var(--text-primary); transform: translateY(-1px); }
+        .btn-primary { background: linear-gradient(135deg, var(--accent-gold), #cc8800); color: #000; border: none; font-weight: 600; }
+        .btn-primary:hover { box-shadow: 0 4px 12px rgba(255,170,0,0.3); }
+        .btn-sm { padding: 4px 8px; font-size: 9px; }
+        .btn-icon { width: 28px; height: 28px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: var(--radius-sm); }
+        .btn-group { display: flex; gap: 4px; }
+
+        input, select, textarea { background: var(--bg-deep); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); color: var(--text-primary); font-family: var(--font-display); padding: 7px 10px; font-size: 11px; transition: all 0.2s; width: 100%; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--border-active); box-shadow: 0 0 0 2px var(--accent-glow); }
+
+        .badge { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.5px; text-transform: uppercase; padding: 3px 7px; border-radius: 3px; background: var(--accent-glow); color: var(--accent-gold); }
+        .badge-green { background: rgba(0,255,136,0.12); color: var(--accent-success); }
+        .badge-orange { background: rgba(255,107,53,0.12); color: var(--accent-warning); }
+        .badge-red { background: rgba(255,68,102,0.12); color: var(--accent-danger); }
+        .badge-blue { background: rgba(0,207,255,0.12); color: var(--accent-blue); }
+        .badge-purple { background: rgba(168,85,247,0.12); color: var(--accent-purple); }
+
+        .toc-item { background: var(--bg-deep); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 10px 12px; cursor: grab; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .toc-item:hover { border-color: var(--border-active); background: var(--bg-surface); transform: translateX(3px); }
+        .toc-item.is-part { background: var(--bg-surface); border-left: 3px solid var(--accent-gold); }
+        .toc-item .type-tag { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); min-width: 14px; }
+        .toc-item .title { font-size: 12px; flex: 1; }
+        .toc-item.is-part .title { color: var(--text-primary); font-weight: 600; }
+        .toc-item.mismatch { border-color: var(--accent-danger); background: rgba(255,68,102,0.06); }
+        .ghost { opacity: 0.3; }
+        .drag-chosen { box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+
+        .card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 14px; transition: all 0.25s; }
+        .card:hover { border-color: var(--border-hover); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .card-title { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+
+        .research-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 16px; transition: all 0.25s; }
+        .research-card:hover { border-color: var(--border-active); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.3); }
+        .research-card.used { opacity: 0.45; }
+
+        .research-block { border-radius: var(--radius-sm); padding: 8px 10px; margin-bottom: 6px; font-size: 11px; line-height: 1.6; }
+        .research-block-label { font-family: var(--font-mono); font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 3px; opacity: 0.7; }
+        .research-block-a { background: rgba(116,185,255,0.1); border-left: 3px solid #74b9ff; }
+        .research-block-b { background: rgba(85,239,196,0.1); border-left: 3px solid #55efc4; }
+        .research-block-c { background: rgba(255,234,167,0.1); border-left: 3px solid #ffeaa7; }
+        .research-block-d { background: rgba(255,118,117,0.1); border-left: 3px solid #ff7675; }
+
+        .exercise-item { background: var(--bg-deep); border: 1px solid var(--border-subtle); border-radius: var(--radius-sm); padding: 8px 10px; cursor: grab; transition: all 0.15s; font-size: 11px; }
+        .exercise-item:hover { border-color: var(--border-active); background: var(--bg-surface); }
+
+        .mindmap-canvas { position: relative; width: 100%; height: 100%; background: var(--bg-deep); overflow: auto; }
+        .mindmap-node { position: absolute; padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); cursor: move; font-size: 12px; font-weight: 500; transition: box-shadow 0.2s; user-select: none; }
+        .mindmap-node:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-color: var(--border-hover); }
+
+        .collapsible-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; cursor: pointer; border-radius: var(--radius-md); transition: background 0.2s; }
+        .collapsible-header:hover { background: var(--bg-surface); }
+        .collapsible-arrow { transition: transform 0.2s; font-size: 10px; color: var(--text-tertiary); }
+        .collapsible-body { overflow: hidden; transition: max-height 0.3s ease; }
+        .collapsed .collapsible-body { max-height: 0 !important; }
+        .collapsed .collapsible-arrow { transform: rotate(-90deg); }
+
+        .ql-toolbar { background: var(--bg-surface) !important; border-color: var(--border-subtle) !important; border-radius: var(--radius-md) var(--radius-md) 0 0; }
+        .ql-container { border-color: var(--border-subtle) !important; background: var(--bg-deep) !important; color: var(--text-primary) !important; min-height: 300px; border-radius: 0 0 var(--radius-md) var(--radius-md); }
         .ql-editor { font-family: 'Georgia', serif; font-size: 14px; line-height: 1.8; }
-        .ql-snow .ql-stroke { stroke: #71717a !important; }
-        .ql-snow .ql-fill { fill: #71717a !important; }
-        .ql-snow .ql-picker { color: #71717a !important; }
-        .html-preview { border: 1px solid #27272a; background: #fff; }
-        .research-card { border: 1px solid #27272a; transition: all 0.2s; }
-        .research-card:hover { border-color: #52525b; transform: translateY(-2px); }
-        .mismatch { background: #7f1d1d; border-color: #991b1b; }
-        .resizable { resize: both; overflow: auto; min-width: 200px; min-height: 100px; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #0a0a0a; }
-        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 3px; }
-        .collapse-btn { transition: transform 0.2s; }
-        .collapsed .collapse-btn { transform: rotate(-90deg); }
-        .collapsed .panel-content { display: none; }
+        .ql-snow .ql-stroke { stroke: var(--text-tertiary) !important; }
+        .ql-snow .ql-fill { fill: var(--text-tertiary) !important; }
+        .ql-snow .ql-picker { color: var(--text-tertiary) !important; }
+
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--bg-elevated); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.12); }
+
+        .grid { display: grid; gap: 12px; }
+        .grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .grid-4 { grid-template-columns: repeat(4, 1fr); }
+        .grid-auto { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        .flex { display: flex; }
+        .flex-col { flex-direction: column; }
+        .gap-2 { gap: 8px; }
+        .gap-3 { gap: 12px; }
+        .gap-4 { gap: 16px; }
+        .items-center { align-items: center; }
+        .justify-between { justify-content: space-between; }
+        .w-full { width: 100%; }
+        .mt-3 { margin-top: 12px; }
+        .mb-3 { margin-bottom: 12px; }
+        .mb-4 { margin-bottom: 16px; }
+        .space-y > * + * { margin-top: 8px; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; }
+        .modal-overlay.open { display: flex; }
+        .modal { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 24px; width: 360px; }
+
+        /* Matrix layout */
+        .matrix-layout { display: flex; width: 100%; height: 100%; position: relative; }
+        .matrix-sidebar { width: 200px; border-right: 1px solid var(--border-subtle); padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--bg-deep); overflow-y: auto; flex-shrink: 0; }
+        .matrix-center { flex: 1; position: relative; overflow: hidden; }
+        #cy-container { width: 100%; height: 100%; }
+        .context-panel { width: 320px; position: absolute; right: 0; top: 0; bottom: 0; background: var(--bg-surface); border-left: 1px solid var(--border-subtle); transform: translateX(100%); transition: transform 300ms ease; overflow-y: auto; padding: 16px; z-index: 10; }
+        .context-panel.open { transform: translateX(0); }
+        .context-panel-close { position: absolute; top: 10px; right: 10px; cursor: pointer; background: none; border: none; color: var(--text-tertiary); font-size: 16px; }
+        .context-panel-close:hover { color: var(--text-primary); }
+        .node-detail-label { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); margin-bottom: 3px; margin-top: 10px; }
+        .node-detail-value { font-size: 12px; color: var(--text-primary); margin-bottom: 6px; }
+        .prereq-badge { display: inline-block; padding: 2px 8px; border-radius: 3px; background: var(--bg-deep); border: 1px solid var(--border-subtle); font-size: 10px; color: var(--text-secondary); margin: 2px; }
+
+        /* Matrix filter section */
+        .matrix-filter-group { margin-bottom: 8px; }
+        .matrix-filter-title { font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); margin-bottom: 6px; }
+        .matrix-filter-group label { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text-secondary); cursor: pointer; padding: 2px 0; }
+        .matrix-filter-group input[type="checkbox"] { width: auto; accent-color: var(--accent-gold); }
+
+        /* Taxonomy table */
+        .taxonomy-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .taxonomy-table thead { position: sticky; top: 0; z-index: 2; }
+        .taxonomy-table th { background: var(--bg-surface); border-bottom: 2px solid var(--border-subtle); padding: 10px 12px; text-align: left; font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-tertiary); }
+        .taxonomy-table td { padding: 8px 12px; border-bottom: 1px solid var(--border-subtle); color: var(--text-secondary); }
+        .taxonomy-table tr:hover td { background: var(--bg-surface); color: var(--text-primary); }
+        .taxonomy-table .stage-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; }
+
+        /* Export cards */
+        .export-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; transition: all 0.25s; }
+        .export-card:hover { border-color: var(--border-active); transform: translateY(-2px); }
+        .export-card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+        .export-card-desc { font-size: 10px; color: var(--text-tertiary); margin-bottom: 12px; }
+
+        /* Barcode */
+        .qr-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; text-align: center; }
+        .qr-card canvas { border-radius: var(--radius-md); margin-top: 10px; }
+        .qr-label { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
+        .qr-url { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); word-break: break-all; }
+
+        /* Internal tab */
+        .internal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .internal-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; }
+        .internal-card-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 12px; }
+        .locked-item { font-size: 10px; color: var(--text-tertiary); line-height: 2; }
+        .locked-status { color: var(--accent-success); font-weight: 600; }
+        .locked-status-active { color: var(--accent-gold); font-weight: 600; }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden">
-    <!-- TOP NAVIGATION BAR -->
-    <header class="h-12 border-b border-zinc-800 bg-black flex items-center justify-between px-4">
-        <div class="flex items-center gap-6">
-            <h1 class="text-white text-sm font-bold tracking-wider">SATURNO_COMMAND_CENTER</h1>
-            <nav class="flex gap-1 text-[10px] uppercase tracking-widest">
-                <button onclick="switchTab('toc')" id="tab-toc" class="px-4 py-3 tab-active">TOC</button>
-                <button onclick="switchTab('writing')" id="tab-writing" class="px-4 py-3 hover:bg-zinc-900">Writing</button>
-                <button onclick="switchTab('htmls')" id="tab-htmls" class="px-4 py-3 hover:bg-zinc-900">HTMLs</button>
-                <button onclick="switchTab('research')" id="tab-research" class="px-4 py-3 hover:bg-zinc-900">Research</button>
-                <button onclick="switchTab('workout')" id="tab-workout" class="px-4 py-3 hover:bg-zinc-900">Workout</button>
-                <button onclick="switchTab('mindmap')" id="tab-mindmap" class="px-4 py-3 hover:bg-zinc-900">MindMap</button>
-            </nav>
+<body>
+
+    <!-- HEADER -->
+    <header class="header">
+        <div class="logo">
+            <div class="logo-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="11" ry="3.5"/></svg>
+            </div>
+            <div>
+                <div class="logo-title">SATURNO COMMAND CENTER</div>
+                <div class="logo-sub">VICTORY BELT | The Art of Calisthenics</div>
+            </div>
         </div>
-        <div class="flex items-center gap-4">
-            <span class="text-[10px] text-zinc-500">VB Deadline: 10 Days</span>
-            <button onclick="openInternalSection()" class="w-6 h-6 border border-zinc-700 rounded flex items-center justify-center text-[10px] hover:border-white" title="Internal Section">S</button>
+        <nav class="tabs">
+            <button class="tab active" data-tab="toc">TOC</button>
+            <button class="tab" data-tab="writing">Writing</button>
+            <button class="tab" data-tab="decisions">Decisions</button>
+            <button class="tab" data-tab="research">Research</button>
+            <button class="tab" data-tab="htmls">HTMLs</button>
+            <button class="tab" data-tab="matrix">Matrix</button>
+            <button class="tab" data-tab="taxonomy">Taxonomy</button>
+            <button class="tab" data-tab="workout">Workout</button>
+            <button class="tab" data-tab="mindmap">Mind Map</button>
+            <button class="tab" data-tab="barcode">Barcode</button>
+            <button class="tab" data-tab="export">Export</button>
+            <button class="tab" data-tab="internal">Internal</button>
+        </nav>
+        <div class="flex items-center gap-2">
+            <span class="badge">V3</span>
+            <button class="btn-icon btn" onclick="exportAllState()" title="Export State">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            </button>
+            <button class="btn-icon btn" onclick="openInternal()" title="Internal Section" style="font-family:var(--font-mono);font-size:11px;font-weight:700;color:var(--accent-gold);">S</button>
         </div>
     </header>
 
-    <!-- MAIN CONTENT AREA -->
-    <main class="flex-grow flex overflow-hidden">
+    <!-- KERNEL BAR -->
+    <div class="kernel glaze">
+        <div class="kernel-item"><div class="kernel-dot" style="background:var(--accent-success)"></div><span class="kernel-label">Book</span><span class="kernel-value">The Art of Calisthenics</span></div>
+        <div class="kernel-item"><div class="kernel-dot" style="background:var(--accent-gold)"></div><span class="kernel-label">Chapters</span><span class="kernel-value" id="k-chapters">27</span></div>
+        <div class="kernel-item"><div class="kernel-dot" style="background:var(--accent-blue)"></div><span class="kernel-label">Parts</span><span class="kernel-value" id="k-parts">7</span></div>
+        <div class="kernel-item"><div class="kernel-dot" style="background:var(--accent-success)"></div><span class="kernel-label">Status</span><span class="kernel-value" style="color:var(--accent-success)">Active</span></div>
+        <div class="kernel-item"><div class="kernel-dot" style="background:var(--accent-purple)"></div><span class="kernel-label">Decisions</span><span class="kernel-value" id="k-decisions">0</span></div>
+        <div class="kernel-item"><div class="kernel-dot" style="background:var(--accent-warning)"></div><span class="kernel-label">Nodes</span><span class="kernel-value" id="k-nodes">95</span></div>
+    </div>
 
-        <!-- ============ TOC TAB ============ -->
-        <section id="view-toc" class="w-full h-full flex">
-            <!-- TOC Version Selector -->
-            <div class="w-48 border-r border-zinc-800 p-4 flex flex-col gap-2">
-                <p class="text-[9px] uppercase tracking-widest text-zinc-500 mb-2">TOC Versions</p>
-                <select id="toc-version-left" onchange="loadTOC('left')" class="bg-zinc-900 border border-zinc-700 text-xs p-2 mb-2">
-                    <option value="v1">TOC v1 (Original)</option>
-                    <option value="v2">TOC v2 (Revised)</option>
-                    <option value="v3">TOC v3 (Final)</option>
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+        <!-- === TOC TAB === -->
+        <section id="sec-toc" class="section active">
+            <div class="sidebar">
+                <div class="sidebar-label">TOC Versions</div>
+                <select id="toc-v-left" onchange="loadTOC('left')">
+                    <option value="v1">v1 - Original (7 Parts)</option>
+                    <option value="v2">v2 - Compact (25 Ch)</option>
                 </select>
-                <select id="toc-version-right" onchange="loadTOC('right')" class="bg-zinc-900 border border-zinc-700 text-xs p-2 mb-4">
-                    <option value="v2" selected>TOC v2 (Revised)</option>
-                    <option value="v1">TOC v1 (Original)</option>
-                    <option value="v3">TOC v3 (Final)</option>
+                <select id="toc-v-right" onchange="loadTOC('right')">
+                    <option value="v2" selected>v2 - Compact (25 Ch)</option>
+                    <option value="v1">v1 - Original (7 Parts)</option>
                 </select>
-                <button onclick="addTOCVersion()" class="text-[10px] border border-zinc-700 p-2 hover:border-white">+ New Version</button>
-                <button onclick="compareTOCs()" class="text-[10px] border border-zinc-700 p-2 hover:border-white mt-2">Compare TOCs</button>
-                <button onclick="exportTOC()" class="text-[10px] border border-zinc-700 p-2 hover:border-white mt-2">Export TOC</button>
-                <div class="mt-auto">
-                    <p class="text-[9px] text-zinc-600">Drag items to reorder</p>
-                    <p class="text-[9px] text-zinc-600">Red = Mismatch</p>
+                <div style="border-top:1px solid var(--border-subtle);padding-top:8px;margin-top:4px"></div>
+                <button class="btn w-full" onclick="addTOCVersion()">+ New Version</button>
+                <button class="btn w-full" onclick="compareTOCs()">Compare</button>
+                <button class="btn w-full" onclick="exportTOC()">Export JSON</button>
+                <button class="btn btn-primary w-full" onclick="loadExternalTOC()">Load toc.json</button>
+                <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle)">
+                    <div style="font-size:9px;color:var(--text-tertiary);line-height:1.5">Drag items to reorder.<br>Red = mismatch between versions.</div>
                 </div>
             </div>
-
-            <!-- TOC Panel Left -->
-            <div class="flex-1 border-r border-zinc-800 p-4 overflow-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <p class="text-[10px] uppercase tracking-widest text-zinc-400">TOC v1</p>
-                    <button onclick="addChapter('left')" class="text-[10px] border border-zinc-700 px-2 py-1 hover:border-white">+ Chapter</button>
+            <div class="content-split">
+                <div class="content-half">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="sidebar-label" style="margin:0" id="toc-left-label">TOC v1</span>
+                        <button class="btn btn-sm" onclick="addChapter('left')">+ Chapter</button>
+                    </div>
+                    <div id="toc-left" class="space-y"></div>
                 </div>
-                <div id="toc-left" class="space-y-2">
-                    <!-- TOC items will be loaded here -->
-                </div>
-            </div>
-
-            <!-- TOC Panel Right -->
-            <div class="flex-1 p-4 overflow-auto">
-                <div class="flex justify-between items-center mb-4">
-                    <p class="text-[10px] uppercase tracking-widest text-zinc-400">TOC v2</p>
-                    <button onclick="addChapter('right')" class="text-[10px] border border-zinc-700 px-2 py-1 hover:border-white">+ Chapter</button>
-                </div>
-                <div id="toc-right" class="space-y-2">
-                    <!-- TOC items will be loaded here -->
+                <div class="content-half">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="sidebar-label" style="margin:0" id="toc-right-label">TOC v2</span>
+                        <button class="btn btn-sm" onclick="addChapter('right')">+ Chapter</button>
+                    </div>
+                    <div id="toc-right" class="space-y"></div>
                 </div>
             </div>
         </section>
 
-        <!-- ============ WRITING TAB ============ -->
-        <section id="view-writing" class="w-full h-full hidden flex">
-            <!-- TOC Sidebar -->
-            <div class="w-64 border-r border-zinc-800 p-4 overflow-auto">
-                <p class="text-[9px] uppercase tracking-widest text-zinc-500 mb-4">Document Structure</p>
-                <div id="writing-toc" class="space-y-1">
-                    <!-- Document TOC -->
-                </div>
-                <div class="mt-6 pt-4 border-t border-zinc-800">
-                    <p class="text-[9px] uppercase tracking-widest text-zinc-500 mb-2">Export As</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="exportAs('md')" class="text-[10px] border border-zinc-700 p-2 hover:border-white">MD</button>
-                        <button onclick="exportAs('txt')" class="text-[10px] border border-zinc-700 p-2 hover:border-white">TXT</button>
-                        <button onclick="exportAs('word')" class="text-[10px] border border-zinc-700 p-2 hover:border-white">Word</button>
-                        <button onclick="exportAs('pdf')" class="text-[10px] border border-zinc-700 p-2 hover:border-white">PDF</button>
-                        <button onclick="exportAs('yaml')" class="text-[10px] border border-zinc-700 p-2 hover:border-white">YAML</button>
-                        <button onclick="exportAs('html')" class="text-[10px] border border-zinc-700 p-2 hover:border-white">HTML</button>
+        <!-- === WRITING TAB === -->
+        <section id="sec-writing" class="section">
+            <div class="sidebar sidebar-wide">
+                <div class="sidebar-label">Document Structure</div>
+                <div id="writing-toc" class="space-y"></div>
+                <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle)">
+                    <div class="sidebar-label">Export As</div>
+                    <div class="grid grid-2 gap-2" style="margin-top:6px">
+                        <button class="btn" onclick="exportAs('md')">MD</button>
+                        <button class="btn" onclick="exportAs('txt')">TXT</button>
+                        <button class="btn" onclick="exportAs('html')">HTML</button>
+                        <button class="btn" onclick="exportAs('yaml')">YAML</button>
+                        <button class="btn" onclick="exportAs('word')">Word</button>
+                        <button class="btn" onclick="exportAs('pdf')">PDF</button>
                     </div>
                 </div>
-                <div class="mt-6 pt-4 border-t border-zinc-800">
-                    <p class="text-[9px] uppercase tracking-widest text-zinc-500 mb-2">Send To</p>
-                    <button onclick="sendTo('dropbox')" class="w-full text-[10px] border border-zinc-700 p-2 hover:border-white mb-2 flex items-center gap-2">
-                        <span class="w-4 h-4 bg-blue-600 rounded text-[8px] flex items-center justify-center">D</span> Dropbox
-                    </button>
-                    <button onclick="sendTo('onedrive')" class="w-full text-[10px] border border-zinc-700 p-2 hover:border-white flex items-center gap-2">
-                        <span class="w-4 h-4 bg-blue-500 rounded text-[8px] flex items-center justify-center">O</span> OneDrive
-                    </button>
-                </div>
             </div>
+            <div class="content flex-col" style="display:flex">
+                <div class="flex items-center justify-between mb-3">
+                    <input type="text" id="doc-title" value="Chapter 1: What, How, Why & Who" style="background:transparent;border:none;font-size:16px;font-weight:600;color:var(--text-primary);width:50%;padding:0">
+                    <div class="btn-group">
+                        <button class="btn" onclick="saveDocument()">Save</button>
+                        <button class="btn btn-primary" onclick="exportAs('md')">Export</button>
+                    </div>
+                </div>
+                <div id="editor-wrap" style="flex:1"><div id="editor"></div></div>
+            </div>
+        </section>
 
-            <!-- Rich Text Editor -->
-            <div class="flex-1 p-4 flex flex-col">
+        <!-- === DECISIONS TAB === -->
+        <section id="sec-decisions" class="section" style="flex-direction:column">
+            <div class="content" style="flex:1">
                 <div class="flex items-center justify-between mb-4">
-                    <input type="text" id="doc-title" value="Chapter 1: The Art of Calisthenics" class="bg-transparent text-white text-lg font-bold outline-none border-b border-transparent hover:border-zinc-700 focus:border-white">
+                    <div>
+                        <div style="font-size:15px;font-weight:600;color:var(--text-primary)">Decision Log & Bottlenecks</div>
+                        <div style="font-size:11px;color:var(--text-tertiary)">Track every decision and blocker</div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="addDecision()">+ Decision</button>
+                        <button class="btn" onclick="addBottleneck()">+ Bottleneck</button>
+                    </div>
+                </div>
+                <div class="grid grid-2">
+                    <div class="card">
+                        <div class="card-header"><span class="card-title flex items-center gap-2"><span class="kernel-dot" style="background:var(--accent-success)"></span> Decisions Made</span></div>
+                        <div id="decisions-list" class="space-y"></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header"><span class="card-title flex items-center gap-2"><span class="kernel-dot" style="background:var(--accent-warning)"></span> Bottlenecks</span></div>
+                        <div id="bottlenecks-list" class="space-y"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === RESEARCH TAB === -->
+        <section id="sec-research" class="section" style="flex-direction:column">
+            <div class="content" style="flex:1">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <div style="font-size:15px;font-weight:600;color:var(--text-primary)">Research Frameworks</div>
+                        <div style="font-size:11px;color:var(--text-tertiary)">Evidence-based claims with A/B/C/D blocks</div>
+                    </div>
                     <div class="flex gap-2">
-                        <button onclick="saveDocument()" class="text-[10px] bg-white text-black px-4 py-2 font-bold">Save</button>
+                        <select id="research-filter" onchange="renderResearch(this.value)" style="width:160px">
+                            <option value="all">All Categories</option>
+                        </select>
+                        <button class="btn" onclick="loadExternalResearch()">Load JSON</button>
+                        <button class="btn" onclick="addResearchCard()">+ Add</button>
                     </div>
                 </div>
-                <div id="editor-container" class="flex-grow">
-                    <div id="editor"></div>
-                </div>
+                <div id="research-grid" class="grid grid-auto"></div>
             </div>
         </section>
 
-        <!-- ============ HTMLS TAB ============ -->
-        <section id="view-htmls" class="w-full h-full hidden flex">
-            <!-- HTML File List -->
-            <div class="w-64 border-r border-zinc-800 p-4 overflow-auto">
-                <p class="text-[9px] uppercase tracking-widest text-zinc-500 mb-4">HTML Collection</p>
-                <div class="mb-4">
-                    <input type="text" placeholder="Search HTMLs..." class="w-full bg-zinc-900 border border-zinc-700 text-xs p-2">
-                </div>
-                <div id="html-list" class="space-y-2">
-                    <!-- HTML files will be listed here -->
-                </div>
-                <button onclick="addHTML()" class="w-full text-[10px] border border-zinc-700 p-2 hover:border-white mt-4">+ Add HTML</button>
+        <!-- === HTMLS TAB === -->
+        <section id="sec-htmls" class="section">
+            <div class="sidebar sidebar-wide">
+                <div class="sidebar-label">HTML Collection</div>
+                <input type="text" id="html-search" placeholder="Search..." oninput="filterHTMLs()" style="margin-bottom:8px">
+                <div id="html-list" class="space-y"></div>
+                <button class="btn w-full" style="margin-top:8px" onclick="addHTML()">+ Add HTML</button>
             </div>
-
-            <!-- HTML Preview Panels -->
-            <div class="flex-1 flex">
-                <div class="flex-1 p-4 border-r border-zinc-800">
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-[10px] uppercase tracking-widest text-zinc-400">Preview 1</p>
-                        <div class="flex gap-2">
-                            <button onclick="togglePanel('html-panel-1')" class="text-[10px] border border-zinc-700 px-2 py-1">Collapse</button>
-                            <button onclick="openInNewTab('html-panel-1')" class="text-[10px] border border-zinc-700 px-2 py-1">Open</button>
-                        </div>
+            <div class="content-split">
+                <div class="content-half" style="padding:8px">
+                    <div class="flex items-center justify-between" style="padding:8px 8px 0">
+                        <span class="sidebar-label" style="margin:0">Preview 1</span>
+                        <button class="btn btn-sm" onclick="openIframe(1)">Open</button>
                     </div>
-                    <div id="html-panel-1" class="html-preview h-full rounded">
-                        <iframe id="html-iframe-1" class="w-full h-full" srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;'>Select an HTML to preview</body></html>"></iframe>
+                    <div style="background:#fff;border-radius:var(--radius-md);height:calc(100% - 32px);margin-top:8px;overflow:hidden">
+                        <iframe id="html-iframe-1" style="width:100%;height:100%;border:none" srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Select an HTML to preview</body></html>"></iframe>
                     </div>
                 </div>
-                <div class="flex-1 p-4">
-                    <div class="flex items-center justify-between mb-2">
-                        <p class="text-[10px] uppercase tracking-widest text-zinc-400">Preview 2 (Compare)</p>
-                        <div class="flex gap-2">
-                            <button onclick="togglePanel('html-panel-2')" class="text-[10px] border border-zinc-700 px-2 py-1">Collapse</button>
-                            <button onclick="openInNewTab('html-panel-2')" class="text-[10px] border border-zinc-700 px-2 py-1">Open</button>
-                        </div>
+                <div class="content-half" style="padding:8px">
+                    <div class="flex items-center justify-between" style="padding:8px 8px 0">
+                        <span class="sidebar-label" style="margin:0">Preview 2 (Compare)</span>
+                        <button class="btn btn-sm" onclick="openIframe(2)">Open</button>
                     </div>
-                    <div id="html-panel-2" class="html-preview h-full rounded">
-                        <iframe id="html-iframe-2" class="w-full h-full" srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;'>Select an HTML to compare</body></html>"></iframe>
+                    <div style="background:#fff;border-radius:var(--radius-md);height:calc(100% - 32px);margin-top:8px;overflow:hidden">
+                        <iframe id="html-iframe-2" style="width:100%;height:100%;border:none" srcdoc="<html><body style='display:flex;align-items:center;justify-content:center;height:100vh;color:#999;font-family:sans-serif'>Select an HTML to compare</body></html>"></iframe>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- ============ RESEARCH TAB ============ -->
-        <section id="view-research" class="w-full h-full hidden p-4 overflow-auto">
-            <div class="flex justify-between items-center mb-4">
-                <p class="text-[10px] uppercase tracking-widest text-zinc-400">Research Frameworks</p>
-                <div class="flex gap-2">
-                    <select id="research-filter" class="bg-zinc-900 border border-zinc-700 text-xs p-2">
-                        <option value="all">All Categories</option>
-                        <option value="psychology">Psychology</option>
-                        <option value="movement">Movement</option>
-                        <option value="neuroscience">Neuroscience</option>
-                        <option value="training">Training</option>
-                    </select>
-                    <button onclick="addResearchCard()" class="text-[10px] border border-zinc-700 px-3 py-2 hover:border-white">+ Add Card</button>
+        <!-- === MATRIX TAB === -->
+        <section id="sec-matrix" class="section">
+            <div class="matrix-layout">
+                <div class="matrix-sidebar">
+                    <div class="sidebar-label">Matrix Filters</div>
+                    <div class="matrix-filter-group">
+                        <div class="matrix-filter-title">Stage</div>
+                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="0" checked> Stage 0</label>
+                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="1" checked> Stage 1</label>
+                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="2" checked> Stage 2</label>
+                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="3" checked> Stage 3</label>
+                    </div>
+                    <div class="matrix-filter-group" id="matrix-pattern-filters">
+                        <div class="matrix-filter-title">Pattern</div>
+                    </div>
+                    <div class="matrix-filter-group" id="matrix-discipline-filters">
+                        <div class="matrix-filter-title">Discipline</div>
+                    </div>
+                    <div class="matrix-filter-group" id="matrix-type-filters">
+                        <div class="matrix-filter-title">Node Type</div>
+                    </div>
+                    <div style="margin-top:auto;padding-top:8px;border-top:1px solid var(--border-subtle)">
+                        <button class="btn w-full" onclick="resetMatrixFilters()">Reset Filters</button>
+                        <button class="btn w-full mt-3" onclick="refitMatrix()">Re-fit Graph</button>
+                    </div>
                 </div>
-            </div>
-            <div id="research-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                <!-- Research cards will be loaded here -->
+                <div class="matrix-center">
+                    <div id="cy-container"></div>
+                    <div class="context-panel" id="node-detail-panel">
+                        <button class="context-panel-close" onclick="closeNodePanel()">&times;</button>
+                        <div id="node-detail-content"></div>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- ============ WORKOUT TAB ============ -->
-        <section id="view-workout" class="w-full h-full hidden flex">
-            <!-- Exercise Library -->
-            <div class="w-72 border-r border-zinc-800 p-4 overflow-auto">
-                <p class="text-[9px] uppercase tracking-widest text-zinc-500 mb-4">Exercise Library</p>
-                <input type="text" id="exercise-search" placeholder="Search exercises..." class="w-full bg-zinc-900 border border-zinc-700 text-xs p-2 mb-4">
-                <select id="pattern-filter" class="w-full bg-zinc-900 border border-zinc-700 text-xs p-2 mb-4">
+        <!-- === TAXONOMY TAB === -->
+        <section id="sec-taxonomy" class="section" style="flex-direction:column">
+            <div style="padding:12px 16px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--bg-deep)">
+                <input type="text" id="tax-search" placeholder="Search movements..." oninput="renderTaxonomy()" style="width:240px">
+                <select id="tax-pattern" onchange="renderTaxonomy()" style="width:160px">
                     <option value="all">All Patterns</option>
-                    <option value="horizontal-push">Horizontal Push</option>
-                    <option value="horizontal-pull">Horizontal Pull</option>
-                    <option value="vertical-push">Vertical Push</option>
-                    <option value="vertical-pull">Vertical Pull</option>
-                    <option value="knee-dominant">Knee Dominant</option>
-                    <option value="hip-dominant">Hip Dominant</option>
-                    <option value="core">Core</option>
                 </select>
-                <div id="exercise-library" class="space-y-2">
-                    <!-- Exercise list -->
-                </div>
+                <select id="tax-stage" onchange="renderTaxonomy()" style="width:130px">
+                    <option value="all">All Stages</option>
+                    <option value="0">Stage 0</option>
+                    <option value="1">Stage 1</option>
+                    <option value="2">Stage 2</option>
+                    <option value="3">Stage 3</option>
+                </select>
+                <select id="tax-type" onchange="renderTaxonomy()" style="width:130px">
+                    <option value="all">All Types</option>
+                </select>
+                <span id="tax-count" style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-left:auto"></span>
             </div>
+            <div class="content" style="flex:1;padding:0">
+                <table class="taxonomy-table">
+                    <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Pattern</th><th>Stage</th><th>Discipline</th><th>Function</th></tr></thead>
+                    <tbody id="tax-tbody"></tbody>
+                </table>
+            </div>
+        </section>
 
-            <!-- Workout Builder -->
-            <div class="flex-1 p-4">
-                <div class="flex justify-between items-center mb-4">
-                    <input type="text" id="workout-name" value="New Workout" class="bg-transparent text-white text-lg font-bold outline-none border-b border-transparent hover:border-zinc-700 focus:border-white">
-                    <div class="flex gap-2">
-                        <button onclick="exportWorkout('excel')" class="text-[10px] border border-zinc-700 px-3 py-2 hover:border-white">Export Excel</button>
-                        <button onclick="exportWorkout('pdf')" class="text-[10px] border border-zinc-700 px-3 py-2 hover:border-white">Export PDF</button>
-                        <button onclick="saveWorkout()" class="text-[10px] bg-white text-black px-4 py-2 font-bold">Save</button>
+        <!-- === WORKOUT TAB === -->
+        <section id="sec-workout" class="section">
+            <div class="sidebar sidebar-wide">
+                <div class="sidebar-label">Exercise Library</div>
+                <input type="text" id="ex-search" placeholder="Search exercises..." oninput="filterExercises()" style="margin-bottom:6px">
+                <select id="ex-pattern-filter" onchange="filterExercises()" style="margin-bottom:8px">
+                    <option value="all">All Patterns</option>
+                    <option value="Horizontal Push">Horizontal Push</option>
+                    <option value="Horizontal Pull">Horizontal Pull</option>
+                    <option value="Downward Press">Downward Press</option>
+                    <option value="Vertical Pull">Vertical Pull</option>
+                    <option value="Overhead Press">Overhead Press</option>
+                    <option value="Knee-Dominant">Knee-Dominant</option>
+                    <option value="Hip-Dominant">Hip-Dominant</option>
+                    <option value="Core">Core</option>
+                    <option value="Mobility">Mobility</option>
+                </select>
+                <div id="ex-library" class="space-y"></div>
+            </div>
+            <div class="content flex-col" style="display:flex">
+                <div class="flex items-center justify-between mb-3">
+                    <input type="text" id="workout-name" value="New Workout" style="background:transparent;border:none;font-size:16px;font-weight:600;color:var(--text-primary);width:300px;padding:0">
+                    <div class="btn-group">
+                        <button class="btn" onclick="exportWorkout()">Export</button>
+                        <button class="btn btn-primary" onclick="saveWorkout()">Save</button>
                     </div>
                 </div>
-                <div id="workout-builder" class="space-y-2 min-h-96 border border-zinc-800 border-dashed p-4 rounded">
-                    <p class="text-zinc-600 text-sm">Drag exercises here to build your workout</p>
+                <div id="workout-builder" style="flex:1;border:1px dashed var(--border-subtle);border-radius:var(--radius-md);padding:12px;min-height:200px" class="space-y">
+                    <div style="color:var(--text-tertiary);font-size:12px;text-align:center;padding:40px">Drag exercises here to build your workout</div>
                 </div>
             </div>
         </section>
 
-        <!-- ============ MINDMAP TAB ============ -->
-        <section id="view-mindmap" class="w-full h-full hidden">
-            <div class="p-4 border-b border-zinc-800 flex justify-between items-center">
-                <div class="flex gap-4">
-                    <button onclick="addMindmapNode()" class="text-[10px] border border-zinc-700 px-3 py-2 hover:border-white">+ Add Node</button>
-                    <button onclick="addMindmapConnection()" class="text-[10px] border border-zinc-700 px-3 py-2 hover:border-white">+ Connection</button>
+        <!-- === MINDMAP TAB === -->
+        <section id="sec-mindmap" class="section" style="flex-direction:column">
+            <div style="padding:10px 16px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+                <div class="btn-group">
+                    <button class="btn" onclick="addMindmapNode()">+ Node</button>
+                    <button class="btn" onclick="addMindmapConnection()">+ Connection</button>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="exportMindmap('png')" class="text-[10px] border border-zinc-700 px-3 py-2 hover:border-white">Export PNG</button>
-                    <button onclick="exportMindmap('json')" class="text-[10px] border border-zinc-700 px-3 py-2 hover:border-white">Export JSON</button>
+                <div class="btn-group">
+                    <button class="btn" onclick="exportMindmap('json')">Export JSON</button>
+                    <button class="btn" onclick="clearMindmap()">Clear</button>
                 </div>
             </div>
-            <div id="mindmap-canvas" class="w-full h-full bg-zinc-950 relative overflow-auto" style="height: calc(100% - 56px);">
-                <svg id="mindmap-svg" class="absolute inset-0 w-full h-full pointer-events-none"></svg>
-                <div id="mindmap-nodes">
-                    <!-- Mindmap nodes will be rendered here -->
+            <div class="mindmap-canvas" id="mm-canvas">
+                <svg id="mm-svg" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></svg>
+                <div id="mm-nodes"></div>
+            </div>
+        </section>
+
+        <!-- === BARCODE TAB === -->
+        <section id="sec-barcode" class="section" style="flex-direction:column">
+            <div class="content" style="flex:1">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <div style="font-size:15px;font-weight:600;color:var(--text-primary)">QR Code Generator</div>
+                        <div style="font-size:11px;color:var(--text-tertiary)">Generate QR codes for project URLs</div>
+                    </div>
+                </div>
+                <div style="margin-bottom:20px">
+                    <div class="sidebar-label" style="margin-bottom:8px">Custom URL</div>
+                    <div class="flex gap-2">
+                        <input type="text" id="qr-custom-url" placeholder="https://example.com" style="flex:1">
+                        <button class="btn btn-primary" onclick="generateCustomQR()">Generate</button>
+                    </div>
+                    <div id="qr-custom-output" style="margin-top:12px;text-align:center"></div>
+                </div>
+                <div class="sidebar-label" style="margin-bottom:10px">Preset QR Codes</div>
+                <div class="grid grid-3" id="qr-presets"></div>
+            </div>
+        </section>
+
+        <!-- === EXPORT TAB === -->
+        <section id="sec-export" class="section" style="flex-direction:column">
+            <div class="content" style="flex:1">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <div style="font-size:15px;font-weight:600;color:var(--text-primary)">Export Hub</div>
+                        <div style="font-size:11px;color:var(--text-tertiary)">Centralized export for all data</div>
+                    </div>
+                </div>
+                <div class="grid grid-3" id="export-grid">
+                    <div class="export-card">
+                        <div class="export-card-title">TOC</div>
+                        <div class="export-card-desc">Table of Contents structure</div>
+                        <button class="btn w-full" onclick="exportTOCJson()">Export JSON</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-title">Matrix</div>
+                        <div class="export-card-desc">Movement graph data</div>
+                        <div class="flex gap-2">
+                            <button class="btn" style="flex:1" onclick="exportMatrixJson()">JSON</button>
+                            <button class="btn" style="flex:1" onclick="exportMatrixCsv()">CSV</button>
+                        </div>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-title">Research</div>
+                        <div class="export-card-desc">Research frameworks data</div>
+                        <button class="btn w-full" onclick="exportResearchJson()">Export JSON</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-title">Writing - Word</div>
+                        <div class="export-card-desc">Export current document as .doc</div>
+                        <button class="btn w-full" onclick="exportAs('word')">Export Word</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-title">Writing - PDF</div>
+                        <div class="export-card-desc">Export current document as PDF</div>
+                        <button class="btn w-full" onclick="exportAs('pdf')">Export PDF</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-title">Writing - MD</div>
+                        <div class="export-card-desc">Export as Markdown</div>
+                        <button class="btn w-full" onclick="exportAs('md')">Export MD</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-title">Writing - HTML</div>
+                        <div class="export-card-desc">Export as standalone HTML</div>
+                        <button class="btn w-full" onclick="exportAs('html')">Export HTML</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-title">Full State Backup</div>
+                        <div class="export-card-desc">Complete app state as JSON</div>
+                        <button class="btn btn-primary w-full" onclick="exportAllState()">Backup All</button>
+                    </div>
+                    <div class="export-card">
+                        <div class="export-card-title">Mindmap</div>
+                        <div class="export-card-desc">Mindmap nodes and connections</div>
+                        <button class="btn w-full" onclick="exportMindmap('json')">Export JSON</button>
+                    </div>
                 </div>
             </div>
         </section>
-    </main>
 
-    <!-- INTERNAL SECTION MODAL -->
-    <div id="internal-modal" class="hidden fixed inset-0 bg-black/90 z-50 flex items-center justify-center">
-        <div class="bg-zinc-900 border border-zinc-700 p-8 rounded-lg w-96">
-            <h2 class="text-white text-lg font-bold mb-4">Internal Section</h2>
-            <input type="password" id="internal-password" placeholder="Enter password..." class="w-full bg-zinc-800 border border-zinc-700 p-3 mb-4">
+        <!-- === INTERNAL TAB === -->
+        <section id="sec-internal" class="section" style="flex-direction:column">
+            <div class="content" style="flex:1">
+                <div id="internal-tab-locked" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:16px">
+                    <div style="font-size:48px;opacity:0.2">&#x1f512;</div>
+                    <div style="font-size:14px;font-weight:600;color:var(--text-primary)">Internal Section Locked</div>
+                    <div style="font-size:11px;color:var(--text-tertiary);margin-bottom:8px">Enter password to access deployment tools</div>
+                    <div class="flex gap-2" style="width:300px">
+                        <input type="password" id="internal-tab-pw" placeholder="Password..." style="flex:1">
+                        <button class="btn btn-primary" onclick="unlockInternalTab()">Unlock</button>
+                    </div>
+                </div>
+                <div id="internal-tab-content" style="display:none">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <div style="font-size:15px;font-weight:600;color:var(--text-primary)">Internal Deployment Forge</div>
+                            <div style="font-size:11px;color:var(--text-tertiary)">Deployment tools and system status</div>
+                        </div>
+                        <button class="btn" onclick="lockInternalTab()">Lock</button>
+                    </div>
+                    <div class="internal-grid">
+                        <div class="internal-card">
+                            <div class="internal-card-title">Quick Deploy</div>
+                            <button class="btn w-full mb-3" onclick="alert('Run: npx gh-pages -d .')">GitHub Pages</button>
+                            <button class="btn w-full mb-3" onclick="alert('Push to GitHub for Vercel auto-deploy')">Vercel</button>
+                            <button class="btn w-full" onclick="alert('Run: netlify deploy --prod')">Netlify</button>
+                        </div>
+                        <div class="internal-card">
+                            <div class="internal-card-title">Storage Usage</div>
+                            <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px">localStorage Usage</div>
+                            <div style="height:6px;background:var(--bg-deep);border-radius:3px;overflow:hidden"><div id="storage-bar-tab" style="height:100%;background:var(--accent-gold);border-radius:3px;width:2%"></div></div>
+                            <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px" id="storage-label-tab">0 KB</div>
+                            <button class="btn w-full mt-3" onclick="if(confirm('Clear all cached data?')){localStorage.clear();location.reload();}">Clear Cache</button>
+                        </div>
+                        <div class="internal-card">
+                            <div class="internal-card-title">Locked Structures</div>
+                            <div class="locked-item">Mobility Big 7: <span class="locked-status">LOCKED V4</span></div>
+                            <div class="locked-item">Movement Patterns: <span class="locked-status">LOCKED V2</span></div>
+                            <div class="locked-item">Six Disciplines: <span class="locked-status">LOCKED</span></div>
+                            <div class="locked-item">Three Stages: <span class="locked-status">LOCKED</span></div>
+                            <div class="locked-item">TOC (7 Parts/25 Ch): <span class="locked-status-active">ACTIVE</span></div>
+                        </div>
+                        <div class="internal-card">
+                            <div class="internal-card-title">Build Info</div>
+                            <div style="font-size:10px;color:var(--text-tertiary);line-height:2">
+                                Version: <span style="color:var(--text-primary)">V3.0</span><br>
+                                Engine: <span style="color:var(--text-primary)">TITAN Design</span><br>
+                                Libraries: <span style="color:var(--text-primary)">Quill, Sortable, Cytoscape, pdfmake, kjua</span><br>
+                                State Key: <span style="color:var(--text-primary)">scc3</span><br>
+                                Build Date: <span style="color:var(--text-primary)" id="build-date"></span>
+                            </div>
+                        </div>
+                        <div class="internal-card">
+                            <div class="internal-card-title">Data Status</div>
+                            <div style="font-size:10px;color:var(--text-tertiary);line-height:2">
+                                Matrix Nodes: <span style="color:var(--text-primary)" id="int-matrix-nodes">0</span><br>
+                                Matrix Edges: <span style="color:var(--text-primary)" id="int-matrix-edges">0</span><br>
+                                Research Cards: <span style="color:var(--text-primary)" id="int-research-count">0</span><br>
+                                Decisions: <span style="color:var(--text-primary)" id="int-decisions-count">0</span><br>
+                                TOC Items: <span style="color:var(--text-primary)" id="int-toc-count">0</span>
+                            </div>
+                        </div>
+                        <div class="internal-card">
+                            <div class="internal-card-title">Actions</div>
+                            <button class="btn w-full mb-3" onclick="exportAllState()">Export Full State</button>
+                            <button class="btn w-full mb-3" onclick="importState()">Import State</button>
+                            <input type="file" id="import-file" style="display:none" accept=".json" onchange="handleImport(event)">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- INTERNAL SECTION MODAL (for S button) -->
+    <div class="modal-overlay" id="internal-modal">
+        <div class="modal">
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:16px">Internal Section</div>
+            <input type="password" id="internal-pw" placeholder="Password..." style="margin-bottom:12px">
             <div class="flex gap-2">
-                <button onclick="validatePassword()" class="flex-1 bg-white text-black p-2 font-bold">Enter</button>
-                <button onclick="closeInternalModal()" class="flex-1 border border-zinc-700 p-2">Cancel</button>
+                <button class="btn btn-primary" style="flex:1" onclick="validateInternal()">Enter</button>
+                <button class="btn" style="flex:1" onclick="closeInternal()">Cancel</button>
             </div>
         </div>
     </div>
 
-    <!-- INTERNAL DEPLOYMENT SECTION (Hidden until password) -->
-    <div id="internal-section" class="hidden fixed inset-0 bg-black z-50 overflow-auto">
-        <header class="h-12 border-b border-zinc-800 flex items-center justify-between px-4">
-            <h1 class="text-white text-sm font-bold">INTERNAL DEPLOYMENT FORGE</h1>
-            <button onclick="exitInternalSection()" class="text-[10px] border border-zinc-700 px-3 py-2">Exit</button>
-        </header>
-        <div class="p-8">
-            <div class="grid grid-cols-3 gap-6">
-                <div class="panel p-4">
-                    <h3 class="text-white text-sm font-bold mb-4">Quick Deploy</h3>
-                    <button onclick="deployToGitHub()" class="w-full border border-zinc-700 p-3 mb-2 hover:border-white text-left">
-                        <span class="text-white">GitHub Pages</span>
-                        <span class="text-[10px] text-zinc-500 block">Deploy to gabosaturno11.github.io</span>
-                    </button>
-                    <button onclick="deployToVercel()" class="w-full border border-zinc-700 p-3 hover:border-white text-left">
-                        <span class="text-white">Vercel</span>
-                        <span class="text-[10px] text-zinc-500 block">Deploy to Vercel project</span>
-                    </button>
+    <!-- INTERNAL SECTION OVERLAY (for S button) -->
+    <div id="internal-section" style="display:none;position:fixed;inset:0;background:var(--bg-void);z-index:90;overflow:auto">
+        <div class="header" style="border-bottom:1px solid var(--border-subtle)">
+            <div class="flex items-center gap-3">
+                <div class="logo-icon" style="width:28px;height:28px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="11" ry="3.5"/></svg></div>
+                <span style="font-size:13px;font-weight:600;color:var(--text-primary)">INTERNAL DEPLOYMENT FORGE</span>
+            </div>
+            <button class="btn" onclick="exitInternal()">Exit</button>
+        </div>
+        <div style="padding:24px">
+            <div class="grid grid-3">
+                <div class="card">
+                    <div class="card-title mb-3">Quick Deploy</div>
+                    <button class="btn w-full mb-3" onclick="alert('Run: npx gh-pages -d .')">GitHub Pages</button>
+                    <button class="btn w-full" onclick="alert('Push to GitHub for Vercel auto-deploy')">Vercel</button>
                 </div>
-                <div class="panel p-4">
-                    <h3 class="text-white text-sm font-bold mb-4">Storage</h3>
-                    <div class="mb-4">
-                        <div class="flex justify-between text-[10px] mb-1">
-                            <span>Used</span>
-                            <span id="storage-used">0 MB / 5 GB</span>
-                        </div>
-                        <div class="h-2 bg-zinc-800 rounded">
-                            <div id="storage-bar" class="h-full bg-white rounded" style="width: 5%"></div>
-                        </div>
-                    </div>
-                    <button onclick="clearStorage()" class="w-full border border-zinc-700 p-2 text-[10px] hover:border-white">Clear Cache</button>
+                <div class="card">
+                    <div class="card-title mb-3">Storage</div>
+                    <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:6px">localStorage Usage</div>
+                    <div style="height:6px;background:var(--bg-deep);border-radius:3px;overflow:hidden"><div id="storage-bar" style="height:100%;background:var(--accent-gold);border-radius:3px;width:2%"></div></div>
+                    <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px" id="storage-label">0 KB</div>
+                    <button class="btn w-full mt-3" onclick="if(confirm('Clear all cached data?')){localStorage.clear();alert('Cleared')}">Clear Cache</button>
                 </div>
-                <div class="panel p-4">
-                    <h3 class="text-white text-sm font-bold mb-4">MCP Status</h3>
-                    <div class="space-y-2 text-[10px]">
-                        <div class="flex justify-between"><span>Context7</span><span class="text-green-500">Active</span></div>
-                        <div class="flex justify-between"><span>Filesystem</span><span class="text-green-500">Active</span></div>
-                        <div class="flex justify-between"><span>Fetch</span><span class="text-green-500">Active</span></div>
+                <div class="card">
+                    <div class="card-title mb-3">Locked Structures</div>
+                    <div style="font-size:10px;color:var(--text-tertiary);line-height:1.8">
+                        Mobility Big 7: <span style="color:var(--accent-success)">LOCKED V4</span><br>
+                        Movement Patterns: <span style="color:var(--accent-success)">LOCKED V2</span><br>
+                        Six Disciplines: <span style="color:var(--accent-success)">LOCKED</span><br>
+                        Three Stages: <span style="color:var(--accent-success)">LOCKED</span><br>
+                        TOC (7 Parts/25 Ch): <span style="color:var(--accent-gold)">ACTIVE</span>
                     </div>
                 </div>
             </div>
@@ -329,540 +729,786 @@
     </div>
 
     <script>
-        // ============ STATE MANAGEMENT ============
-        const state = {
-            currentTab: 'toc',
-            tocs: {
-                v1: [
-                    { id: 1, title: 'Introduction', type: 'chapter' },
-                    { id: 2, title: 'Part 1: Foundation', type: 'part' },
-                    { id: 3, title: 'Chapter 1: The Weight Lie', type: 'chapter', parent: 2 },
-                    { id: 4, title: 'Chapter 2: Movement DNA', type: 'chapter', parent: 2 },
-                    { id: 5, title: 'Part 2: The 7 Patterns', type: 'part' },
-                    { id: 6, title: 'Chapter 3: Horizontal Push', type: 'chapter', parent: 5 },
-                    { id: 7, title: 'Chapter 4: Horizontal Pull', type: 'chapter', parent: 5 },
-                ],
-                v2: [
-                    { id: 1, title: 'Introduction', type: 'chapter' },
-                    { id: 2, title: 'Part 1: Foundation', type: 'part' },
-                    { id: 3, title: 'Chapter 1: The Art of Movement', type: 'chapter', parent: 2 },
-                    { id: 4, title: 'Chapter 2: Movement DNA', type: 'chapter', parent: 2 },
-                    { id: 5, title: 'Part 2: The 7 Patterns', type: 'part' },
-                    { id: 6, title: 'Chapter 3: Push Patterns', type: 'chapter', parent: 5 },
-                    { id: 7, title: 'Chapter 4: Pull Patterns', type: 'chapter', parent: 5 },
-                ],
-                v3: []
-            },
-            htmlFiles: [
-                { id: 1, name: 'SATURNO MASTER OS v1', tag: 'AOC v1', path: '/htmls/master-os-v1.html' },
-                { id: 2, name: 'TITAN v1.2', tag: 'AOC v1', path: '/htmls/titan-v1.2.html' },
-                { id: 3, name: 'UNIFIED OS HUB', tag: 'AOC v2', path: '/htmls/unified-os-hub.html' },
-                { id: 4, name: 'DEPLOYMENT FORGE', tag: 'Internal', path: '/htmls/deployment-forge.html' },
-                { id: 5, name: 'LIVING CANVAS V3', tag: 'AOC v1', path: '/htmls/living-canvas-v3.html' },
-                { id: 6, name: 'Solar System App', tag: 'Deployed', path: 'https://gabosaturno11.github.io/saturno-solar-system/' },
+    // STATE
+    const S = {
+        tab: 'toc',
+        tocs: { v1: [], v2: [] },
+        htmlFiles: [
+            { id:1, name:'Saturno Solar System', tag:'Deployed', path:'https://gabosaturno11.github.io/saturno-solar-system/' },
+            { id:2, name:'SATURNO MASTER OS v1', tag:'Reference', path:'' },
+            { id:3, name:'TITAN v1.2', tag:'Reference', path:'' },
+            { id:4, name:'DEPLOYMENT FORGE', tag:'Internal', path:'' },
+            { id:5, name:'LIVING CANVAS V2', tag:'Reference', path:'' },
+            { id:6, name:'UNIFIED OS HUB', tag:'Reference', path:'' },
+        ],
+        research: [
+            { id:1, name:'Movement as First Language', cat:'movement', claim:'The body learns like language: repetition with variation wires fluency', mechanism:'Contextual interference improves differential learning', evidence:'Schmidt & Lee, 2019', placement:'Introduction', used:false, blockA:'', blockB:'', blockC:'', blockD:'' },
+            { id:2, name:'Procrastination as Emotion Regulation', cat:'psychology', claim:'Procrastination is an emotion problem, not time problem', mechanism:'Anticipated negative affect drives delay', evidence:'Pychyl & Sirois, 2016', placement:'Ch1: Barriers sidebar', used:true, blockA:'', blockB:'', blockC:'', blockD:'' },
+            { id:3, name:'Neural Plasticity in Adults', cat:'neuroscience', claim:'Adult brains remain plastic and capable of reorganization', mechanism:'Myelination responds to deliberate practice', evidence:'Pascual-Leone neuroimaging', placement:'Part 1', used:false, blockA:'', blockB:'', blockC:'', blockD:'' },
+            { id:4, name:'Progressive Overload Principle', cat:'training', claim:'Adaptation requires systematic increase in stress', mechanism:'Supercompensation follows stress-recovery', evidence:'Selye, 1956', placement:'Part 4', used:false, blockA:'', blockB:'', blockC:'', blockD:'' },
+        ],
+        exercises: [
+            { id:1,name:'Push-Up',pattern:'Horizontal Push',stage:'Foundation',equip:'Floor' },
+            { id:2,name:'Diamond Push-Up',pattern:'Horizontal Push',stage:'Mastery',equip:'Floor' },
+            { id:3,name:'Archer Push-Up',pattern:'Horizontal Push',stage:'Mastery',equip:'Floor' },
+            { id:4,name:'Pseudo Planche Push-Up',pattern:'Horizontal Push',stage:'Elite',equip:'Floor' },
+            { id:5,name:'Inverted Row',pattern:'Horizontal Pull',stage:'Foundation',equip:'Bar' },
+            { id:6,name:'Tuck Front Lever Row',pattern:'Horizontal Pull',stage:'Mastery',equip:'Bar' },
+            { id:7,name:'Pull-Up',pattern:'Vertical Pull',stage:'Foundation',equip:'Bar' },
+            { id:8,name:'Muscle-Up',pattern:'Vertical Pull',stage:'Elite',equip:'Bar' },
+            { id:9,name:'Dip',pattern:'Downward Press',stage:'Foundation',equip:'Parallettes' },
+            { id:10,name:'Ring Dip',pattern:'Downward Press',stage:'Mastery',equip:'Rings' },
+            { id:11,name:'Pike Push-Up',pattern:'Overhead Press',stage:'Foundation',equip:'Floor' },
+            { id:12,name:'Handstand Push-Up',pattern:'Overhead Press',stage:'Elite',equip:'Wall' },
+            { id:13,name:'Squat',pattern:'Knee-Dominant',stage:'Foundation',equip:'None' },
+            { id:14,name:'Pistol Squat',pattern:'Knee-Dominant',stage:'Elite',equip:'None' },
+            { id:15,name:'Shrimp Squat',pattern:'Knee-Dominant',stage:'Elite',equip:'None' },
+            { id:16,name:'Hip Bridge',pattern:'Hip-Dominant',stage:'Foundation',equip:'Floor' },
+            { id:17,name:'Nordic Curl',pattern:'Hip-Dominant',stage:'Mastery',equip:'Floor' },
+            { id:18,name:'Hollow Body Hold',pattern:'Core',stage:'Foundation',equip:'Floor' },
+            { id:19,name:'L-Sit',pattern:'Core',stage:'Mastery',equip:'Parallettes' },
+            { id:20,name:'Dragon Flag',pattern:'Core',stage:'Elite',equip:'Floor' },
+            { id:21,name:'Resting Squat',pattern:'Mobility',stage:'Foundation',equip:'None' },
+            { id:22,name:'Forward Fold',pattern:'Mobility',stage:'Foundation',equip:'None' },
+            { id:23,name:'Pancake',pattern:'Mobility',stage:'Mastery',equip:'None' },
+            { id:24,name:'Front Split',pattern:'Mobility',stage:'Elite',equip:'None' },
+            { id:25,name:'Bridge',pattern:'Mobility',stage:'Mastery',equip:'Floor' },
+            { id:26,name:'German Hang',pattern:'Mobility',stage:'Mastery',equip:'Bar' },
+        ],
+        decisions: [
+            { id:1, date:'2026-01-27', title:'Use "Mastering" not "Master"', context:'Language choice: process vs title', status:'resolved' },
+            { id:2, date:'2026-01-27', title:'Excellence > Perfection paradigm', context:'Chapter 11 technique naming', status:'resolved' },
+            { id:3, date:'2026-01-27', title:'TOC is NOT final - 5000 versions', context:'Go slow, do not assume', status:'open' },
+        ],
+        bottlenecks: [
+            { id:1, title:'TOC version sync with Kortext', priority:'high' },
+            { id:2, title:'13 CSVs pending in Perplexity', priority:'high' },
+        ],
+        mindmap: {
+            nodes: [
+                { id:1,x:400,y:180,text:'Art of Calisthenics',color:'var(--accent-gold)' },
+                { id:2,x:160,y:80,text:'7 Patterns',color:'var(--accent-blue)' },
+                { id:3,x:640,y:80,text:'6 Disciplines',color:'var(--accent-success)' },
+                { id:4,x:160,y:280,text:'Mobility Big 7',color:'var(--accent-warning)' },
+                { id:5,x:640,y:280,text:'3 Stages',color:'var(--accent-purple)' },
+                { id:6,x:400,y:360,text:'Solar System',color:'var(--accent-gold)' },
             ],
-            researchCards: [
-                { id: 1, name: 'Movement as First Language', category: 'movement', claim: 'The body learns like language: repetition with variation wires fluency', mechanism: 'Contextual interference improves differential learning', evidence: 'Schmidt & Lee, 2019', placement: 'Introduction', used: false },
-                { id: 2, name: 'Procrastination as Emotion Regulation', category: 'psychology', claim: 'Procrastination is an emotion problem, not time problem', mechanism: 'Anticipated negative affect drives delay', evidence: 'Pychyl & Sirois, 2016', placement: 'Ch1: Barriers sidebar', used: true },
-                { id: 3, name: 'Neural Plasticity in Adults', category: 'neuroscience', claim: 'Adult brains remain plastic and capable of reorganization', mechanism: 'Myelination responds to deliberate practice', evidence: 'Pascual-Leone neuroimaging', placement: 'Part 1', used: false },
-                { id: 4, name: 'Progressive Overload Principle', category: 'training', claim: 'Adaptation requires systematic increase in stress', mechanism: 'Supercompensation follows stress-recovery', evidence: 'Selye, 1956', placement: 'Part 4', used: false },
-            ],
-            exercises: [
-                { id: 1, name: 'Push-Up', pattern: 'horizontal-push', stage: 'foundation' },
-                { id: 2, name: 'Diamond Push-Up', pattern: 'horizontal-push', stage: 'mastery' },
-                { id: 3, name: 'Archer Push-Up', pattern: 'horizontal-push', stage: 'mastery' },
-                { id: 4, name: 'Inverted Row', pattern: 'horizontal-pull', stage: 'foundation' },
-                { id: 5, name: 'Pull-Up', pattern: 'vertical-pull', stage: 'foundation' },
-                { id: 6, name: 'Dip', pattern: 'vertical-push', stage: 'foundation' },
-                { id: 7, name: 'Squat', pattern: 'knee-dominant', stage: 'foundation' },
-                { id: 8, name: 'Pistol Squat', pattern: 'knee-dominant', stage: 'elite' },
-                { id: 9, name: 'Hip Bridge', pattern: 'hip-dominant', stage: 'foundation' },
-                { id: 10, name: 'Hollow Body', pattern: 'core', stage: 'foundation' },
-            ],
-            mindmapNodes: [
-                { id: 1, x: 400, y: 200, text: 'Art of Calisthenics', color: '#fff' },
-                { id: 2, x: 200, y: 100, text: '7 Patterns', color: '#3b82f6' },
-                { id: 3, x: 600, y: 100, text: '6 Disciplines', color: '#22c55e' },
-                { id: 4, x: 200, y: 300, text: 'Mobility Big 7', color: '#f59e0b' },
-                { id: 5, x: 600, y: 300, text: 'Stages', color: '#8b5cf6' },
-            ],
-            mindmapConnections: [
-                { from: 1, to: 2 },
-                { from: 1, to: 3 },
-                { from: 1, to: 4 },
-                { from: 1, to: 5 },
-            ],
-            documents: {},
-            workouts: [],
-            internalPassword: 'saturno2026'
-        };
-
-        // ============ TAB SWITCHING ============
-        function switchTab(tab) {
-            state.currentTab = tab;
-            document.querySelectorAll('[id^="view-"]').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('[id^="tab-"]').forEach(el => el.classList.remove('tab-active'));
-            document.getElementById(`view-${tab}`).classList.remove('hidden');
-            document.getElementById(`tab-${tab}`).classList.add('tab-active');
-
-            if (tab === 'toc') initTOC();
-            if (tab === 'writing') initWriting();
-            if (tab === 'htmls') initHTMLs();
-            if (tab === 'research') initResearch();
-            if (tab === 'workout') initWorkout();
-            if (tab === 'mindmap') initMindmap();
-        }
-
-        // ============ TOC MANAGEMENT ============
-        function initTOC() {
-            loadTOC('left');
-            loadTOC('right');
-        }
-
-        function loadTOC(side) {
-            const version = document.getElementById(`toc-version-${side}`).value;
-            const container = document.getElementById(`toc-${side}`);
-            const items = state.tocs[version] || [];
-
-            container.innerHTML = items.map(item => `
-                <div class="toc-item p-3 ${item.type === 'part' ? 'bg-zinc-900' : ''}" data-id="${item.id}">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-2">
-                            <span class="text-[10px] text-zinc-500">${item.type === 'part' ? 'P' : 'C'}</span>
-                            <span class="text-sm ${item.type === 'part' ? 'text-white font-bold' : ''}">${item.title}</span>
-                        </div>
-                        <div class="flex gap-1">
-                            <button onclick="editTOCItem(${item.id}, '${side}')" class="text-[10px] text-zinc-500 hover:text-white px-1">Edit</button>
-                            <button onclick="deleteTOCItem(${item.id}, '${side}')" class="text-[10px] text-zinc-500 hover:text-red-500 px-1">X</button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-
-            new Sortable(container, {
-                animation: 150,
-                ghostClass: 'ghost',
-                onEnd: () => saveTOCOrder(side)
-            });
-        }
-
-        function compareTOCs() {
-            const leftVersion = document.getElementById('toc-version-left').value;
-            const rightVersion = document.getElementById('toc-version-right').value;
-            const leftItems = state.tocs[leftVersion] || [];
-            const rightItems = state.tocs[rightVersion] || [];
-
-            // Find mismatches
-            const leftContainer = document.getElementById('toc-left');
-            const rightContainer = document.getElementById('toc-right');
-
-            leftItems.forEach((item, i) => {
-                const rightItem = rightItems[i];
-                const leftEl = leftContainer.children[i];
-                const rightEl = rightContainer.children[i];
-
-                if (!rightItem || item.title !== rightItem.title) {
-                    if (leftEl) leftEl.classList.add('mismatch');
-                    if (rightEl) rightEl.classList.add('mismatch');
-                } else {
-                    if (leftEl) leftEl.classList.remove('mismatch');
-                    if (rightEl) rightEl.classList.remove('mismatch');
-                }
-            });
-
-            alert('Mismatches highlighted in red');
-        }
-
-        function addChapter(side) {
-            const version = document.getElementById(`toc-version-${side}`).value;
-            const title = prompt('Enter chapter/part title:');
-            if (!title) return;
-
-            const type = confirm('Is this a Part? (OK=Part, Cancel=Chapter)') ? 'part' : 'chapter';
-            const newId = Math.max(...state.tocs[version].map(i => i.id), 0) + 1;
-
-            state.tocs[version].push({ id: newId, title, type });
-            loadTOC(side);
-            saveToStorage();
-        }
-
-        function deleteTOCItem(id, side) {
-            const version = document.getElementById(`toc-version-${side}`).value;
-            state.tocs[version] = state.tocs[version].filter(i => i.id !== id);
-            loadTOC(side);
-            saveToStorage();
-        }
-
-        function editTOCItem(id, side) {
-            const version = document.getElementById(`toc-version-${side}`).value;
-            const item = state.tocs[version].find(i => i.id === id);
-            const newTitle = prompt('Edit title:', item.title);
-            if (newTitle) {
-                item.title = newTitle;
-                loadTOC(side);
-                saveToStorage();
-            }
-        }
-
-        function saveTOCOrder(side) {
-            // Save drag-drop order
-            saveToStorage();
-        }
-
-        function addTOCVersion() {
-            const name = prompt('Version name (e.g., v4):');
-            if (name && !state.tocs[name]) {
-                state.tocs[name] = [];
-                // Add to dropdowns
-                const opt = `<option value="${name}">TOC ${name}</option>`;
-                document.getElementById('toc-version-left').innerHTML += opt;
-                document.getElementById('toc-version-right').innerHTML += opt;
-                saveToStorage();
-            }
-        }
-
-        function exportTOC() {
-            const version = document.getElementById('toc-version-left').value;
-            const data = JSON.stringify(state.tocs[version], null, 2);
-            downloadFile(`toc-${version}.json`, data, 'application/json');
-        }
-
-        // ============ WRITING HUB ============
-        let quillEditor = null;
-
-        function initWriting() {
-            if (!quillEditor) {
-                quillEditor = new Quill('#editor', {
-                    theme: 'snow',
-                    modules: {
-                        toolbar: [
-                            [{ 'header': [1, 2, 3, false] }],
-                            ['bold', 'italic', 'underline', 'strike'],
-                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                            ['link', 'blockquote', 'code-block'],
-                            ['clean']
-                        ]
-                    },
-                    placeholder: 'Start writing your chapter...'
-                });
-
-                // Load saved content
-                const saved = localStorage.getItem('saturno_document');
-                if (saved) {
-                    quillEditor.root.innerHTML = saved;
-                }
-            }
-
-            // Build writing TOC
-            const tocContainer = document.getElementById('writing-toc');
-            const version = document.getElementById('toc-version-left')?.value || 'v1';
-            tocContainer.innerHTML = (state.tocs[version] || []).map(item => `
-                <div class="text-[11px] p-2 hover:bg-zinc-800 cursor-pointer ${item.type === 'part' ? 'text-white font-bold' : 'text-zinc-400 pl-4'}">
-                    ${item.title}
-                </div>
-            `).join('');
-        }
-
-        function saveDocument() {
-            const content = quillEditor.root.innerHTML;
-            localStorage.setItem('saturno_document', content);
-            alert('Document saved!');
-        }
-
-        function exportAs(format) {
-            const content = quillEditor.getText();
-            const html = quillEditor.root.innerHTML;
-            const title = document.getElementById('doc-title').value;
-
-            switch(format) {
-                case 'md':
-                    downloadFile(`${title}.md`, `# ${title}\n\n${content}`, 'text/markdown');
-                    break;
-                case 'txt':
-                    downloadFile(`${title}.txt`, content, 'text/plain');
-                    break;
-                case 'html':
-                    downloadFile(`${title}.html`, `<!DOCTYPE html><html><head><title>${title}</title></head><body>${html}</body></html>`, 'text/html');
-                    break;
-                case 'yaml':
-                    downloadFile(`${title}.yaml`, `title: "${title}"\ncontent: |\n  ${content.replace(/\n/g, '\n  ')}`, 'text/yaml');
-                    break;
-                case 'word':
-                case 'pdf':
-                    alert(`${format.toUpperCase()} export requires additional library. Use HTML export and convert.`);
-                    break;
-            }
-        }
-
-        function sendTo(service) {
-            alert(`Opening ${service} folder location...`);
-            // In real implementation, would use file system API or electron
-        }
-
-        // ============ HTML VISUALIZATION ============
-        function initHTMLs() {
-            const container = document.getElementById('html-list');
-            container.innerHTML = state.htmlFiles.map(file => `
-                <div class="p-2 border border-zinc-800 hover:border-zinc-600 cursor-pointer" onclick="previewHTML(${file.id}, 1)">
-                    <div class="text-sm text-white">${file.name}</div>
-                    <div class="text-[10px] text-zinc-500">${file.tag}</div>
-                </div>
-            `).join('');
-        }
-
-        function previewHTML(id, panel) {
-            const file = state.htmlFiles.find(f => f.id === id);
-            const iframe = document.getElementById(`html-iframe-${panel}`);
-
-            if (file.path.startsWith('http')) {
-                iframe.src = file.path;
-            } else {
-                iframe.srcdoc = `<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif;">
-                    <div style="text-align:center">
-                        <h2>${file.name}</h2>
-                        <p>Local file: ${file.path}</p>
-                    </div>
-                </body></html>`;
-            }
-        }
-
-        function togglePanel(panelId) {
-            const panel = document.getElementById(panelId);
-            panel.classList.toggle('hidden');
-        }
-
-        function openInNewTab(panelId) {
-            const iframe = document.getElementById(panelId.replace('panel', 'iframe'));
-            if (iframe.src) window.open(iframe.src, '_blank');
-        }
-
-        // ============ RESEARCH CARDS ============
-        function initResearch() {
-            renderResearchCards();
-        }
-
-        function renderResearchCards(filter = 'all') {
-            const cards = filter === 'all' ? state.researchCards : state.researchCards.filter(c => c.category === filter);
-            const container = document.getElementById('research-grid');
-
-            container.innerHTML = cards.map(card => `
-                <div class="research-card p-4 ${card.used ? 'opacity-50' : ''}">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-[10px] uppercase tracking-wider text-${getCategoryColor(card.category)}-500">${card.category}</span>
-                        <button onclick="toggleUsed(${card.id})" class="text-[10px] ${card.used ? 'text-green-500' : 'text-zinc-500'}">${card.used ? 'Used' : 'Mark Used'}</button>
-                    </div>
-                    <h3 class="text-white font-bold mb-2">${card.name}</h3>
-                    <p class="text-sm mb-2">${card.claim}</p>
-                    <div class="text-[10px] text-zinc-500 mb-2">
-                        <div><strong>Mechanism:</strong> ${card.mechanism}</div>
-                        <div><strong>Evidence:</strong> ${card.evidence}</div>
-                        <div><strong>Placement:</strong> ${card.placement}</div>
-                    </div>
-                    <button onclick="copyCard(${card.id})" class="text-[10px] border border-zinc-700 px-2 py-1 hover:border-white w-full">Copy to Clipboard</button>
-                </div>
-            `).join('');
-        }
-
-        function getCategoryColor(cat) {
-            const colors = { psychology: 'yellow', movement: 'blue', neuroscience: 'purple', training: 'green' };
-            return colors[cat] || 'zinc';
-        }
-
-        function copyCard(id) {
-            const card = state.researchCards.find(c => c.id === id);
-            const text = `**${card.name}**\n\nCore Claim: ${card.claim}\nMechanism: ${card.mechanism}\nEvidence: ${card.evidence}\nBook Placement: ${card.placement}`;
-            navigator.clipboard.writeText(text);
-            alert('Copied to clipboard!');
-        }
-
-        function toggleUsed(id) {
-            const card = state.researchCards.find(c => c.id === id);
-            card.used = !card.used;
-            renderResearchCards();
-            saveToStorage();
-        }
-
-        // ============ WORKOUT CREATOR ============
-        function initWorkout() {
-            renderExerciseLibrary();
-
-            new Sortable(document.getElementById('workout-builder'), {
-                animation: 150,
-                group: 'exercises'
-            });
-        }
-
-        function renderExerciseLibrary() {
-            const container = document.getElementById('exercise-library');
-            container.innerHTML = state.exercises.map(ex => `
-                <div class="p-2 border border-zinc-800 cursor-grab" draggable="true" data-id="${ex.id}">
-                    <div class="text-sm">${ex.name}</div>
-                    <div class="text-[10px] text-zinc-500">${ex.pattern} | ${ex.stage}</div>
-                </div>
-            `).join('');
-
-            new Sortable(container, {
-                animation: 150,
-                group: { name: 'exercises', pull: 'clone', put: false },
-                sort: false
-            });
-        }
-
-        function exportWorkout(format) {
-            const name = document.getElementById('workout-name').value;
-            alert(`Exporting ${name} as ${format.toUpperCase()}...`);
-        }
-
-        // ============ MINDMAP ============
-        function initMindmap() {
-            renderMindmap();
-        }
-
-        function renderMindmap() {
-            const nodesContainer = document.getElementById('mindmap-nodes');
-            const svg = document.getElementById('mindmap-svg');
-
-            // Render connections
-            let lines = '';
-            state.mindmapConnections.forEach(conn => {
-                const from = state.mindmapNodes.find(n => n.id === conn.from);
-                const to = state.mindmapNodes.find(n => n.id === conn.to);
-                if (from && to) {
-                    lines += `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}" stroke="#27272a" stroke-width="2"/>`;
-                }
-            });
-            svg.innerHTML = lines;
-
-            // Render nodes
-            nodesContainer.innerHTML = state.mindmapNodes.map(node => `
-                <div class="absolute p-3 border border-zinc-700 bg-zinc-900 rounded cursor-move"
-                     style="left: ${node.x - 50}px; top: ${node.y - 20}px; color: ${node.color}"
-                     draggable="true"
-                     ondragend="moveMindmapNode(${node.id}, event)">
-                    ${node.text}
-                </div>
-            `).join('');
-        }
-
-        function moveMindmapNode(id, event) {
-            const node = state.mindmapNodes.find(n => n.id === id);
-            const canvas = document.getElementById('mindmap-canvas').getBoundingClientRect();
-            node.x = event.clientX - canvas.left + 50;
-            node.y = event.clientY - canvas.top + 20;
-            renderMindmap();
-        }
-
-        function addMindmapNode() {
-            const text = prompt('Node text:');
-            if (!text) return;
-            const newId = Math.max(...state.mindmapNodes.map(n => n.id), 0) + 1;
-            state.mindmapNodes.push({ id: newId, x: 400, y: 200, text, color: '#fff' });
-            renderMindmap();
-        }
-
-        function addMindmapConnection() {
-            const from = parseInt(prompt('From node ID:'));
-            const to = parseInt(prompt('To node ID:'));
-            if (from && to) {
-                state.mindmapConnections.push({ from, to });
-                renderMindmap();
-            }
-        }
-
-        function exportMindmap(format) {
-            if (format === 'json') {
-                const data = JSON.stringify({ nodes: state.mindmapNodes, connections: state.mindmapConnections }, null, 2);
-                downloadFile('mindmap.json', data, 'application/json');
-            } else {
-                alert('PNG export requires html2canvas library');
-            }
-        }
-
-        // ============ INTERNAL SECTION ============
-        function openInternalSection() {
-            document.getElementById('internal-modal').classList.remove('hidden');
-        }
-
-        function closeInternalModal() {
-            document.getElementById('internal-modal').classList.add('hidden');
-        }
-
-        function validatePassword() {
-            const password = document.getElementById('internal-password').value;
-            if (password === state.internalPassword) {
-                closeInternalModal();
-                document.getElementById('internal-section').classList.remove('hidden');
-                updateStorageDisplay();
-            } else {
-                alert('Invalid password');
-            }
-        }
-
-        function exitInternalSection() {
-            document.getElementById('internal-section').classList.add('hidden');
-        }
-
-        function updateStorageDisplay() {
-            // Calculate localStorage usage
-            let total = 0;
-            for (let key in localStorage) {
-                if (localStorage.hasOwnProperty(key)) {
-                    total += localStorage[key].length * 2; // UTF-16
-                }
-            }
-            const mb = (total / 1024 / 1024).toFixed(2);
-            document.getElementById('storage-used').textContent = `${mb} MB / 5 GB`;
-            document.getElementById('storage-bar').style.width = `${(total / (5 * 1024 * 1024 * 1024)) * 100}%`;
-        }
-
-        function deployToGitHub() {
-            alert('GitHub Pages deployment: Run "npx gh-pages -d dist" in terminal');
-        }
-
-        function deployToVercel() {
-            alert('Vercel deployment: Push to GitHub and Vercel will auto-deploy');
-        }
-
-        function clearStorage() {
-            if (confirm('Clear all cached data?')) {
-                localStorage.clear();
-                updateStorageDisplay();
-            }
-        }
-
-        // ============ UTILITIES ============
-        function downloadFile(filename, content, type) {
-            const blob = new Blob([content], { type });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        function saveToStorage() {
-            localStorage.setItem('saturno_state', JSON.stringify(state));
-        }
-
-        function loadFromStorage() {
-            const saved = localStorage.getItem('saturno_state');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                Object.assign(state, parsed);
-            }
-        }
-
-        // ============ INITIALIZATION ============
-        document.addEventListener('DOMContentLoaded', () => {
-            loadFromStorage();
-            initTOC();
-
-            // Filter event
-            document.getElementById('research-filter')?.addEventListener('change', (e) => {
-                renderResearchCards(e.target.value);
-            });
+            edges: [{f:1,t:2},{f:1,t:3},{f:1,t:4},{f:1,t:5},{f:1,t:6}]
+        },
+        documents: {},
+        matrixData: null,
+        pw: 'saturno2026'
+    };
+
+    let cy = null;
+
+    // TAB SWITCHING
+    document.querySelectorAll('.tab').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const t = this.dataset.tab;
+            S.tab = t;
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+            document.getElementById('sec-'+t).classList.add('active');
+            this.classList.add('active');
+            const init = {
+                toc: initTOC,
+                writing: initWriting,
+                htmls: initHTMLs,
+                research: ()=>renderResearch('all'),
+                workout: initWorkout,
+                mindmap: renderMindmap,
+                decisions: initDecisions,
+                matrix: initMatrix,
+                taxonomy: initTaxonomy,
+                barcode: initBarcode,
+                export: initExport,
+                internal: initInternalTab
+            };
+            if (init[t]) init[t]();
         });
+    });
+
+    // TOC
+    function initTOC() { loadTOC('left'); loadTOC('right'); }
+
+    async function loadExternalTOC() {
+        try {
+            const r = await fetch('data/toc.json');
+            const d = await r.json();
+            ['v1','v2'].forEach(v => {
+                if (!d.tocs?.[v]) return;
+                S.tocs[v] = []; let id = 1;
+                d.tocs[v].parts.forEach(p => {
+                    S.tocs[v].push({id:id++, title:p.name, type:'part'});
+                    (p.chapters||[]).forEach(c => S.tocs[v].push({id:id++, title:c.title, type:'chapter'}));
+                });
+            });
+            document.getElementById('k-chapters').textContent = S.tocs.v1.filter(i=>i.type==='chapter').length;
+            document.getElementById('k-parts').textContent = S.tocs.v1.filter(i=>i.type==='part').length;
+            initTOC(); save();
+        } catch(e) { console.warn('toc.json not found, using defaults'); loadDefaultTOC(); }
+    }
+
+    function loadDefaultTOC() {
+        S.tocs.v1 = [
+            {id:1,title:'FRONT MATTER',type:'part'},{id:2,title:'Dedication',type:'chapter'},{id:3,title:'Foreword',type:'chapter'},
+            {id:4,title:'THE SPARK: INTRODUCTION',type:'part'},{id:5,title:'The Movement Paradox',type:'chapter'},{id:6,title:'Why Calisthenics?',type:'chapter'},
+            {id:7,title:'I: BEGIN',type:'part'},{id:8,title:'Chapter 1: What, How, Why & Who',type:'chapter'},{id:9,title:'Chapter 2: Getting Started',type:'chapter'},
+        ];
+        S.tocs.v2 = [{id:1,title:'Start Here',type:'part'},{id:2,title:'What, How, Why & Who',type:'chapter'},{id:3,title:'Getting Started',type:'chapter'}];
+        initTOC();
+    }
+
+    function loadTOC(side) {
+        const v = document.getElementById('toc-v-'+side).value;
+        const el = document.getElementById('toc-'+side);
+        document.getElementById('toc-'+side+'-label').textContent = 'TOC '+v;
+        const items = S.tocs[v] || [];
+        el.innerHTML = items.map(i => `
+            <div class="toc-item ${i.type==='part'?'is-part':''}" data-id="${i.id}">
+                <span class="type-tag">${i.type==='part'?'P':'C'}</span>
+                <span class="title">${i.title}</span>
+                <div class="btn-group">
+                    <button class="btn btn-sm" onclick="editTOCItem(${i.id},'${side}')">Edit</button>
+                    <button class="btn btn-sm" onclick="delTOCItem(${i.id},'${side}')" style="color:var(--accent-danger)">x</button>
+                </div>
+            </div>`).join('');
+        new Sortable(el, { animation:150, ghostClass:'ghost', chosenClass:'drag-chosen', onEnd:()=>save() });
+    }
+
+    function compareTOCs() {
+        const lv=document.getElementById('toc-v-left').value, rv=document.getElementById('toc-v-right').value;
+        const li=S.tocs[lv]||[], ri=S.tocs[rv]||[];
+        const lc=document.getElementById('toc-left'), rc=document.getElementById('toc-right');
+        li.forEach((item,idx) => {
+            const r=ri[idx], le=lc.children[idx], re=rc.children[idx];
+            if(!r||item.title!==r.title) { le?.classList.add('mismatch'); re?.classList.add('mismatch'); }
+            else { le?.classList.remove('mismatch'); re?.classList.remove('mismatch'); }
+        });
+    }
+
+    function addChapter(side) {
+        const v=document.getElementById('toc-v-'+side).value, title=prompt('Title:');
+        if(!title) return;
+        const type=confirm('Part? (OK=Part, Cancel=Chapter)')?'part':'chapter';
+        S.tocs[v].push({id:Date.now(), title, type}); loadTOC(side); save();
+    }
+    function editTOCItem(id,side) {
+        const v=document.getElementById('toc-v-'+side).value, item=S.tocs[v].find(i=>i.id===id);
+        const t=prompt('Edit:',item.title); if(t){item.title=t; loadTOC(side); save();}
+    }
+    function delTOCItem(id,side) {
+        const v=document.getElementById('toc-v-'+side).value;
+        S.tocs[v]=S.tocs[v].filter(i=>i.id!==id); loadTOC(side); save();
+    }
+    function addTOCVersion() {
+        const n=prompt('Version (e.g. v3):'); if(!n||S.tocs[n]) return;
+        S.tocs[n]=[]; ['toc-v-left','toc-v-right'].forEach(id=>{
+            document.getElementById(id).innerHTML+=`<option value="${n}">TOC ${n}</option>`;
+        }); save();
+    }
+    function exportTOC() {
+        const v=document.getElementById('toc-v-left').value;
+        dl(`toc-${v}.json`, JSON.stringify(S.tocs[v],null,2), 'application/json');
+    }
+
+    // WRITING
+    let quill=null;
+    function initWriting() {
+        if(!quill) {
+            quill=new Quill('#editor',{theme:'snow',modules:{toolbar:[[{'header':[1,2,3,false]}],['bold','italic','underline','strike'],[{'list':'ordered'},{'list':'bullet'}],['link','blockquote','code-block'],['clean']]},placeholder:'Start writing...'});
+            const saved=localStorage.getItem('scc_doc'); if(saved) quill.root.innerHTML=saved;
+        }
+        const el=document.getElementById('writing-toc'), v=document.getElementById('toc-v-left')?.value||'v1';
+        el.innerHTML=(S.tocs[v]||[]).map(i=>`<div style="font-size:11px;padding:6px 8px;cursor:pointer;border-radius:4px;${i.type==='part'?'color:var(--text-primary);font-weight:600':'color:var(--text-tertiary);padding-left:16px'}" onmouseover="this.style.background='var(--bg-surface)'" onmouseout="this.style.background=''">${i.title}</div>`).join('');
+    }
+    function saveDocument() { localStorage.setItem('scc_doc',quill.root.innerHTML); alert('Saved'); }
+    function exportAs(fmt) {
+        if(!quill) initWriting();
+        const txt=quill?quill.getText():'', html=quill?quill.root.innerHTML:'', title=document.getElementById('doc-title').value;
+        if(fmt==='md') dl(title+'.md','# '+title+'\n\n'+txt,'text/markdown');
+        if(fmt==='txt') dl(title+'.txt',txt,'text/plain');
+        if(fmt==='html') dl(title+'.html','<!DOCTYPE html><html><head><title>'+title+'</title><style>body{font-family:Georgia,serif;max-width:700px;margin:40px auto;line-height:1.8;padding:20px}</style></head><body>'+html+'</body></html>','text/html');
+        if(fmt==='yaml') dl(title+'.yaml','title: "'+title+'"\ncontent: |\n  '+txt.replace(/\n/g,'\n  '),'text/yaml');
+        if(fmt==='word') {
+            const wordHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:Georgia,serif;line-height:1.8}</style></head><body><h1>${title}</h1>${html}</body></html>`;
+            const blob = new Blob(['\ufeff'+wordHtml], {type:'application/msword'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href=url; a.download=title+'.doc'; a.click(); URL.revokeObjectURL(url);
+        }
+        if(fmt==='pdf') {
+            try {
+                const docDef = { content: [{ text: title, style: 'header' }, { text: txt, style: 'body' }], styles: { header: { fontSize: 22, bold: true, margin: [0,0,0,20] }, body: { fontSize: 12, lineHeight: 1.8 } } };
+                pdfMake.createPdf(docDef).download(title+'.pdf');
+            } catch(e) { alert('PDF export requires pdfmake library'); console.error(e); }
+        }
+    }
+
+    // HTMLS
+    function initHTMLs() { renderHTMLList(S.htmlFiles); }
+    function renderHTMLList(files) {
+        document.getElementById('html-list').innerHTML=files.map(f=>`
+            <div class="card" style="padding:10px;cursor:pointer" onclick="previewHTML(${f.id},event)">
+                <div style="font-size:12px;color:var(--text-primary);margin-bottom:4px">${f.name}</div>
+                <span class="badge">${f.tag}</span>
+            </div>`).join('');
+    }
+    function filterHTMLs() {
+        const q=document.getElementById('html-search').value.toLowerCase();
+        renderHTMLList(S.htmlFiles.filter(f=>f.name.toLowerCase().includes(q)));
+    }
+    function previewHTML(id,e) {
+        const f=S.htmlFiles.find(x=>x.id===id), panel=e?.shiftKey?2:1, iframe=document.getElementById('html-iframe-'+panel);
+        if(f.path&&f.path.startsWith('http')) iframe.src=f.path;
+        else iframe.srcdoc=`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif"><div style="text-align:center"><h2>${f.name}</h2><p style="font-size:12px;opacity:.6">${f.tag} | ${f.path||'No URL'}</p></div></body></html>`;
+    }
+    function openIframe(n) { const f=document.getElementById('html-iframe-'+n); if(f.src) window.open(f.src,'_blank'); }
+    function addHTML() {
+        const name=prompt('HTML name:'); if(!name) return;
+        const tag=prompt('Tag (e.g. Deployed, Reference):')||'Custom';
+        const path=prompt('URL (leave empty for local):')||'';
+        S.htmlFiles.push({id:Date.now(),name,tag,path}); initHTMLs(); save();
+    }
+
+    // RESEARCH
+    const catColors={psychology:'#f59e0b',movement:'#3b82f6',neuroscience:'#8b5cf6',training:'#22c55e',biomechanics:'#00cfff',philosophy:'#ff6b35',pedagogy:'#ff4466'};
+
+    async function loadExternalResearch() {
+        try {
+            const r = await fetch('data/research.json');
+            const d = await r.json();
+            if (Array.isArray(d)) {
+                S.research = d.map((item,i) => ({
+                    id: item.id || i+1,
+                    name: item.name || item.title || '',
+                    cat: item.cat || item.category || 'movement',
+                    claim: item.claim || '',
+                    mechanism: item.mechanism || '',
+                    evidence: item.evidence || '',
+                    placement: item.placement || '',
+                    used: item.used || false,
+                    blockA: item.blockA || item.core_concept || item.claim || '',
+                    blockB: item.blockB || item.supporting_evidence || item.evidence || '',
+                    blockC: item.blockC || item.application || item.placement || '',
+                    blockD: item.blockD || item.contradictions || ''
+                }));
+            } else if (d.cards) {
+                S.research = d.cards.map((item,i) => ({
+                    id: item.id || i+1,
+                    name: item.name || item.title || '',
+                    cat: item.cat || item.category || 'movement',
+                    claim: item.claim || '',
+                    mechanism: item.mechanism || '',
+                    evidence: item.evidence || '',
+                    placement: item.placement || '',
+                    used: item.used || false,
+                    blockA: item.blockA || item.core_concept || item.claim || '',
+                    blockB: item.blockB || item.supporting_evidence || item.evidence || '',
+                    blockC: item.blockC || item.application || item.placement || '',
+                    blockD: item.blockD || item.contradictions || ''
+                }));
+            }
+            populateResearchFilters();
+            renderResearch('all');
+            save();
+        } catch(e) { console.warn('research.json not found, using defaults'); }
+    }
+
+    function populateResearchFilters() {
+        const cats = [...new Set(S.research.map(r=>r.cat))];
+        const sel = document.getElementById('research-filter');
+        sel.innerHTML = '<option value="all">All Categories</option>' + cats.map(c=>`<option value="${c}">${c.charAt(0).toUpperCase()+c.slice(1)}</option>`).join('');
+    }
+
+    function renderResearch(filter) {
+        populateResearchFilters();
+        const cards=filter==='all'?S.research:S.research.filter(c=>c.cat===filter);
+        document.getElementById('research-grid').innerHTML=cards.map(c=>{
+            const bA = c.blockA || c.claim || '';
+            const bB = c.blockB || c.evidence || '';
+            const bC = c.blockC || c.placement || '';
+            const bD = c.blockD || '';
+            return `
+            <div class="research-card ${c.used?'used':''}">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="badge" style="background:${catColors[c.cat]||'#666'}20;color:${catColors[c.cat]||'#666'}">${c.cat}</span>
+                    <button class="btn btn-sm" onclick="toggleUsed(${c.id})" style="${c.used?'color:var(--accent-success)':''}">${c.used?'Used':'Mark Used'}</button>
+                </div>
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:10px">${c.name}</div>
+                ${bA ? `<div class="research-block research-block-a"><div class="research-block-label">A - Core Concept</div>${bA}</div>` : ''}
+                ${bB ? `<div class="research-block research-block-b"><div class="research-block-label">B - Supporting Evidence</div>${bB}</div>` : ''}
+                ${bC ? `<div class="research-block research-block-c"><div class="research-block-label">C - Application</div>${bC}</div>` : ''}
+                ${bD ? `<div class="research-block research-block-d"><div class="research-block-label">D - Contradictions</div>${bD}</div>` : ''}
+                ${(!bA && !bB && !bC && !bD) ? `<div style="font-size:10px;color:var(--text-tertiary);line-height:1.7">
+                    <div><b>Mechanism:</b> ${c.mechanism||''}</div>
+                    <div><b>Evidence:</b> ${c.evidence||''}</div>
+                    <div><b>Placement:</b> ${c.placement||''}</div>
+                </div>` : ''}
+                <button class="btn w-full mt-3" onclick="copyCard(${c.id})">Copy to Clipboard</button>
+            </div>`;
+        }).join('');
+    }
+    function toggleUsed(id) { const c=S.research.find(x=>x.id===id); c.used=!c.used; renderResearch(document.getElementById('research-filter').value); save(); }
+    function copyCard(id) {
+        const c=S.research.find(x=>x.id===id);
+        const text = `${c.name}\n\nA - Core Concept: ${c.blockA||c.claim||''}\nB - Supporting Evidence: ${c.blockB||c.evidence||''}\nC - Application: ${c.blockC||c.placement||''}\nD - Contradictions: ${c.blockD||''}`;
+        navigator.clipboard.writeText(text);
+    }
+    function addResearchCard() {
+        const name=prompt('Name:'); if(!name) return;
+        const cat=prompt('Category (psychology/movement/neuroscience/training):')||'movement';
+        const claim=prompt('Core claim (Block A):')||'';
+        S.research.push({id:Date.now(),name,cat,claim,mechanism:'',evidence:'',placement:'',used:false,blockA:claim,blockB:'',blockC:'',blockD:''});
+        renderResearch('all'); save();
+    }
+
+    // MATRIX
+    const stageColors = { 0:'#55efc4', 1:'#74b9ff', 2:'#ffeaa7', 3:'#ff7675' };
+    const transferColors = { high:'#55efc4', medium:'#ffeaa7', low:'#ff7675', direct:'#74b9ff' };
+
+    async function loadMatrix() {
+        try {
+            const res = await fetch('data/movement_matrix.json');
+            const data = await res.json();
+            S.matrixData = data;
+            document.getElementById('k-nodes').textContent = (data.nodes||[]).length;
+            buildMatrixFilters(data);
+            buildCytoscape(data);
+            save();
+        } catch(e) {
+            console.warn('movement_matrix.json not found, matrix will be empty');
+            document.getElementById('cy-container').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-tertiary);font-size:12px">Load data/movement_matrix.json to populate the graph</div>';
+        }
+    }
+
+    function buildMatrixFilters(data) {
+        if (!data || !data.enums) return;
+        const pf = document.getElementById('matrix-pattern-filters');
+        const df = document.getElementById('matrix-discipline-filters');
+        const tf = document.getElementById('matrix-type-filters');
+        if (data.enums.patterns) {
+            pf.innerHTML = '<div class="matrix-filter-title">Pattern</div>' + data.enums.patterns.map(p => `<label><input type="checkbox" class="matrix-filter" data-type="pattern" data-val="${p.name||p}" checked> ${p.name||p}</label>`).join('');
+        }
+        if (data.enums.disciplines) {
+            df.innerHTML = '<div class="matrix-filter-title">Discipline</div>' + data.enums.disciplines.map(d => `<label><input type="checkbox" class="matrix-filter" data-type="discipline" data-val="${d.name||d}" checked> ${d.name||d}</label>`).join('');
+        }
+        const types = [...new Set((data.nodes||[]).map(n=>n.type).filter(Boolean))];
+        if (types.length) {
+            tf.innerHTML = '<div class="matrix-filter-title">Node Type</div>' + types.map(t => `<label><input type="checkbox" class="matrix-filter" data-type="type" data-val="${t}" checked> ${t}</label>`).join('');
+        }
+        document.querySelectorAll('.matrix-filter').forEach(cb => cb.addEventListener('change', applyMatrixFilters));
+    }
+
+    function buildCytoscape(data) {
+        if (!data || !data.nodes) return;
+        const stColors = {};
+        if (data.enums && data.enums.stages) {
+            data.enums.stages.forEach(s => { stColors[s.id !== undefined ? s.id : s.name] = s.color || stageColors[s.id] || '#888'; });
+        }
+        const nodeElements = (data.nodes||[]).map(n => {
+            const stage = n.stage !== undefined ? n.stage : 0;
+            const color = stColors[stage] || stageColors[stage] || '#888';
+            return {
+                data: {
+                    id: String(n.id), name: n.name||n.label||'', color: color,
+                    type: n.type||'', stage: stage, pattern: n.pattern||'',
+                    discipline: n.discipline||'', func: n.function||n.func||'',
+                    prerequisites: n.prerequisites||[], raw: n
+                }
+            };
+        });
+        const trScale = (data.enums && data.enums.transfer_scale) || {};
+        const edgeElements = (data.edges||[]).map((e,i) => {
+            const tVal = e.transfer || e.type || 'medium';
+            const tColor = (trScale[tVal] && trScale[tVal].color) || transferColors[tVal] || 'rgba(255,255,255,0.15)';
+            return { data: { id: 'e'+i, source: String(e.source), target: String(e.target), color: tColor, transfer: tVal } };
+        });
+
+        if (cy) cy.destroy();
+        cy = cytoscape({
+            container: document.getElementById('cy-container'),
+            elements: [...nodeElements, ...edgeElements],
+            style: [
+                { selector: 'node', style: { 'label': 'data(name)', 'background-color': 'data(color)', 'color': '#fff', 'text-valign': 'center', 'text-halign': 'center', 'font-size': '8px', 'width': 30, 'height': 30, 'text-outline-color': '#000', 'text-outline-width': 1, 'text-wrap': 'ellipsis', 'text-max-width': '60px' }},
+                { selector: 'edge', style: { 'line-color': 'data(color)', 'target-arrow-color': 'data(color)', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'width': 1.5, 'opacity': 0.6 }},
+                { selector: 'node:selected', style: { 'border-width': 3, 'border-color': '#ffaa00' }},
+                { selector: 'node.hidden', style: { 'display': 'none' }},
+                { selector: 'edge.hidden', style: { 'display': 'none' }}
+            ],
+            layout: { name: 'cose', animate: false, nodeRepulsion: function(){ return 8000; }, idealEdgeLength: function(){ return 80; }, padding: 30 }
+        });
+        cy.on('tap', 'node', function(evt) { showNodeDetail(evt.target.data()); });
+        cy.on('tap', function(evt) { if (evt.target === cy) closeNodePanel(); });
+    }
+
+    function initMatrix() {
+        if (!S.matrixData) loadMatrix();
+        else { buildCytoscape(S.matrixData); buildMatrixFilters(S.matrixData); }
+    }
+
+    function showNodeDetail(d) {
+        const panel = document.getElementById('node-detail-panel');
+        const content = document.getElementById('node-detail-content');
+        const prereqs = (d.prerequisites||[]).map(p => `<span class="prereq-badge">${p}</span>`).join('');
+        const connected = [];
+        if (cy) {
+            const node = cy.getElementById(d.id);
+            node.connectedEdges().forEach(edge => {
+                const other = edge.source().id() === d.id ? edge.target() : edge.source();
+                connected.push(other.data('name'));
+            });
+        }
+        content.innerHTML = `
+            <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:4px;margin-top:20px">${d.name}</div>
+            <div class="node-detail-label">ID</div><div class="node-detail-value">${d.id}</div>
+            <div class="node-detail-label">Type</div><div class="node-detail-value">${d.type||'N/A'}</div>
+            <div class="node-detail-label">Stage</div><div class="node-detail-value"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${d.color};margin-right:6px"></span>Stage ${d.stage}</div>
+            <div class="node-detail-label">Pattern</div><div class="node-detail-value">${d.pattern||'N/A'}</div>
+            <div class="node-detail-label">Discipline</div><div class="node-detail-value">${d.discipline||'N/A'}</div>
+            <div class="node-detail-label">Function</div><div class="node-detail-value">${d.func||'N/A'}</div>
+            <div class="node-detail-label">Prerequisites</div><div class="node-detail-value">${prereqs||'None'}</div>
+            <div class="node-detail-label">Connected Nodes (${connected.length})</div>
+            <div class="node-detail-value">${connected.length ? connected.map(c=>`<div style="font-size:10px;padding:3px 0;border-bottom:1px solid var(--border-subtle)">${c}</div>`).join('') : 'None'}</div>
+        `;
+        panel.classList.add('open');
+    }
+
+    function closeNodePanel() {
+        document.getElementById('node-detail-panel').classList.remove('open');
+    }
+
+    function applyMatrixFilters() {
+        if (!cy) return;
+        const activeStages = [...document.querySelectorAll('.matrix-filter[data-type="stage"]:checked')].map(c=>c.dataset.val);
+        const activePatterns = [...document.querySelectorAll('.matrix-filter[data-type="pattern"]:checked')].map(c=>c.dataset.val);
+        const activeDisciplines = [...document.querySelectorAll('.matrix-filter[data-type="discipline"]:checked')].map(c=>c.dataset.val);
+        const activeTypes = [...document.querySelectorAll('.matrix-filter[data-type="type"]:checked')].map(c=>c.dataset.val);
+        cy.nodes().forEach(node => {
+            const d = node.data();
+            const stageMatch = activeStages.length === 0 || activeStages.includes(String(d.stage));
+            const patternMatch = activePatterns.length === 0 || activePatterns.includes(d.pattern);
+            const discMatch = activeDisciplines.length === 0 || activeDisciplines.includes(d.discipline);
+            const typeMatch = activeTypes.length === 0 || activeTypes.includes(d.type);
+            if (stageMatch && patternMatch && discMatch && typeMatch) node.removeClass('hidden');
+            else node.addClass('hidden');
+        });
+        cy.edges().forEach(edge => {
+            if (edge.source().hasClass('hidden') || edge.target().hasClass('hidden')) edge.addClass('hidden');
+            else edge.removeClass('hidden');
+        });
+    }
+
+    function resetMatrixFilters() {
+        document.querySelectorAll('.matrix-filter').forEach(cb => { cb.checked = true; });
+        if (cy) { cy.nodes().removeClass('hidden'); cy.edges().removeClass('hidden'); }
+    }
+
+    function refitMatrix() {
+        if (cy) cy.fit(50);
+    }
+
+    // TAXONOMY
+    function initTaxonomy() {
+        if (!S.matrixData) {
+            fetch('data/movement_matrix.json').then(r=>r.json()).then(d=>{
+                S.matrixData = d;
+                buildTaxonomyFilters(d);
+                renderTaxonomy();
+            }).catch(()=>{
+                document.getElementById('tax-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-tertiary)">Load data/movement_matrix.json</td></tr>';
+            });
+        } else {
+            buildTaxonomyFilters(S.matrixData);
+            renderTaxonomy();
+        }
+    }
+
+    function buildTaxonomyFilters(data) {
+        if (!data) return;
+        const patterns = [...new Set((data.nodes||[]).map(n=>n.pattern).filter(Boolean))];
+        const types = [...new Set((data.nodes||[]).map(n=>n.type).filter(Boolean))];
+        const ps = document.getElementById('tax-pattern');
+        const ts = document.getElementById('tax-type');
+        ps.innerHTML = '<option value="all">All Patterns</option>' + patterns.map(p=>`<option value="${p}">${p}</option>`).join('');
+        ts.innerHTML = '<option value="all">All Types</option>' + types.map(t=>`<option value="${t}">${t}</option>`).join('');
+    }
+
+    function renderTaxonomy() {
+        if (!S.matrixData || !S.matrixData.nodes) return;
+        const q = (document.getElementById('tax-search').value||'').toLowerCase();
+        const pf = document.getElementById('tax-pattern').value;
+        const sf = document.getElementById('tax-stage').value;
+        const tf = document.getElementById('tax-type').value;
+        const nodes = S.matrixData.nodes.filter(n => {
+            if (q && !(n.name||'').toLowerCase().includes(q) && !String(n.id).includes(q)) return false;
+            if (pf !== 'all' && n.pattern !== pf) return false;
+            if (sf !== 'all' && String(n.stage) !== sf) return false;
+            if (tf !== 'all' && n.type !== tf) return false;
+            return true;
+        });
+        document.getElementById('tax-count').textContent = nodes.length + ' / ' + S.matrixData.nodes.length + ' movements';
+        const stColors = { 0:'#55efc4', 1:'#74b9ff', 2:'#ffeaa7', 3:'#ff7675' };
+        document.getElementById('tax-tbody').innerHTML = nodes.map(n => `
+            <tr>
+                <td style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">${n.id}</td>
+                <td style="color:var(--text-primary);font-weight:500">${n.name||''}</td>
+                <td>${n.type||''}</td>
+                <td>${n.pattern||''}</td>
+                <td><span class="stage-dot" style="background:${stColors[n.stage]||'#888'}"></span>Stage ${n.stage!==undefined?n.stage:'?'}</td>
+                <td>${n.discipline||''}</td>
+                <td style="font-size:10px">${n.function||n.func||''}</td>
+            </tr>`).join('');
+    }
+
+    // WORKOUT
+    function initWorkout() {
+        filterExercises();
+        const builder=document.getElementById('workout-builder');
+        new Sortable(builder, {animation:150, group:'exercises', ghostClass:'ghost'});
+    }
+    function filterExercises() {
+        const q=(document.getElementById('ex-search').value||'').toLowerCase();
+        const p=document.getElementById('ex-pattern-filter').value;
+        const filtered=S.exercises.filter(e=>(p==='all'||e.pattern===p)&&(!q||e.name.toLowerCase().includes(q)));
+        const el=document.getElementById('ex-library');
+        el.innerHTML=filtered.map(e=>`
+            <div class="exercise-item" data-id="${e.id}">
+                <div style="color:var(--text-primary)">${e.name}</div>
+                <div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">${e.pattern} | ${e.stage} | ${e.equip}</div>
+            </div>`).join('');
+        new Sortable(el, {animation:150, group:{name:'exercises',pull:'clone',put:false}, sort:false, ghostClass:'ghost'});
+    }
+    function exportWorkout() {
+        const items=[...document.getElementById('workout-builder').children].map(el=>el.textContent.trim()).filter(Boolean);
+        const name=document.getElementById('workout-name').value;
+        dl(name+'.txt', name+'\n'+'='.repeat(name.length)+'\n\n'+items.join('\n'), 'text/plain');
+    }
+    function saveWorkout() { save(); alert('Workout saved'); }
+
+    // MINDMAP
+    function renderMindmap() {
+        const ns=document.getElementById('mm-nodes'), svg=document.getElementById('mm-svg');
+        let lines='';
+        S.mindmap.edges.forEach(e=>{
+            const a=S.mindmap.nodes.find(n=>n.id===e.f), b=S.mindmap.nodes.find(n=>n.id===e.t);
+            if(a&&b) lines+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>`;
+        });
+        svg.innerHTML=lines;
+        ns.innerHTML=S.mindmap.nodes.map(n=>`
+            <div class="mindmap-node" style="left:${n.x-50}px;top:${n.y-18}px;color:${n.color};border-color:${n.color}30"
+                 onmousedown="startDragNode(event,${n.id})">${n.text}</div>`).join('');
+    }
+    let dragNode=null, dragOff={x:0,y:0};
+    function startDragNode(e,id) {
+        dragNode=S.mindmap.nodes.find(n=>n.id===id);
+        const rect=e.target.getBoundingClientRect(), canvas=document.getElementById('mm-canvas').getBoundingClientRect();
+        dragOff={x:e.clientX-(dragNode.x-50+canvas.left), y:e.clientY-(dragNode.y-18+canvas.top)};
+        document.onmousemove=moveNode; document.onmouseup=stopDrag;
+    }
+    function moveNode(e) {
+        if(!dragNode) return;
+        const canvas=document.getElementById('mm-canvas').getBoundingClientRect();
+        dragNode.x=e.clientX-canvas.left-dragOff.x+50;
+        dragNode.y=e.clientY-canvas.top-dragOff.y+18;
+        renderMindmap();
+    }
+    function stopDrag() { dragNode=null; document.onmousemove=null; document.onmouseup=null; save(); }
+    function addMindmapNode() {
+        const text=prompt('Node text:'); if(!text) return;
+        S.mindmap.nodes.push({id:Date.now(),x:300+Math.random()*200,y:150+Math.random()*150,text,color:'var(--text-primary)'});
+        renderMindmap(); save();
+    }
+    function addMindmapConnection() {
+        const list=S.mindmap.nodes.map(n=>`${n.id}: ${n.text}`).join('\n');
+        const fid=parseInt(prompt('From node ID:\n'+list)); const tid=parseInt(prompt('To node ID:\n'+list));
+        if(fid&&tid) { S.mindmap.edges.push({f:fid,t:tid}); renderMindmap(); save(); }
+    }
+    function clearMindmap() { if(confirm('Clear mindmap?')){S.mindmap={nodes:[],edges:[]}; renderMindmap(); save();} }
+    function exportMindmap(fmt) { dl('mindmap.json',JSON.stringify(S.mindmap,null,2),'application/json'); }
+
+    // DECISIONS
+    function initDecisions() {
+        document.getElementById('k-decisions').textContent=S.decisions.length;
+        document.getElementById('decisions-list').innerHTML=S.decisions.map(d=>`
+            <div class="card" style="padding:10px;background:var(--bg-deep)">
+                <div class="flex items-center justify-between" style="margin-bottom:6px">
+                    <span class="badge ${d.status==='resolved'?'badge-green':'badge-orange'}">${d.status}</span>
+                    <span style="font-size:9px;color:var(--text-tertiary)">${d.date}</span>
+                </div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-primary)">${d.title}</div>
+                <div style="font-size:10px;color:var(--text-tertiary);margin-top:3px">${d.context}</div>
+            </div>`).join('');
+        document.getElementById('bottlenecks-list').innerHTML=S.bottlenecks.map(b=>`
+            <div class="card" style="padding:10px;background:var(--bg-deep);border-color:${b.priority==='high'?'var(--accent-warning)':'var(--border-subtle)'}">
+                <div class="flex items-center justify-between" style="margin-bottom:6px">
+                    <span class="badge ${b.priority==='high'?'badge-orange':''}">${b.priority}</span>
+                    <button class="btn btn-sm" onclick="resolveBottleneck(${b.id})">Resolve</button>
+                </div>
+                <div style="font-size:12px;font-weight:600;color:var(--text-primary)">${b.title}</div>
+            </div>`).join('');
+    }
+    function addDecision() {
+        const title=prompt('Decision:'); if(!title) return;
+        const ctx=prompt('Context:')||'';
+        S.decisions.push({id:Date.now(),date:new Date().toISOString().split('T')[0],title,context:ctx,status:'resolved'});
+        initDecisions(); save();
+    }
+    function addBottleneck() {
+        const title=prompt('Bottleneck:'); if(!title) return;
+        const priority=confirm('High priority?')?'high':'normal';
+        S.bottlenecks.push({id:Date.now(),title,priority}); initDecisions(); save();
+    }
+    function resolveBottleneck(id) { S.bottlenecks=S.bottlenecks.filter(b=>b.id!==id); initDecisions(); save(); }
+
+    // BARCODE
+    function initBarcode() {
+        const presets = [
+            { label: 'Saturno Solar System', url: 'https://gabosaturno11.github.io/saturno-solar-system/' },
+            { label: 'Command Center', url: window.location.href },
+            { label: 'Saturno Movement', url: 'https://saturnomovement.com' }
+        ];
+        const grid = document.getElementById('qr-presets');
+        grid.innerHTML = presets.map(p => `
+            <div class="qr-card">
+                <div class="qr-label">${p.label}</div>
+                <div class="qr-url">${p.url}</div>
+                <div class="qr-output" data-url="${p.url}"></div>
+            </div>`).join('');
+        grid.querySelectorAll('.qr-output').forEach(el => {
+            try {
+                const qr = kjua({ text: el.dataset.url, size: 200, fill: '#ffaa00', back: '#0a0a0c', rounded: 80 });
+                el.appendChild(qr);
+            } catch(e) { el.textContent = 'QR generation failed'; }
+        });
+    }
+
+    function generateCustomQR() {
+        const url = document.getElementById('qr-custom-url').value.trim();
+        if (!url) return;
+        const out = document.getElementById('qr-custom-output');
+        out.innerHTML = '';
+        try {
+            const qr = kjua({ text: url, size: 250, fill: '#ffaa00', back: '#0a0a0c', rounded: 80 });
+            out.appendChild(qr);
+            const label = document.createElement('div');
+            label.style.cssText = 'font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-top:8px';
+            label.textContent = url;
+            out.appendChild(label);
+        } catch(e) { out.textContent = 'QR generation failed'; }
+    }
+
+    // EXPORT TAB
+    function initExport() {}
+
+    function exportTOCJson() {
+        dl('toc-all.json', JSON.stringify(S.tocs, null, 2), 'application/json');
+    }
+    function exportMatrixJson() {
+        if (S.matrixData) dl('movement_matrix.json', JSON.stringify(S.matrixData, null, 2), 'application/json');
+        else alert('No matrix data loaded');
+    }
+    function exportMatrixCsv() {
+        if (!S.matrixData || !S.matrixData.nodes) { alert('No matrix data loaded'); return; }
+        const headers = ['id','name','type','pattern','stage','discipline','function'];
+        const rows = S.matrixData.nodes.map(n => headers.map(h => {
+            const v = n[h] || n.func || '';
+            return '"' + String(v).replace(/"/g, '""') + '"';
+        }).join(','));
+        dl('movement_matrix.csv', headers.join(',') + '\n' + rows.join('\n'), 'text/csv');
+    }
+    function exportResearchJson() {
+        dl('research.json', JSON.stringify(S.research, null, 2), 'application/json');
+    }
+
+    // INTERNAL (S button modal)
+    function openInternal() { document.getElementById('internal-modal').classList.add('open'); }
+    function closeInternal() { document.getElementById('internal-modal').classList.remove('open'); document.getElementById('internal-pw').value=''; }
+    function validateInternal() {
+        if(document.getElementById('internal-pw').value===S.pw) { closeInternal(); document.getElementById('internal-section').style.display='block'; updateStorage(); }
+        else alert('Invalid');
+    }
+    function exitInternal() { document.getElementById('internal-section').style.display='none'; }
+    function updateStorage() {
+        let total=0; for(let k in localStorage) if(localStorage.hasOwnProperty(k)) total+=localStorage[k].length*2;
+        const kb = (total/1024).toFixed(1);
+        const pct = Math.min(total/(5*1024*1024)*100,100);
+        if (document.getElementById('storage-label')) { document.getElementById('storage-label').textContent=kb+' KB'; document.getElementById('storage-bar').style.width=pct+'%'; }
+        if (document.getElementById('storage-label-tab')) { document.getElementById('storage-label-tab').textContent=kb+' KB'; document.getElementById('storage-bar-tab').style.width=pct+'%'; }
+    }
+
+    // INTERNAL TAB
+    function initInternalTab() {
+        const locked = document.getElementById('internal-tab-locked');
+        const content = document.getElementById('internal-tab-content');
+        if (content.style.display === 'block') {
+            updateInternalStats();
+            return;
+        }
+        locked.style.display = 'flex';
+        content.style.display = 'none';
+    }
+
+    function unlockInternalTab() {
+        if (document.getElementById('internal-tab-pw').value === S.pw) {
+            document.getElementById('internal-tab-locked').style.display = 'none';
+            document.getElementById('internal-tab-content').style.display = 'block';
+            document.getElementById('internal-tab-pw').value = '';
+            updateInternalStats();
+        } else {
+            alert('Invalid password');
+        }
+    }
+
+    function lockInternalTab() {
+        document.getElementById('internal-tab-locked').style.display = 'flex';
+        document.getElementById('internal-tab-content').style.display = 'none';
+    }
+
+    function updateInternalStats() {
+        updateStorage();
+        document.getElementById('build-date').textContent = new Date().toLocaleDateString();
+        document.getElementById('int-matrix-nodes').textContent = S.matrixData ? (S.matrixData.nodes||[]).length : 0;
+        document.getElementById('int-matrix-edges').textContent = S.matrixData ? (S.matrixData.edges||[]).length : 0;
+        document.getElementById('int-research-count').textContent = S.research.length;
+        document.getElementById('int-decisions-count').textContent = S.decisions.length;
+        const tocCount = Object.values(S.tocs).reduce((sum,arr)=>sum+(Array.isArray(arr)?arr.length:0),0);
+        document.getElementById('int-toc-count').textContent = tocCount;
+    }
+
+    function importState() { document.getElementById('import-file').click(); }
+    function handleImport(e) {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+            try {
+                const data = JSON.parse(ev.target.result);
+                Object.assign(S, data);
+                save();
+                alert('State imported successfully. Reloading...');
+                location.reload();
+            } catch(err) { alert('Invalid JSON file'); }
+        };
+        reader.readAsText(file);
+    }
+
+    // UTILITIES
+    function dl(name,content,type) {
+        const b=new Blob([content],{type}), u=URL.createObjectURL(b), a=document.createElement('a');
+        a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+    }
+    function save() { try { localStorage.setItem('scc3',JSON.stringify(S)); } catch(e) { console.warn('Save failed',e); } }
+    function load() { const d=localStorage.getItem('scc3'); if(d) { try { Object.assign(S,JSON.parse(d)); } catch(e) {} } }
+    function exportAllState() { dl('command-center-state.json',JSON.stringify(S,null,2),'application/json'); }
+
+    // INIT
+    document.addEventListener('DOMContentLoaded', () => {
+        load();
+        if (S.tocs.v1.length === 0) loadExternalTOC().catch(()=>loadDefaultTOC());
+        else initTOC();
+        loadExternalResearch().catch(()=>{});
+        loadMatrix().catch(()=>{});
+    });
     </script>
 </body>
 </html>

@@ -1,0 +1,11 @@
+id,name,target_area,function,stage,unlocks_pattern
+MOB-01,Resting Squat,Hips/Ankles,Deep Flexion,0,Knee-Dominant
+MOB-02,Forward Fold,Posterior Chain,Spinal Flexion,0,Hip-Dominant
+MOB-03,Pancake Stretch,Adductors,Active Compression,0,Horizontal Pull
+MOB-04,Front Split,Hip Flexors,Linear Range,0,Knee-Dominant
+MOB-05,Side Split,Abductors,Lateral Range,0,Horizontal Push
+MOB-06,Thoracic Bridge,Anterior Chain,Spinal Extension,0,Overhead Press
+MOB-07,German Hang,Shoulders,Extension under load,0,Downward Press
+MOB-08,Wrist Routine A,Wrists,Load preparation,0,Hand-Balancing
+MOB-09,Scapular CARs,Scapula,Controlled Rotation,0,All Patterns
+MOB-10,Hip CARs,Hips,Controlled Rotation,0,All Patterns

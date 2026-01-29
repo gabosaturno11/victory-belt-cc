@@ -1,0 +1,73 @@
+id,name,pattern,stage,discipline,prerequisites,transfer_value
+MOV-P1-01,Push Up,Horizontal Push,1,Calisthenics,INF-CR-01;INF-SC-04,STRONG_POSITIVE
+MOV-P1-02,Diamond Push Up,Horizontal Push,1,Bodybuilding,MOV-P1-01,STRONG_POSITIVE
+MOV-P1-03,Wide Push Up,Horizontal Push,1,Bodybuilding,MOV-P1-01,MODERATE_POSITIVE
+MOV-P1-04,Decline Push Up,Horizontal Push,1,Calisthenics,MOV-P1-01,STRONG_POSITIVE
+MOV-P1-05,Archer Push Up,Horizontal Push,2,Calisthenics,MOV-P1-02;MOV-P1-03,STRONG_POSITIVE
+MOV-P1-06,Pseudo Planche Push Up,Horizontal Push,2,Power-Free,MOV-P1-01;INF-SC-04,STRONG_POSITIVE
+MOV-P1-07,Ring Push Up,Horizontal Push,2,Calisthenics,MOV-P1-01,MODERATE_POSITIVE
+MOV-P1-08,Typewriter Push Up,Horizontal Push,2,Freestyle,MOV-P1-05,MODERATE_POSITIVE
+MOV-P1-09,One Arm Push Up,Horizontal Push,3,Power-Free,MOV-P1-05,STRONG_POSITIVE
+MOV-P1-10,Planche Push Up,Horizontal Push,3,Power-Free,MOV-P1-06;MOV-P3-07,STRONG_POSITIVE
+MOV-P1-11,90 Degree Push Up,Horizontal Push,3,Power-Free,MOV-P1-06;MOV-P5-03,STRONG_POSITIVE
+MOV-P2-01,Inverted Row,Horizontal Pull,1,Calisthenics,INF-SC-02;INF-CR-01,STRONG_POSITIVE
+MOV-P2-02,Australian Pull Up,Horizontal Pull,1,Calisthenics,MOV-P2-01,STRONG_POSITIVE
+MOV-P2-03,Wide Row,Horizontal Pull,1,Bodybuilding,MOV-P2-01,MODERATE_POSITIVE
+MOV-P2-04,Ring Row,Horizontal Pull,1,Calisthenics,MOV-P2-01,STRONG_POSITIVE
+MOV-P2-05,Archer Row,Horizontal Pull,2,Calisthenics,MOV-P2-02;MOV-P2-03,STRONG_POSITIVE
+MOV-P2-06,Front Lever Row,Horizontal Pull,3,Power-Free,MOV-P2-05;MOV-P2-07,STRONG_POSITIVE
+MOV-P2-07,Tuck Front Lever,Horizontal Pull,2,Power-Free,MOV-P2-01;INF-CR-02,STRONG_POSITIVE
+MOV-P2-08,Advanced Front Lever,Horizontal Pull,3,Power-Free,MOV-P2-07,STRONG_POSITIVE
+MOV-P2-09,Front Lever,Horizontal Pull,3,Power-Free,MOV-P2-08,STRONG_POSITIVE
+MOV-P3-01,Dip,Downward Press,1,Calisthenics,INF-SC-04;INF-SC-01,STRONG_POSITIVE
+MOV-P3-02,Ring Dip,Downward Press,2,Calisthenics,MOV-P3-01,STRONG_POSITIVE
+MOV-P3-03,Korean Dip,Downward Press,2,Freestyle,MOV-P3-01,MODERATE_POSITIVE
+MOV-P3-04,Bulgarian Dip,Downward Press,2,Bodybuilding,MOV-P3-01,MODERATE_POSITIVE
+MOV-P3-05,Weighted Dip,Downward Press,2,Street Lifting,MOV-P3-01,STRONG_POSITIVE
+MOV-P3-06,Russian Dip,Downward Press,2,Freestyle,MOV-P3-03,MODERATE_POSITIVE
+MOV-P3-07,Tuck Planche,Downward Press,2,Power-Free,MOV-P3-01;INF-SC-04;INF-CR-02,STRONG_POSITIVE
+MOV-P3-08,Advanced Planche,Downward Press,3,Power-Free,MOV-P3-07,STRONG_POSITIVE
+MOV-P3-09,Full Planche,Downward Press,3,Power-Free,MOV-P3-08,STRONG_POSITIVE
+MOV-P3-10,Impossible Dip,Downward Press,3,Freestyle,MOV-P3-06;MOV-P3-05,MODERATE_POSITIVE
+MOV-P4-01,Dead Hang,Vertical Pull,1,Calisthenics,INF-SC-03,STRONG_POSITIVE
+MOV-P4-02,Scapular Pull Up,Vertical Pull,1,Calisthenics,MOV-P4-01;INF-SC-02,STRONG_POSITIVE
+MOV-P4-03,Pull Up,Vertical Pull,1,Calisthenics,MOV-P4-02,STRONG_POSITIVE
+MOV-P4-04,Chin Up,Vertical Pull,1,Calisthenics,MOV-P4-02,STRONG_POSITIVE
+MOV-P4-05,Wide Pull Up,Vertical Pull,1,Bodybuilding,MOV-P4-03,MODERATE_POSITIVE
+MOV-P4-06,L-Sit Pull Up,Vertical Pull,2,Calisthenics,MOV-P4-03;INF-CR-05,STRONG_POSITIVE
+MOV-P4-07,Archer Pull Up,Vertical Pull,2,Calisthenics,MOV-P4-05,STRONG_POSITIVE
+MOV-P4-08,Muscle Up (Bar),Vertical Pull,2,Calisthenics,MOV-P4-03;MOV-P3-01,STRONG_POSITIVE
+MOV-P4-09,Ring Muscle Up,Vertical Pull,2,Calisthenics,MOV-P4-08;MOV-P3-02,STRONG_POSITIVE
+MOV-P4-10,Weighted Pull Up,Vertical Pull,2,Street Lifting,MOV-P4-03,STRONG_POSITIVE
+MOV-P4-11,Typewriter Pull Up,Vertical Pull,2,Freestyle,MOV-P4-07,MODERATE_POSITIVE
+MOV-P4-12,One Arm Pull Up,Vertical Pull,3,Power-Free,MOV-P4-07;MOV-P4-10,STRONG_POSITIVE
+MOV-P4-13,One Arm Chin Up,Vertical Pull,3,Power-Free,MOV-P4-12,STRONG_POSITIVE
+MOV-P5-01,Pike Push Up,Overhead Press,1,Calisthenics,MOV-P1-01;INF-SC-01,STRONG_POSITIVE
+MOV-P5-02,Elevated Pike Push Up,Overhead Press,1,Calisthenics,MOV-P5-01,STRONG_POSITIVE
+MOV-P5-03,Wall Handstand Hold,Overhead Press,1,Hand-Balancing,MOV-P5-01;INF-CR-02,STRONG_POSITIVE
+MOV-P5-04,Wall Handstand Push Up,Overhead Press,2,Hand-Balancing,MOV-P5-03,STRONG_POSITIVE
+MOV-P5-05,Free Handstand Hold,Overhead Press,2,Hand-Balancing,MOV-P5-03,STRONG_POSITIVE
+MOV-P5-06,Handstand Push Up,Overhead Press,3,Hand-Balancing,MOV-P5-04;MOV-P5-05,STRONG_POSITIVE
+MOV-P5-07,90 Degree Handstand Push Up,Overhead Press,3,Hand-Balancing,MOV-P5-06;MOV-P1-11,STRONG_POSITIVE
+MOV-P5-08,One Arm Handstand,Overhead Press,3,Hand-Balancing,MOV-P5-05,STRONG_POSITIVE
+MOV-P5-09,Press to Handstand,Overhead Press,3,Hand-Balancing,MOV-P5-05;INF-CR-05,STRONG_POSITIVE
+MOV-P6-01,Bodyweight Squat,Knee-Dominant,1,Calisthenics,MOB-01,STRONG_POSITIVE
+MOV-P6-02,Split Squat,Knee-Dominant,1,Calisthenics,MOV-P6-01,STRONG_POSITIVE
+MOV-P6-03,Bulgarian Split Squat,Knee-Dominant,1,Calisthenics,MOV-P6-02,STRONG_POSITIVE
+MOV-P6-04,Pistol Squat,Knee-Dominant,2,Calisthenics,MOV-P6-03;MOB-01;MOB-02,STRONG_POSITIVE
+MOV-P6-05,Shrimp Squat,Knee-Dominant,2,Calisthenics,MOV-P6-03;MOB-04,STRONG_POSITIVE
+MOV-P6-06,Dragon Squat,Knee-Dominant,3,Calisthenics,MOV-P6-04;MOV-P6-05,STRONG_POSITIVE
+MOV-P6-07,Sissy Squat,Knee-Dominant,2,Bodybuilding,MOV-P6-01,MODERATE_POSITIVE
+MOV-P6-08,Natural Leg Extension,Knee-Dominant,2,Bodybuilding,MOV-P6-07,MODERATE_POSITIVE
+MOV-P6-09,Jump Squat,Knee-Dominant,1,Freestyle,MOV-P6-01,MODERATE_POSITIVE
+MOV-P6-10,Box Jump,Knee-Dominant,2,Freestyle,MOV-P6-09,MODERATE_POSITIVE
+MOV-P6-11,Weighted Squat,Knee-Dominant,2,Street Lifting,MOV-P6-01,STRONG_POSITIVE
+MOV-P6-12,Cossack Squat,Knee-Dominant,2,Mobility,MOV-P6-01;MOB-05,MODERATE_POSITIVE
+MOV-P7-01,Glute Bridge,Hip-Dominant,1,Calisthenics,MOB-06,STRONG_POSITIVE
+MOV-P7-02,Hip Thrust,Hip-Dominant,1,Bodybuilding,MOV-P7-01,STRONG_POSITIVE
+MOV-P7-03,Single Leg Glute Bridge,Hip-Dominant,1,Calisthenics,MOV-P7-01,STRONG_POSITIVE
+MOV-P7-04,Nordic Curl,Hip-Dominant,2,Calisthenics,MOV-P7-01;INF-CR-01,STRONG_POSITIVE
+MOV-P7-05,Reverse Hyper,Hip-Dominant,2,Bodybuilding,MOV-P7-01;INF-CR-03,MODERATE_POSITIVE
+MOV-P7-06,Wrestler Bridge,Hip-Dominant,2,Calisthenics,MOV-P7-01;MOB-06,STRONG_POSITIVE
+MOV-P7-07,Stand to Bridge,Hip-Dominant,3,Mobility,MOV-P7-06;MOB-06,STRONG_POSITIVE
+MOV-P7-08,Bridge Walk,Hip-Dominant,3,Mobility,MOV-P7-07,MODERATE_POSITIVE

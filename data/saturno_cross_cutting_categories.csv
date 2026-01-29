@@ -1,0 +1,14 @@
+id,name,category,function,stage,prerequisites
+INF-SC-01,Scapular Push Up,Scapular Control,Protraction,1,MOB-09
+INF-SC-02,Scapular Row,Scapular Control,Retraction,1,MOB-09
+INF-SC-03,Active Hang,Scapular Control,Elevation,1,MOB-07;MOB-09
+INF-SC-04,Support Hold,Scapular Control,Depression,1,MOB-09
+INF-SC-05,One Arm Scapular Hang,Scapular Control,Unilateral Stability,2,INF-SC-03
+INF-CR-01,Plank,Core,Anti-Extension,1,MOB-09
+INF-CR-02,Hollow Body Hold,Core,Anti-Extension,1,INF-CR-01
+INF-CR-03,Arch Body Hold,Core,Posterior Chain,1,MOB-06
+INF-CR-04,Side Plank,Core,Anti-Lateral Flexion,1,INF-CR-01
+INF-CR-05,L-Sit,Core,Compression,2,INF-CR-02;MOB-03
+INF-CR-06,Dragon Flag,Core,Anti-Extension (Dynamic),3,INF-CR-02
+INF-CR-07,Ab Wheel Rollout,Core,Anti-Extension (Dynamic),2,INF-CR-01
+INF-CR-08,Windshield Wiper,Core,Rotation,3,INF-CR-02
