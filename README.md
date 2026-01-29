@@ -13,22 +13,23 @@ A single-file command center for managing the production of **The Art of Calisth
 
 ---
 
-## 14 Tabs
+## 15 Tabs
 
 | Tab | Purpose |
 |-----|---------|
 | **TOC** | Dual-pane Table of Contents editor with drag-reorder, version comparison, and Part/Chapter/Section hierarchy |
-| **Writing** | Quill.js rich text editor with per-chapter storage, TOC sidebar navigation, and optional preview pane |
+| **Writing** | Quill.js rich text editor with 7 voice modes, refinement sliders, per-chapter storage, and preview pane |
 | **Decisions** | Decision log + bottleneck tracker with timestamps and priority levels |
 | **Research** | A/B/C/D research card framework — Core Concept, Supporting Evidence, Application, Contradictions |
-| **HTMLs** | HTML file collection with dual iframe previews for comparison |
-| **Matrix** | Cytoscape.js directed graph — 95 movement nodes, 119 edges, filterable by stage/pattern/discipline/type |
+| **HTMLs** | HTML file collection with upload, tag filtering, dual iframe previews for comparison |
+| **Matrix** | Cytoscape.js directed graph — 95+ nodes, 119+ edges, filterable + query engine (7 query types) |
 | **Taxonomy** | Sortable/filterable table of all movement nodes with click-to-inspect detail panel |
 | **Workout** | Drag-and-drop workout builder from exercise library |
 | **Mind Map** | Freeform draggable node map with SVG connections |
 | **Barcode** | QR code generator (kjua) with presets and custom URL support |
 | **Vault** | Knowledge Vault — document library with categories, cross-referencing, and search |
 | **Dashboard** | Overview dashboard — stats, writing progress, matrix coverage, decisions, bottlenecks |
+| **Calendar** | Excel/CSV parser (SheetJS) with calendar grid renderer, PDF/CSV export |
 | **Export** | Centralized export hub — JSON, MD, HTML, Word, PDF, CSV, Full State Backup, Export Bundle |
 | **Internal** | Password-protected deployment forge — storage usage, locked structures, build info, state import/export |
 
@@ -42,6 +43,7 @@ A single-file command center for managing the production of **The Art of Calisth
 | Sortable.js | 1.15.0 | Drag-and-drop reordering |
 | Cytoscape.js | 3.28.1 | Graph visualization |
 | pdfmake | 0.2.7 | PDF generation |
+| SheetJS | 0.18.5 | Excel/CSV parsing |
 | kjua | 0.9.0 | QR code generation |
 
 All loaded via CDN. No build step required.
@@ -103,7 +105,7 @@ data/
 
 ```
 saturno-command-center/
-  index.html          — Complete app (single file, ~2944 lines)
+  index.html          — Complete app (single file, ~3343 lines)
   BB_EDITS.md         — Bug fix changelog (TITAN stabilization pass)
   README.md           — This file
   package.json        — gh-pages deployment config
@@ -197,6 +199,19 @@ See `BB_EDITS.md` for complete documentation.
 - **R. Persistent Memory** — Version history (last 10 snapshots), session recovery notification
 - **S. Mindmap** — 5 shape palette (rectangle/circle/diamond/hexagon/pill), curved + bidirectional edges, SVG export
 - **T. Dashboard** — NEW TAB: Overview with 6 stat cards, writing progress, matrix coverage, recent decisions, active bottlenecks
+
+See `BB_EDITS.md` for complete documentation.
+
+---
+
+## Pass 6 — CEO Lens Excellence (Jan 29, 2026 — Final Session)
+
+11 improvements across 4 categories + 1 new tab:
+
+- **U. Writing Hub** — Unified gold pill design, compression + technical depth refinement sliders
+- **V. HTML Upload** — Drag-and-drop file upload, FileReader storage, tag-colored card system with filtering
+- **X. Calendar** — NEW TAB: SheetJS Excel/CSV parser, auto-detect calendar vs data table, grid renderer, PDF/CSV export
+- **Y. Matrix Query Engine** — 7 query types (prerequisites, unlocks, path, cluster, pattern, stage, orphans), BFS pathfinding, graph highlighting
 
 See `BB_EDITS.md` for complete documentation.
 

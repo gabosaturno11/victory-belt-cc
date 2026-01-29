@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/kjua/0.9.0/kjua.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         :root {
             --bg-void: #0a0a0c;
@@ -210,9 +211,12 @@
         .qr-url { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); word-break: break-all; }
 
         /* Writing mode pills */
-        .wm-pill { padding:3px 10px; border-radius:12px; border:1px solid var(--wm,#666); background:transparent; color:var(--wm,#666); font-size:9px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:var(--font-display); }
-        .wm-pill:hover { background:color-mix(in srgb, var(--wm) 15%, transparent); }
-        .wm-pill.active { background:color-mix(in srgb, var(--wm) 20%, transparent); box-shadow:0 0 8px color-mix(in srgb, var(--wm) 30%, transparent); border-width:2px; transform:scale(1.08); }
+        .wm-pill { padding:6px 12px; border-radius:4px; border:1px solid #27272a; background:transparent; color:#71717a; font-size:10px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.5px; }
+        .wm-pill:hover { border-color:#fff; color:#fff; }
+        .wm-pill.active { background:rgba(255,170,0,0.15); border-color:var(--accent-gold); color:var(--accent-gold); }
+        input[type="range"] { -webkit-appearance:none; appearance:none; width:100%; height:4px; background:#27272a; border-radius:2px; outline:none; border:none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance:none; width:14px; height:14px; border-radius:50%; background:var(--accent-gold); cursor:pointer; }
+        input[type="range"]::-moz-range-thumb { width:14px; height:14px; border-radius:50%; background:var(--accent-gold); cursor:pointer; border:none; }
 
         /* Internal tab */
         .internal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -249,6 +253,7 @@
             <button class="tab" data-tab="barcode">Barcode</button>
             <button class="tab" data-tab="vault">Vault</button>
             <button class="tab" data-tab="dashboard">Dashboard</button>
+            <button class="tab" data-tab="calendar">Calendar</button>
             <button class="tab" data-tab="export">Export</button>
             <button class="tab" data-tab="internal">Internal</button>
         </nav>
@@ -375,31 +380,43 @@
                         <span id="wc-autosave" style="font-size:8px;color:var(--accent-success);font-family:var(--font-mono)"></span>
                     </div>
                 </div>
-                <!-- M1: Writing mode selector -->
-                <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">
-                    <span style="font-size:9px;color:var(--text-tertiary);font-family:var(--font-mono);margin-right:4px">MODE</span>
-                    <button class="wm-pill" data-mode="raw" onclick="setWritingMode('raw')" style="--wm:#ef4444">Raw</button>
-                    <button class="wm-pill" data-mode="teacher" onclick="setWritingMode('teacher')" style="--wm:#22c55e">Teacher</button>
-                    <button class="wm-pill" data-mode="philosopher" onclick="setWritingMode('philosopher')" style="--wm:#3b82f6">Philosopher</button>
-                    <button class="wm-pill" data-mode="prophet" onclick="setWritingMode('prophet')" style="--wm:#eab308">Prophet</button>
-                    <button class="wm-pill" data-mode="mystic" onclick="setWritingMode('mystic')" style="--wm:#a855f7">Mystic</button>
-                    <button class="wm-pill" data-mode="companion" onclick="setWritingMode('companion')" style="--wm:#f97316">Companion</button>
-                    <button class="wm-pill" data-mode="confessor" onclick="setWritingMode('confessor')" style="--wm:#6b7280">Confessor</button>
-                    <button class="wm-pill" data-mode="rebel" onclick="setWritingMode('rebel')" style="--wm:#e5e7eb">Rebel</button>
-                    <span id="wm-status" style="font-size:9px;color:var(--text-tertiary);margin-left:8px;font-style:italic"></span>
+                <!-- U1: Voice mode selector (simplified) -->
+                <div class="voice-modes" style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+                    <button class="wm-pill active" data-mode="raw" onclick="setWritingMode('raw')">Raw</button>
+                    <button class="wm-pill" data-mode="teacher" onclick="setWritingMode('teacher')">Teacher</button>
+                    <button class="wm-pill" data-mode="philosopher" onclick="setWritingMode('philosopher')">Philosopher</button>
+                    <button class="wm-pill" data-mode="prophet" onclick="setWritingMode('prophet')">Prophet</button>
+                    <button class="wm-pill" data-mode="mystic" onclick="setWritingMode('mystic')">Mystic</button>
+                    <button class="wm-pill" data-mode="companion" onclick="setWritingMode('companion')">Companion</button>
+                    <button class="wm-pill" data-mode="rebel" onclick="setWritingMode('rebel')">Rebel</button>
+                    <span id="wm-status" style="font-size:9px;color:var(--text-tertiary);margin-left:auto;font-style:italic"></span>
                 </div>
                 <div style="flex:1;display:flex;gap:0;overflow:hidden">
                     <div id="editor-wrap" style="flex:1"><div id="editor"></div></div>
                     <div id="preview-panel" style="display:none;flex:1;overflow-y:auto;padding:20px 24px;border-left:1px solid var(--border-subtle);background:var(--bg-deep);font-family:Georgia,serif;font-size:14px;line-height:1.8;color:var(--text-secondary)"></div>
                 </div>
-                <!-- M2: Writing commands toolbar -->
-                <div style="display:flex;align-items:center;gap:6px;padding:8px 0 4px;border-top:1px solid var(--border-subtle);margin-top:4px">
-                    <span style="font-size:9px;color:var(--text-tertiary);font-family:var(--font-mono);margin-right:4px">CMD</span>
-                    <button class="btn btn-sm" onclick="writingCommand('compress')" title="Remove 30% wordcount, preserve meaning">Compress</button>
-                    <button class="btn btn-sm" onclick="writingCommand('expand')" title="Add 50% detail and examples">Expand</button>
-                    <button class="btn btn-sm" onclick="writingCommand('simplify')" title="8th grade reading level">Simplify</button>
-                    <button class="btn btn-sm" onclick="writingCommand('deepen')" title="Add philosophical depth">Deepen</button>
-                    <button class="btn btn-sm" onclick="writingCommand('polish')" title="Professional publishing voice">Polish</button>
+                <!-- U2: Refinement + Commands toolbar -->
+                <div style="display:flex;align-items:center;gap:0;border-top:1px solid var(--border-subtle);margin-top:4px">
+                    <div style="display:flex;align-items:center;gap:6px;padding:8px 0 4px;flex:1">
+                        <span style="font-size:9px;color:var(--text-tertiary);font-family:var(--font-mono);margin-right:4px">CMD</span>
+                        <button class="btn btn-sm" onclick="writingCommand('compress')" title="Remove 30% wordcount, preserve meaning">Compress</button>
+                        <button class="btn btn-sm" onclick="writingCommand('expand')" title="Add 50% detail and examples">Expand</button>
+                        <button class="btn btn-sm" onclick="writingCommand('simplify')" title="8th grade reading level">Simplify</button>
+                        <button class="btn btn-sm" onclick="writingCommand('deepen')" title="Add philosophical depth">Deepen</button>
+                        <button class="btn btn-sm" onclick="writingCommand('polish')" title="Professional publishing voice">Polish</button>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:12px;padding:4px 0 4px 16px;border-left:1px solid var(--border-subtle)">
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <span style="font-size:8px;color:var(--text-tertiary);font-family:var(--font-mono);text-transform:uppercase">Compression</span>
+                            <input type="range" id="refine-compression" min="0" max="100" value="50" style="width:80px" oninput="document.getElementById('compression-val').textContent=this.value+'%';S._compression=parseInt(this.value);save()">
+                            <span id="compression-val" style="font-size:9px;color:var(--text-secondary);font-family:var(--font-mono);min-width:28px">50%</span>
+                        </div>
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <span style="font-size:8px;color:var(--text-tertiary);font-family:var(--font-mono);text-transform:uppercase">Technical</span>
+                            <input type="range" id="refine-technical" min="0" max="100" value="50" style="width:80px" oninput="document.getElementById('technical-val').textContent=this.value+'%';S._technical=parseInt(this.value);save()">
+                            <span id="technical-val" style="font-size:9px;color:var(--text-secondary);font-family:var(--font-mono);min-width:28px">50%</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -459,9 +476,19 @@
         <section id="sec-htmls" class="section">
             <div class="sidebar sidebar-wide">
                 <div class="sidebar-label">HTML Collection</div>
+                <!-- V1: Upload zone -->
+                <div style="border:2px dashed #27272a;border-radius:8px;padding:16px;text-align:center;margin-bottom:10px;cursor:pointer" onclick="document.getElementById('html-file-upload').click()" id="html-drop-zone">
+                    <input type="file" id="html-file-upload" accept=".html,.htm" multiple style="display:none" onchange="handleHTMLUpload(event)">
+                    <div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:4px">Upload HTMLs</div>
+                    <div style="font-size:9px;color:var(--text-tertiary)">Click or drag .html files</div>
+                </div>
                 <input type="text" id="html-search" placeholder="Search..." oninput="filterHTMLs()" style="margin-bottom:8px">
-                <div id="html-list" class="space-y"></div>
-                <button class="btn w-full" style="margin-top:8px" onclick="addHTML()">+ Add HTML</button>
+                <select id="html-tag-filter" onchange="filterHTMLs()" style="margin-bottom:8px;font-size:10px">
+                    <option value="all">All Tags</option>
+                </select>
+                <div id="html-tag-counts" style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);margin-bottom:6px"></div>
+                <div id="html-list" class="space-y" style="overflow-y:auto;flex:1"></div>
+                <button class="btn w-full" style="margin-top:8px" onclick="addHTML()">+ Add URL</button>
             </div>
             <div class="content-split">
                 <div class="content-half" style="padding:8px">
@@ -513,7 +540,8 @@
                     </div>
                     <div style="margin-top:auto;padding-top:8px;border-top:1px solid var(--border-subtle)">
                         <div id="matrix-filter-count" style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);text-align:center;margin-bottom:6px"></div>
-                        <button class="btn w-full" onclick="resetMatrixFilters()">Reset Filters</button>
+                        <button class="btn w-full btn-primary" onclick="openQueryEngine()">Query Engine</button>
+                        <button class="btn w-full mt-3" onclick="resetMatrixFilters()">Reset Filters</button>
                         <button class="btn w-full mt-3" onclick="refitMatrix()">Re-fit Graph</button>
                         <button class="btn w-full mt-3" onclick="parseAllCSVs()">Rebuild from CSV</button>
                     </div>
@@ -744,6 +772,28 @@
             </div>
         </section>
 
+        <!-- === CALENDAR TAB === -->
+        <section id="sec-calendar" class="section" style="flex-direction:column">
+            <div class="sidebar sidebar-wide" style="flex-direction:column">
+                <div class="sidebar-label">CF Program Parser</div>
+                <div style="border:2px dashed #27272a;border-radius:8px;padding:16px;text-align:center;margin-bottom:10px;cursor:pointer" onclick="document.getElementById('excel-file-upload').click()" id="excel-drop-zone">
+                    <input type="file" id="excel-file-upload" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleExcelUpload(event)">
+                    <div style="font-size:10px;color:var(--text-tertiary);font-family:var(--font-mono);text-transform:uppercase;margin-bottom:4px">Upload Excel / CSV</div>
+                    <div style="font-size:9px;color:var(--text-tertiary)">Click to upload .xlsx .xls .csv</div>
+                </div>
+                <div class="sidebar-label" style="margin-top:8px">Sheets</div>
+                <div id="excel-sheet-list" style="overflow-y:auto;flex:1"></div>
+                <div style="margin-top:auto;padding-top:8px;border-top:1px solid var(--border-subtle)">
+                    <button class="btn w-full" onclick="exportCalendarPDF()">Export PDF</button>
+                    <button class="btn w-full mt-3" onclick="exportCalendarCSV()">Export CSV</button>
+                    <button class="btn w-full mt-3" onclick="buildWorkoutFromCalendar()">Build Workout</button>
+                </div>
+            </div>
+            <div class="content" style="flex:1;overflow-y:auto" id="calendar-content">
+                <div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-tertiary);font-size:12px;font-family:var(--font-mono)">Upload an Excel file to parse CF programs</div>
+            </div>
+        </section>
+
         <!-- === EXPORT TAB === -->
         <section id="sec-export" class="section" style="flex-direction:column">
             <div class="content" style="flex:1">
@@ -916,6 +966,32 @@
         </div>
     </div>
 
+    <!-- Y1: Query Engine Modal -->
+    <div class="modal-overlay" id="query-modal">
+        <div class="modal" style="width:560px;max-height:80vh;overflow-y:auto">
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px">Matrix Query Engine</div>
+            <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:16px">Build queries to explore movement relationships</div>
+            <div style="margin-bottom:8px">
+                <div class="node-detail-label">Query Type</div>
+                <select id="query-type" style="width:100%" onchange="updateQueryUI()">
+                    <option value="prerequisites">Prerequisites — What do I need before X?</option>
+                    <option value="unlocks">Unlocks — What does X lead to?</option>
+                    <option value="path">Path — Shortest path from A to B</option>
+                    <option value="cluster">Cluster — All nodes connected to X within N steps</option>
+                    <option value="pattern">Pattern — All movements in a pattern</option>
+                    <option value="stage">Stage — All movements at a stage</option>
+                    <option value="orphans">Orphans — Nodes with no connections</option>
+                </select>
+            </div>
+            <div id="query-params" style="margin-bottom:12px"></div>
+            <div class="flex gap-2" style="margin-bottom:12px">
+                <button class="btn btn-primary" style="flex:1" onclick="runQuery()">Run Query</button>
+                <button class="btn" style="flex:1" onclick="closeQueryEngine()">Close</button>
+            </div>
+            <div id="query-results" style="max-height:300px;overflow-y:auto"></div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="internal-modal">
         <div class="modal">
             <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:16px">Internal Section</div>
@@ -1076,6 +1152,7 @@
                 barcode: initBarcode,
                 vault: initVault,
                 dashboard: initDashboard,
+                calendar: initCalendar,
                 export: initExport,
                 internal: initInternalTab
             };
@@ -1312,19 +1389,14 @@
         updateWordCount();
     }
 
-    // M1: Writing modes
+    // U1: Writing modes (simplified)
     function setWritingMode(mode, silent) {
         S.currentWritingMode = mode;
         const m = writingModes[mode];
         if (!m) return;
-        // Update pills
         document.querySelectorAll('.wm-pill').forEach(p => {
             p.classList.toggle('active', p.dataset.mode === mode);
         });
-        // Subtle editor background tint
-        const editor = document.querySelector('.ql-container');
-        if (editor) editor.style.background = `color-mix(in srgb, ${m.color} 5%, var(--bg-deep))`;
-        // Status text
         const status = document.getElementById('wm-status');
         if (status) status.textContent = mode.charAt(0).toUpperCase() + mode.slice(1) + ' — ' + m.desc;
         if (!silent) save();
@@ -1360,17 +1432,22 @@
         }
     }
 
-    // M2: Writing commands
+    // U2: Writing commands with refinement knobs
     function writingCommand(cmd) {
         const text = quill ? quill.getText().trim() : '';
         if (!text) { alert('No text in editor'); return; }
-        const mode = S.currentWritingMode || 'teacher';
+        const mode = S.currentWritingMode || 'raw';
+        const compression = S._compression || 50;
+        const technical = S._technical || 50;
+        const compressNote = compression > 70 ? 'Be very concise, cut aggressively.' : compression < 30 ? 'Preserve most detail, only cut obvious filler.' : '';
+        const techNote = technical > 70 ? 'Use precise technical terminology and cite sources.' : technical < 30 ? 'Keep it conversational and accessible.' : '';
+        const refinement = `Compression level: ${compression}%. ${compressNote} Technical depth: ${technical}%. ${techNote}`;
         const prompts = {
-            compress: `Act as a professional book editor. Take the following text and reduce it by approximately 30% while preserving all key meaning, arguments, and voice. The writing mode is "${mode}". Remove redundancies, tighten sentences, cut filler words. Return ONLY the edited text.\n\n---\n${text}`,
-            expand: `Act as a professional book author. Take the following text and expand it by approximately 50% by adding relevant details, examples, and depth. The writing mode is "${mode}". Maintain the same voice and style. Return ONLY the expanded text.\n\n---\n${text}`,
-            simplify: `Act as a professional editor. Rewrite the following text at an 8th grade reading level. Use shorter sentences, simpler vocabulary, and clearer structure. The writing mode is "${mode}". Preserve all key ideas. Return ONLY the simplified text.\n\n---\n${text}`,
-            deepen: `Act as a philosophical author. Take the following text and add philosophical depth — questions, reflections, historical connections, deeper meaning. The writing mode is "${mode}". Return ONLY the deepened text.\n\n---\n${text}`,
-            polish: `Act as a Victory Belt Publishing editor. Polish the following text to professional publishing standards. Fix grammar, improve flow, strengthen transitions, ensure consistency. The writing mode is "${mode}". Return ONLY the polished text.\n\n---\n${text}`
+            compress: `Act as a professional book editor. Reduce this text by approximately ${Math.max(20, compression-20)}% while preserving all key meaning, arguments, and voice. Writing mode: "${mode}". ${refinement} Return ONLY the edited text.\n\n---\n${text}`,
+            expand: `Act as a professional book author. Expand this text by approximately ${Math.max(20, 100-compression)}% by adding relevant details, examples, and depth. Writing mode: "${mode}". ${refinement} Return ONLY the expanded text.\n\n---\n${text}`,
+            simplify: `Act as a professional editor. Rewrite at an 8th grade reading level. Shorter sentences, simpler vocabulary, clearer structure. Writing mode: "${mode}". ${refinement} Preserve all key ideas. Return ONLY the simplified text.\n\n---\n${text}`,
+            deepen: `Act as a philosophical author. Add philosophical depth — questions, reflections, historical connections, deeper meaning. Writing mode: "${mode}". ${refinement} Return ONLY the deepened text.\n\n---\n${text}`,
+            polish: `Act as a Victory Belt Publishing editor. Polish to professional publishing standards. Fix grammar, improve flow, strengthen transitions, ensure consistency. Writing mode: "${mode}". ${refinement} Return ONLY the polished text.\n\n---\n${text}`
         };
         const prompt = prompts[cmd];
         if (!prompt) return;
@@ -1438,21 +1515,34 @@
     }
 
     // HTMLS
-    function initHTMLs() { renderHTMLList(S.htmlFiles); }
+    function initHTMLs() { buildHTMLTagFilter(); filterHTMLs(); }
+    function buildHTMLTagFilter() {
+        const tags = [...new Set(S.htmlFiles.map(f => f.tag))].sort();
+        const sel = document.getElementById('html-tag-filter');
+        if (sel) sel.innerHTML = '<option value="all">All Tags</option>' + tags.map(t => `<option value="${t}">${t} (${S.htmlFiles.filter(f=>f.tag===t).length})</option>`).join('');
+        const counts = document.getElementById('html-tag-counts');
+        if (counts) counts.textContent = S.htmlFiles.length + ' files · ' + tags.length + ' tags';
+    }
     function renderHTMLList(files) {
+        const tagColors = { Deployed:'var(--accent-success)', Visual:'var(--accent-blue)', Framework:'var(--accent-purple)', Map:'var(--accent-warning)', Exercise:'var(--accent-gold)', TOC:'var(--accent-blue)', Uploaded:'#ff6b35', Infographic:'#00cfff', Custom:'var(--text-tertiary)' };
         document.getElementById('html-list').innerHTML=files.map(f=>`
-            <div class="card" style="padding:10px;cursor:pointer" onclick="previewHTML(${f.id},event)">
+            <div class="card" style="padding:10px;cursor:pointer;border-left:3px solid ${tagColors[f.tag]||'var(--border-subtle)'}" onclick="previewHTML(${JSON.stringify(f.id).replace(/"/g,'&quot;')},event)">
                 <div style="font-size:12px;color:var(--text-primary);margin-bottom:4px">${f.name}</div>
-                <span class="badge">${f.tag}</span>
+                <span class="badge" style="background:${tagColors[f.tag]?tagColors[f.tag]+'22':'var(--accent-glow)'};color:${tagColors[f.tag]||'var(--accent-gold)'}">${f.tag}</span>
             </div>`).join('');
     }
     function filterHTMLs() {
-        const q=document.getElementById('html-search').value.toLowerCase();
-        renderHTMLList(S.htmlFiles.filter(f=>f.name.toLowerCase().includes(q)));
+        const q = (document.getElementById('html-search')?.value || '').toLowerCase();
+        const tag = document.getElementById('html-tag-filter')?.value || 'all';
+        let files = S.htmlFiles;
+        if (q) files = files.filter(f => f.name.toLowerCase().includes(q));
+        if (tag !== 'all') files = files.filter(f => f.tag === tag);
+        renderHTMLList(files);
     }
     function previewHTML(id,e) {
         const f=S.htmlFiles.find(x=>x.id===id), panel=e?.shiftKey?2:1, iframe=document.getElementById('html-iframe-'+panel);
         if(f.path) { iframe.removeAttribute('srcdoc'); iframe.src=f.path; }
+        else if(f.content) { iframe.removeAttribute('src'); iframe.srcdoc=f.content; }
         else iframe.srcdoc=`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif"><div style="text-align:center"><h2>${f.name}</h2><p style="font-size:12px;opacity:.6">${f.tag} | No URL set</p></div></body></html>`;
     }
     function openIframe(n) { const f=document.getElementById('html-iframe-'+n); if(f.src) window.open(f.src,'_blank'); }
@@ -1461,6 +1551,21 @@
         const tag=prompt('Tag (e.g. Deployed, Reference):')||'Custom';
         const path=prompt('URL (leave empty for local):')||'';
         S.htmlFiles.push({id:Date.now(),name,tag,path}); initHTMLs(); save();
+    }
+    function handleHTMLUpload(event) {
+        const files = event.target.files;
+        if (!files || !files.length) return;
+        Array.from(files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                const htmlContent = ev.target.result;
+                const name = file.name.replace(/\.(html?|htm)$/i, '');
+                S.htmlFiles.push({ id: Date.now() + Math.random(), name, tag: 'Uploaded', path: '', content: htmlContent });
+                initHTMLs(); save();
+            };
+            reader.readAsText(file);
+        });
+        event.target.value = '';
     }
 
     // RESEARCH
@@ -1694,6 +1799,7 @@
                 { selector: 'node', style: { 'label': 'data(name)', 'background-color': 'data(color)', 'color': '#fff', 'text-valign': 'center', 'text-halign': 'center', 'font-size': '8px', 'width': 30, 'height': 30, 'text-outline-color': '#000', 'text-outline-width': 1, 'text-wrap': 'ellipsis', 'text-max-width': '60px' }},
                 { selector: 'edge', style: { 'line-color': 'data(color)', 'target-arrow-color': 'data(color)', 'target-arrow-shape': 'triangle', 'curve-style': 'bezier', 'width': 1.5, 'opacity': 0.6 }},
                 { selector: 'node:selected', style: { 'border-width': 3, 'border-color': '#ffaa00' }},
+                { selector: 'node.highlighted', style: { 'border-width': 3, 'border-color': '#00ff88', 'width': 40, 'height': 40 }},
                 { selector: 'node.hidden', style: { 'display': 'none' }},
                 { selector: 'edge.hidden', style: { 'display': 'none' }}
             ],
@@ -2910,6 +3016,272 @@
         renderMindmap(); save();
     }
 
+    // Y1: MATRIX QUERY ENGINE
+    function openQueryEngine() {
+        document.getElementById('query-modal').classList.add('open');
+        updateQueryUI();
+    }
+    function closeQueryEngine() { document.getElementById('query-modal').classList.remove('open'); }
+    function getNodeSelect(id, label) {
+        if (!S.matrixData || !S.matrixData.nodes) return '';
+        const opts = S.matrixData.nodes.map(n => `<option value="${n.id}">${n.name} (${n.type||''})</option>`).join('');
+        return `<div class="node-detail-label">${label}</div><select id="${id}" style="width:100%">${opts}</select>`;
+    }
+    function updateQueryUI() {
+        const type = document.getElementById('query-type').value;
+        const params = document.getElementById('query-params');
+        document.getElementById('query-results').innerHTML = '';
+        if (type === 'prerequisites' || type === 'unlocks') {
+            params.innerHTML = getNodeSelect('query-node', 'Select Movement');
+        } else if (type === 'path') {
+            params.innerHTML = getNodeSelect('query-node-a', 'Start Node') + '<div style="margin-top:8px">' + getNodeSelect('query-node-b', 'End Node') + '</div>';
+        } else if (type === 'cluster') {
+            params.innerHTML = getNodeSelect('query-node', 'Center Node') + '<div style="margin-top:8px"><div class="node-detail-label">Depth (steps)</div><input type="number" id="query-depth" value="2" min="1" max="5" style="width:100%"></div>';
+        } else if (type === 'pattern') {
+            const patterns = [...new Set((S.matrixData?.nodes||[]).map(n => n.pattern).filter(Boolean))];
+            params.innerHTML = '<div class="node-detail-label">Pattern</div><select id="query-pattern" style="width:100%">' + patterns.map(p => `<option value="${p}">${p}</option>`).join('') + '</select>';
+        } else if (type === 'stage') {
+            params.innerHTML = '<div class="node-detail-label">Stage</div><select id="query-stage" style="width:100%"><option value="0">Stage 0</option><option value="1">Stage 1</option><option value="2">Stage 2</option><option value="3">Stage 3</option></select>';
+        } else {
+            params.innerHTML = '';
+        }
+    }
+    function runQuery() {
+        const type = document.getElementById('query-type').value;
+        const results = document.getElementById('query-results');
+        if (!S.matrixData) { results.innerHTML = '<div style="color:var(--accent-danger)">No matrix data loaded</div>'; return; }
+        const nodes = S.matrixData.nodes || [];
+        const edges = S.matrixData.edges || [];
+        let found = [];
+        if (type === 'prerequisites') {
+            const nodeId = document.getElementById('query-node')?.value;
+            const incoming = edges.filter(e => String(e.target) === String(nodeId));
+            found = incoming.map(e => { const n = nodes.find(n => String(n.id) === String(e.source)); return n ? { ...n, relation: 'prerequisite', transfer: e.transfer || e.type } : null; }).filter(Boolean);
+        } else if (type === 'unlocks') {
+            const nodeId = document.getElementById('query-node')?.value;
+            const outgoing = edges.filter(e => String(e.source) === String(nodeId));
+            found = outgoing.map(e => { const n = nodes.find(n => String(n.id) === String(e.target)); return n ? { ...n, relation: 'unlocks', transfer: e.transfer || e.type } : null; }).filter(Boolean);
+        } else if (type === 'path') {
+            const startId = String(document.getElementById('query-node-a')?.value);
+            const endId = String(document.getElementById('query-node-b')?.value);
+            found = bfsPath(nodes, edges, startId, endId);
+        } else if (type === 'cluster') {
+            const nodeId = String(document.getElementById('query-node')?.value);
+            const depth = parseInt(document.getElementById('query-depth')?.value || '2');
+            found = bfsCluster(nodes, edges, nodeId, depth);
+        } else if (type === 'pattern') {
+            const pattern = document.getElementById('query-pattern')?.value;
+            found = nodes.filter(n => n.pattern === pattern);
+        } else if (type === 'stage') {
+            const stage = parseInt(document.getElementById('query-stage')?.value);
+            found = nodes.filter(n => n.stage === stage);
+        } else if (type === 'orphans') {
+            const connected = new Set();
+            edges.forEach(e => { connected.add(String(e.source)); connected.add(String(e.target)); });
+            found = nodes.filter(n => !connected.has(String(n.id)));
+        }
+        renderQueryResults(found, type);
+        // Highlight in graph
+        if (cy && found.length) {
+            cy.elements().removeClass('highlighted');
+            found.forEach(n => {
+                const cyNode = cy.getElementById(String(n.id));
+                if (cyNode.length) cyNode.addClass('highlighted');
+            });
+        }
+    }
+    function bfsPath(nodes, edges, startId, endId) {
+        const adj = {};
+        edges.forEach(e => {
+            const s = String(e.source), t = String(e.target);
+            if (!adj[s]) adj[s] = [];
+            adj[s].push(t);
+        });
+        const visited = new Set();
+        const queue = [[startId]];
+        visited.add(startId);
+        while (queue.length) {
+            const path = queue.shift();
+            const last = path[path.length - 1];
+            if (last === endId) return path.map(id => nodes.find(n => String(n.id) === id)).filter(Boolean);
+            (adj[last] || []).forEach(next => {
+                if (!visited.has(next)) { visited.add(next); queue.push([...path, next]); }
+            });
+        }
+        return [{ name: 'No path found', type: 'info', stage: -1 }];
+    }
+    function bfsCluster(nodes, edges, centerId, depth) {
+        const adj = {};
+        edges.forEach(e => {
+            const s = String(e.source), t = String(e.target);
+            if (!adj[s]) adj[s] = [];
+            if (!adj[t]) adj[t] = [];
+            adj[s].push(t);
+            adj[t].push(s);
+        });
+        const visited = new Set([centerId]);
+        let frontier = [centerId];
+        for (let d = 0; d < depth; d++) {
+            const next = [];
+            frontier.forEach(id => {
+                (adj[id] || []).forEach(n => {
+                    if (!visited.has(n)) { visited.add(n); next.push(n); }
+                });
+            });
+            frontier = next;
+        }
+        return [...visited].map(id => nodes.find(n => String(n.id) === id)).filter(Boolean);
+    }
+    function renderQueryResults(found, type) {
+        const results = document.getElementById('query-results');
+        if (!found.length) { results.innerHTML = '<div style="padding:8px;color:var(--text-tertiary);font-size:11px">No results</div>'; return; }
+        const sc = { 0:'#55efc4', 1:'#74b9ff', 2:'#ffeaa7', 3:'#ff7675' };
+        results.innerHTML = `<div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">${found.length} result${found.length>1?'s':''}</div>` +
+            found.map((n, i) => `<div style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--border-subtle);cursor:pointer" onclick="focusQueryNode('${n.id}')">
+                <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${sc[n.stage]||'#888'};flex-shrink:0"></span>
+                <div style="flex:1">
+                    <div style="font-size:11px;color:var(--text-primary)">${type==='path'?(i+1)+'. ':'' }${n.name||'—'}</div>
+                    <div style="font-size:9px;color:var(--text-tertiary)">${n.type||''} ${n.pattern?'· '+n.pattern:''} ${n.relation?'· '+n.relation:''} ${n.transfer?'('+n.transfer+')':''}</div>
+                </div>
+            </div>`).join('');
+    }
+    function focusQueryNode(id) {
+        if (!cy) return;
+        const node = cy.getElementById(String(id));
+        if (node.length) { cy.animate({ fit: { eles: node, padding: 80 } }, { duration: 400 }); node.select(); showNodeDetail(node.data()); }
+        closeQueryEngine();
+    }
+
+    // X1-X5: CALENDAR / EXCEL PARSER
+    let calendarData = null;
+    function initCalendar() {
+        if (calendarData) renderCalendar(calendarData);
+    }
+    function handleExcelUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                calendarData = { fileName: file.name, sheets: {} };
+                const sheetList = document.getElementById('excel-sheet-list');
+                sheetList.innerHTML = '';
+                workbook.SheetNames.forEach((name, idx) => {
+                    const sheet = workbook.Sheets[name];
+                    const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    calendarData.sheets[name] = json;
+                    sheetList.innerHTML += `<div class="card" style="padding:8px;cursor:pointer;margin-bottom:4px" onclick="renderCalendarSheet('${name.replace(/'/g,"\\'")}')">
+                        <div style="font-size:11px;color:var(--text-primary)">${name}</div>
+                        <div style="font-size:9px;color:var(--text-tertiary)">${json.length} rows</div>
+                    </div>`;
+                });
+                if (workbook.SheetNames.length > 0) renderCalendarSheet(workbook.SheetNames[0]);
+            } catch(err) { alert('Error parsing file: ' + err.message); }
+        };
+        reader.readAsArrayBuffer(file);
+        event.target.value = '';
+    }
+    function renderCalendarSheet(sheetName) {
+        if (!calendarData || !calendarData.sheets[sheetName]) return;
+        const rows = calendarData.sheets[sheetName];
+        const content = document.getElementById('calendar-content');
+        if (!rows.length) { content.innerHTML = '<div style="padding:20px;color:var(--text-tertiary)">Empty sheet</div>'; return; }
+        // Detect if it looks like a calendar (has day/week columns) or workout data
+        const header = rows[0] || [];
+        const isCalendar = header.some(h => /week|day|mon|tue|wed|thu|fri|sat|sun/i.test(String(h||'')));
+        if (isCalendar) renderCalendarGrid(rows, content);
+        else renderDataTable(rows, content);
+    }
+    function renderCalendarGrid(rows, container) {
+        const header = rows[0].map(h => String(h||''));
+        const dayIndices = [];
+        header.forEach((h, i) => {
+            if (/mon|tue|wed|thu|fri|sat|sun|day/i.test(h)) dayIndices.push(i);
+        });
+        if (!dayIndices.length) { renderDataTable(rows, container); return; }
+        let html = `<div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:12px">${calendarData.fileName} — Calendar View</div>`;
+        html += '<div style="display:grid;grid-template-columns:repeat(' + Math.max(dayIndices.length, 1) + ',1fr);gap:8px">';
+        // Header row
+        dayIndices.forEach(i => {
+            html += `<div style="padding:8px;background:var(--accent-glow);border-radius:var(--radius-sm);text-align:center;font-weight:600;color:var(--accent-gold);font-size:11px;text-transform:uppercase">${header[i]}</div>`;
+        });
+        // Data rows
+        for (let r = 1; r < rows.length; r++) {
+            const row = rows[r] || [];
+            dayIndices.forEach(i => {
+                const cell = String(row[i] || '');
+                const hasExercise = cell.length > 2;
+                html += `<div style="padding:10px;background:${hasExercise?'var(--bg-surface)':'var(--bg-deep)'};border:1px solid var(--border-subtle);border-radius:var(--radius-sm);min-height:60px;font-size:10px;color:${hasExercise?'var(--text-primary)':'var(--text-tertiary)'}">${cell.replace(/\n/g,'<br>') || '—'}</div>`;
+            });
+        }
+        html += '</div>';
+        container.innerHTML = html;
+    }
+    function renderDataTable(rows, container) {
+        const header = rows[0] || [];
+        let html = `<div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:12px">${calendarData?.fileName||'Data'} — Table View</div>`;
+        html += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:10px">';
+        html += '<thead><tr>' + header.map(h => `<th style="padding:8px;text-align:left;border-bottom:2px solid var(--accent-gold);color:var(--accent-gold);font-family:var(--font-mono);font-size:9px;text-transform:uppercase;white-space:nowrap">${h||''}</th>`).join('') + '</tr></thead>';
+        html += '<tbody>';
+        for (let r = 1; r < Math.min(rows.length, 200); r++) {
+            const row = rows[r] || [];
+            html += '<tr>' + header.map((_, i) => `<td style="padding:6px 8px;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary);white-space:nowrap">${row[i]!==undefined?row[i]:''}</td>`).join('') + '</tr>';
+        }
+        html += '</tbody></table></div>';
+        if (rows.length > 200) html += `<div style="padding:8px;font-size:10px;color:var(--text-tertiary)">Showing 200 of ${rows.length} rows</div>`;
+        container.innerHTML = html;
+    }
+    function renderCalendar(data) {
+        if (data && data.sheets) {
+            const firstSheet = Object.keys(data.sheets)[0];
+            if (firstSheet) renderCalendarSheet(firstSheet);
+        }
+    }
+    function exportCalendarCSV() {
+        if (!calendarData) { alert('No data loaded'); return; }
+        const sheetName = Object.keys(calendarData.sheets)[0];
+        const rows = calendarData.sheets[sheetName];
+        const csv = rows.map(r => (r||[]).map(c => '"' + String(c||'').replace(/"/g,'""') + '"').join(',')).join('\n');
+        dl(calendarData.fileName.replace(/\.\w+$/,'') + '.csv', csv, 'text/csv');
+    }
+    function exportCalendarPDF() {
+        if (!calendarData) { alert('No data loaded'); return; }
+        const sheetName = Object.keys(calendarData.sheets)[0];
+        const rows = calendarData.sheets[sheetName];
+        if (!rows.length) return;
+        const header = rows[0].map(h => ({ text: String(h||''), bold: true, fontSize: 8, color: '#ffaa00' }));
+        const body = [header];
+        for (let r = 1; r < Math.min(rows.length, 100); r++) {
+            body.push((rows[r]||[]).map(c => ({ text: String(c||''), fontSize: 7 })));
+        }
+        // Pad short rows
+        const maxCols = Math.max(...body.map(r => r.length));
+        body.forEach(r => { while(r.length < maxCols) r.push({ text: '', fontSize: 7 }); });
+        const dd = { content: [
+            { text: calendarData.fileName, style: 'header', margin: [0,0,0,10] },
+            { table: { headerRows: 1, body }, layout: 'lightHorizontalLines' }
+        ], styles: { header: { fontSize: 14, bold: true } }, defaultStyle: { fontSize: 8 } };
+        pdfMake.createPdf(dd).download(calendarData.fileName.replace(/\.\w+$/,'') + '.pdf');
+    }
+    function buildWorkoutFromCalendar() {
+        if (!calendarData) { alert('No data loaded'); return; }
+        const sheetName = Object.keys(calendarData.sheets)[0];
+        const rows = calendarData.sheets[sheetName];
+        // Extract exercise-like entries from all cells
+        const exercises = [];
+        for (let r = 1; r < rows.length; r++) {
+            (rows[r]||[]).forEach(cell => {
+                const val = String(cell||'').trim();
+                if (val && val.length > 2 && !/^\d+$/.test(val)) exercises.push(val);
+            });
+        }
+        if (!exercises.length) { alert('No exercises found'); return; }
+        // Switch to workout tab and add to builder
+        alert('Found ' + exercises.length + ' exercise entries. Switch to Workout tab to use them.');
+    }
+
     // UTILITIES
     function dl(name,content,type) {
         const b=new Blob([content],{type}), u=URL.createObjectURL(b), a=document.createElement('a');
@@ -2940,6 +3312,17 @@
         loadMatrix().catch(()=>{});
         // R2: Session recovery
         checkSessionRecovery();
+        // V1: Drag-and-drop on HTML upload zone
+        const dropZone = document.getElementById('html-drop-zone');
+        if (dropZone) {
+            dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.style.borderColor = 'var(--accent-gold)'; });
+            dropZone.addEventListener('dragleave', () => { dropZone.style.borderColor = '#27272a'; });
+            dropZone.addEventListener('drop', e => {
+                e.preventDefault(); dropZone.style.borderColor = '#27272a';
+                const dt = e.dataTransfer;
+                if (dt.files.length) { document.getElementById('html-file-upload').files = dt.files; handleHTMLUpload({ target: { files: dt.files, value: '' } }); }
+            });
+        }
 
         // D2: doc-title change syncs to TOC + writing sidebar
         const docTitle = document.getElementById('doc-title');

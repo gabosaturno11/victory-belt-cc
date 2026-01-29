@@ -763,4 +763,107 @@ setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(u); }, 100);
 
 ---
 
-*BB Edits documented by Claude Code | TITAN Stabilization + Second Pass + Third Pass | January 29, 2026*
+---
+
+## Pass 6 — CEO Lens Excellence (January 29, 2026 — Final Session)
+
+**Objective:** Make the command center impossible for Victory Belt to reject. CEO-level polish.
+
+### U. Writing Hub — Voice Mode Redesign
+
+**U1. Unified Gold Pill Design**
+- Replaced per-color `.wm-pill` CSS with unified gold active state
+- Active pill: gold background glow + gold border + gold text
+- Inactive: neutral #27272a border, #71717a text
+- Removed `--wm` custom properties and `color-mix()` complexity
+- Added range input CSS with custom gold thumb styling
+
+**U2. Refinement Sliders**
+- Removed Confessor mode (kept 7: Raw, Teacher, Philosopher, Prophet, Mystic, Companion, Rebel)
+- Added Compression slider (0-100%) — controls writing conciseness
+- Added Technical Depth slider (0-100%) — controls terminology precision
+- Sliders integrated into `writingCommand()` prompts
+- Values persist in state (`S._compression`, `S._technical`)
+- `setWritingMode()` no longer applies per-color editor tinting
+
+### V. HTML Upload System
+
+**V1. Upload Zone**
+- Added drag-and-drop upload zone to HTMLs sidebar
+- File input accepts `.html` and `.htm` files
+- Visual dashed border zone with TITAN styling
+
+**V2. Upload Handler**
+- `handleHTMLUpload(event)` — reads files via FileReader, stores HTML content in state
+- Uploaded files tagged as "Uploaded" with stored content
+- `previewHTML()` updated to support `f.content` via `srcdoc`
+- Drag-and-drop events on drop zone (dragover, dragleave, drop)
+
+**V3. Tag System**
+- Tag filter dropdown in HTMLs sidebar
+- Tag-colored borders on file cards (Deployed=green, Visual=blue, Framework=purple, Map=orange, Exercise=gold, Uploaded=orange-red)
+- File count + tag count display
+- Combined search + tag filtering
+
+### X. Calendar Tab — Excel Parser (SheetJS)
+
+**X1. SheetJS Library**
+- Added `xlsx@0.18.5` CDN to `<head>`
+
+**X2. Calendar Tab**
+- New "Calendar" tab (15th tab)
+- Sidebar: Upload zone, sheet list, export buttons
+- Content area: Calendar grid or data table view
+
+**X3. Excel Parser**
+- `handleExcelUpload(event)` — reads `.xlsx/.xls/.csv` via SheetJS
+- Multi-sheet support with sidebar sheet selector
+- Auto-detects calendar vs data table format
+
+**X4. Calendar Grid Renderer**
+- Detects day/week columns (Mon/Tue/Wed etc.)
+- Renders responsive CSS grid with gold headers
+- Color-coded cells (exercise vs empty)
+
+**X5. Data Table Renderer**
+- Fallback table view for non-calendar sheets
+- Gold-accented headers, scrollable, capped at 200 rows
+- PDF export via pdfmake
+- CSV export
+- "Build Workout" extraction from parsed data
+
+### Y. Matrix Query Engine
+
+**Y1. Query Engine**
+- "Query Engine" button added to Matrix sidebar
+- Modal with 7 query types:
+  - **Prerequisites** — incoming edges to a node
+  - **Unlocks** — outgoing edges from a node
+  - **Path** — BFS shortest path between two nodes
+  - **Cluster** — all nodes within N steps (configurable depth 1-5)
+  - **Pattern** — all movements in a pattern
+  - **Stage** — all movements at a stage level
+  - **Orphans** — nodes with no connections
+- Dynamic parameter UI per query type
+- Results rendered with stage-colored dots
+- Click-to-focus: zooms graph to selected result node
+- Highlighted style for query results in Cytoscape (green border, larger nodes)
+- BFS implementations: `bfsPath()` and `bfsCluster()`
+
+### Summary
+
+| Section | Changes |
+|---------|---------|
+| U. Writing Hub | 2 (pill redesign + refinement sliders) |
+| V. HTML Upload | 3 (upload zone + handler + tag system) |
+| X. Calendar | 5 (library + tab + parser + grid + table) |
+| Y. Query Engine | 1 (7 query types + BFS + highlighting) |
+| **Total** | **11 changes** |
+
+**Running Total:** 51 (Third Pass) + 11 = **62 total changes**
+**Tabs:** 15 (added Calendar)
+**Lines:** ~3343
+
+---
+
+*BB Edits documented by Claude Code | TITAN Stabilization + Second Pass + Third Pass + Pass 6 | January 29, 2026*
