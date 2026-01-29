@@ -92,12 +92,16 @@
         .badge-blue { background: rgba(0,207,255,0.12); color: var(--accent-blue); }
         .badge-purple { background: rgba(168,85,247,0.12); color: var(--accent-purple); }
 
-        .toc-item { background: var(--bg-deep); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 10px 12px; cursor: grab; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .toc-item { background: var(--bg-deep); border: 1px solid var(--border-subtle); border-left: 2px solid #27272a; border-radius: var(--radius-md); padding: 12px 12px 12px 20px; cursor: grab; transition: all 0.2s; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
         .toc-item:hover { border-color: var(--border-active); background: var(--bg-surface); transform: translateX(3px); }
-        .toc-item.is-part { background: var(--bg-surface); border-left: 3px solid var(--accent-gold); }
+        .toc-item.is-part { background: var(--bg-surface); border-left: 4px solid var(--accent-gold); padding: 14px 12px; }
         .toc-item .type-tag { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); min-width: 14px; }
-        .toc-item .title { font-size: 12px; flex: 1; }
-        .toc-item.is-part .title { color: var(--text-primary); font-weight: 600; }
+        .toc-item .title { font-size: 14px; flex: 1; color: #ffffff; font-weight: 500; }
+        .toc-item.is-part .title { font-size: 16px; color: var(--accent-gold); font-weight: 700; font-style: italic; text-transform: uppercase; letter-spacing: 0.5px; }
+        .toc-item.is-section { padding-left: 32px; opacity: 0.8; border-left: none; }
+        .toc-item.is-section .title { font-size: 12px; font-style: italic; font-weight: 400; color: rgba(255,255,255,0.7); }
+        .toc-item .movement-badges { display: flex; gap: 3px; flex-wrap: wrap; }
+        .toc-item .movement-badge { font-size: 7px; padding: 1px 4px; border-radius: 2px; background: rgba(255,170,0,0.12); color: var(--accent-gold); font-family: var(--font-mono); }
         .toc-item.mismatch { border-color: var(--accent-danger); background: rgba(255,68,102,0.06); }
         .ghost { opacity: 0.3; }
         .drag-chosen { box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
@@ -205,6 +209,11 @@
         .qr-label { font-size: 12px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
         .qr-url { font-family: var(--font-mono); font-size: 9px; color: var(--text-tertiary); word-break: break-all; }
 
+        /* Writing mode pills */
+        .wm-pill { padding:3px 10px; border-radius:12px; border:1px solid var(--wm,#666); background:transparent; color:var(--wm,#666); font-size:9px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:var(--font-display); }
+        .wm-pill:hover { background:color-mix(in srgb, var(--wm) 15%, transparent); }
+        .wm-pill.active { background:color-mix(in srgb, var(--wm) 20%, transparent); box-shadow:0 0 8px color-mix(in srgb, var(--wm) 30%, transparent); border-width:2px; transform:scale(1.08); }
+
         /* Internal tab */
         .internal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
         .internal-card { background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 20px; }
@@ -238,11 +247,16 @@
             <button class="tab" data-tab="workout">Workout</button>
             <button class="tab" data-tab="mindmap">Mind Map</button>
             <button class="tab" data-tab="barcode">Barcode</button>
+            <button class="tab" data-tab="vault">Vault</button>
+            <button class="tab" data-tab="dashboard">Dashboard</button>
             <button class="tab" data-tab="export">Export</button>
             <button class="tab" data-tab="internal">Internal</button>
         </nav>
         <div class="flex items-center gap-2">
             <span class="badge">V3</span>
+            <button class="btn-icon btn" onclick="resetToLastSaved()" title="Reset to Last Saved">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 4v6h6"/><path d="M3.51 15a9 9 0 105.64-11.36L1 10"/></svg>
+            </button>
             <button class="btn-icon btn" onclick="exportAllState()" title="Export State">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
             </button>
@@ -270,16 +284,36 @@
                 <select id="toc-v-left" onchange="loadTOC('left')">
                     <option value="v1">v1 - Original (7 Parts)</option>
                     <option value="v2">v2 - Compact (25 Ch)</option>
+                    <option value="v3">v3 - Working Draft</option>
                 </select>
                 <select id="toc-v-right" onchange="loadTOC('right')">
                     <option value="v2" selected>v2 - Compact (25 Ch)</option>
                     <option value="v1">v1 - Original (7 Parts)</option>
+                    <option value="v3">v3 - Working Draft</option>
                 </select>
                 <div style="border-top:1px solid var(--border-subtle);padding-top:8px;margin-top:4px"></div>
                 <button class="btn w-full" onclick="addTOCVersion()">+ New Version</button>
                 <button class="btn w-full" onclick="compareTOCs()">Compare</button>
                 <button class="btn w-full" onclick="exportTOC()">Export JSON</button>
+                <button class="btn w-full" onclick="exportTOCMarkdown()">Export MD</button>
+                <button class="btn w-full" onclick="exportTOCWord()">Export Word</button>
+                <button class="btn w-full" onclick="exportTOCPDF()">Export PDF</button>
                 <button class="btn btn-primary w-full" onclick="loadExternalTOC()">Load toc.json</button>
+                <div style="border-top:1px solid var(--border-subtle);padding-top:8px;margin-top:8px">
+                    <div class="sidebar-label">Cloud Links</div>
+                    <a class="btn w-full" href="https://www.dropbox.com/home" target="_blank" rel="noopener" style="text-decoration:none;justify-content:center;margin-bottom:4px">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 8l10 6 10-6L12 2z"/><path d="M2 16l10 6 10-6"/><path d="M2 12l10 6 10-6"/></svg>
+                        Dropbox
+                    </a>
+                    <a class="btn w-full" href="https://onedrive.live.com/" target="_blank" rel="noopener" style="text-decoration:none;justify-content:center">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+                        OneDrive
+                    </a>
+                </div>
+                <div style="border-top:1px solid var(--border-subtle);padding-top:8px;margin-top:8px">
+                    <div class="sidebar-label">TOC Analytics</div>
+                    <div id="toc-analytics" style="font-size:10px;color:var(--text-tertiary);line-height:2"></div>
+                </div>
                 <div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--border-subtle)">
                     <div style="font-size:9px;color:var(--text-tertiary);line-height:1.5">Drag items to reorder.<br>Red = mismatch between versions.</div>
                 </div>
@@ -319,15 +353,54 @@
                     </div>
                 </div>
             </div>
-            <div class="content flex-col" style="display:flex">
+            <div class="content flex-col" style="display:flex;flex:1">
                 <div class="flex items-center justify-between mb-3">
                     <input type="text" id="doc-title" value="Chapter 1: What, How, Why & Who" style="background:transparent;border:none;font-size:16px;font-weight:600;color:var(--text-primary);width:50%;padding:0">
-                    <div class="btn-group">
-                        <button class="btn" onclick="saveDocument()">Save</button>
-                        <button class="btn btn-primary" onclick="exportAs('md')">Export</button>
+                    <div class="flex items-center gap-2">
+                        <div id="wc-display" style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);cursor:pointer" onclick="setWordTarget()" title="Click to set target">0 words</div>
+                        <div class="btn-group">
+                            <button class="btn" id="preview-toggle" onclick="togglePreview()">Preview</button>
+                            <button class="btn" onclick="saveDocument()">Save</button>
+                            <button class="btn btn-primary" onclick="exportAs('md')">Export</button>
+                        </div>
                     </div>
                 </div>
-                <div id="editor-wrap" style="flex:1"><div id="editor"></div></div>
+                <!-- M3: Word count progress bar -->
+                <div id="wc-progress-wrap" style="display:none;margin-bottom:6px">
+                    <div style="height:3px;background:var(--bg-deep);border-radius:2px;overflow:hidden">
+                        <div id="wc-bar" style="height:100%;width:0%;background:var(--accent-gold);transition:width 0.3s"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:2px">
+                        <span id="wc-target-label" style="font-size:8px;color:var(--text-tertiary);font-family:var(--font-mono)"></span>
+                        <span id="wc-autosave" style="font-size:8px;color:var(--accent-success);font-family:var(--font-mono)"></span>
+                    </div>
+                </div>
+                <!-- M1: Writing mode selector -->
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;flex-wrap:wrap">
+                    <span style="font-size:9px;color:var(--text-tertiary);font-family:var(--font-mono);margin-right:4px">MODE</span>
+                    <button class="wm-pill" data-mode="raw" onclick="setWritingMode('raw')" style="--wm:#ef4444">Raw</button>
+                    <button class="wm-pill" data-mode="teacher" onclick="setWritingMode('teacher')" style="--wm:#22c55e">Teacher</button>
+                    <button class="wm-pill" data-mode="philosopher" onclick="setWritingMode('philosopher')" style="--wm:#3b82f6">Philosopher</button>
+                    <button class="wm-pill" data-mode="prophet" onclick="setWritingMode('prophet')" style="--wm:#eab308">Prophet</button>
+                    <button class="wm-pill" data-mode="mystic" onclick="setWritingMode('mystic')" style="--wm:#a855f7">Mystic</button>
+                    <button class="wm-pill" data-mode="companion" onclick="setWritingMode('companion')" style="--wm:#f97316">Companion</button>
+                    <button class="wm-pill" data-mode="confessor" onclick="setWritingMode('confessor')" style="--wm:#6b7280">Confessor</button>
+                    <button class="wm-pill" data-mode="rebel" onclick="setWritingMode('rebel')" style="--wm:#e5e7eb">Rebel</button>
+                    <span id="wm-status" style="font-size:9px;color:var(--text-tertiary);margin-left:8px;font-style:italic"></span>
+                </div>
+                <div style="flex:1;display:flex;gap:0;overflow:hidden">
+                    <div id="editor-wrap" style="flex:1"><div id="editor"></div></div>
+                    <div id="preview-panel" style="display:none;flex:1;overflow-y:auto;padding:20px 24px;border-left:1px solid var(--border-subtle);background:var(--bg-deep);font-family:Georgia,serif;font-size:14px;line-height:1.8;color:var(--text-secondary)"></div>
+                </div>
+                <!-- M2: Writing commands toolbar -->
+                <div style="display:flex;align-items:center;gap:6px;padding:8px 0 4px;border-top:1px solid var(--border-subtle);margin-top:4px">
+                    <span style="font-size:9px;color:var(--text-tertiary);font-family:var(--font-mono);margin-right:4px">CMD</span>
+                    <button class="btn btn-sm" onclick="writingCommand('compress')" title="Remove 30% wordcount, preserve meaning">Compress</button>
+                    <button class="btn btn-sm" onclick="writingCommand('expand')" title="Add 50% detail and examples">Expand</button>
+                    <button class="btn btn-sm" onclick="writingCommand('simplify')" title="8th grade reading level">Simplify</button>
+                    <button class="btn btn-sm" onclick="writingCommand('deepen')" title="Add philosophical depth">Deepen</button>
+                    <button class="btn btn-sm" onclick="writingCommand('polish')" title="Professional publishing voice">Polish</button>
+                </div>
             </div>
         </section>
 
@@ -368,6 +441,11 @@
                     <div class="flex gap-2">
                         <select id="research-filter" onchange="renderResearch(this.value)" style="width:160px">
                             <option value="all">All Categories</option>
+                        </select>
+                        <select id="research-usage-filter" onchange="renderResearch(document.getElementById('research-filter').value)" style="width:100px">
+                            <option value="all">All</option>
+                            <option value="used">Used</option>
+                            <option value="unused">Unused</option>
                         </select>
                         <button class="btn" onclick="loadExternalResearch()">Load JSON</button>
                         <button class="btn" onclick="addResearchCard()">+ Add</button>
@@ -413,11 +491,11 @@
                 <div class="matrix-sidebar">
                     <div class="sidebar-label">Matrix Filters</div>
                     <div class="matrix-filter-group">
-                        <div class="matrix-filter-title">Stage</div>
-                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="0" checked> Stage 0</label>
-                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="1" checked> Stage 1</label>
-                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="2" checked> Stage 2</label>
-                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="3" checked> Stage 3</label>
+                        <div class="matrix-filter-title">Stage <span style="font-size:8px;opacity:0.5">(dbl-click to rename)</span></div>
+                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="0" checked> <span ondblclick="editStageName(0)">Stage 0</span></label>
+                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="1" checked> <span ondblclick="editStageName(1)">Stage 1</span></label>
+                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="2" checked> <span ondblclick="editStageName(2)">Stage 2</span></label>
+                        <label><input type="checkbox" class="matrix-filter" data-type="stage" data-val="3" checked> <span ondblclick="editStageName(3)">Stage 3</span></label>
                     </div>
                     <div class="matrix-filter-group" id="matrix-pattern-filters">
                         <div class="matrix-filter-title">Pattern</div>
@@ -428,9 +506,16 @@
                     <div class="matrix-filter-group" id="matrix-type-filters">
                         <div class="matrix-filter-title">Node Type</div>
                     </div>
+                    <div class="matrix-filter-group">
+                        <div class="matrix-filter-title">Nodes</div>
+                        <input type="text" id="matrix-node-search" placeholder="Search nodes..." oninput="filterMatrixNodeList()" onkeyup="filterMatrixNodeList(event)" style="margin-bottom:6px;padding:5px 8px;font-size:10px">
+                        <div id="matrix-node-list" style="max-height:200px;overflow-y:auto"></div>
+                    </div>
                     <div style="margin-top:auto;padding-top:8px;border-top:1px solid var(--border-subtle)">
+                        <div id="matrix-filter-count" style="font-family:var(--font-mono);font-size:9px;color:var(--text-tertiary);text-align:center;margin-bottom:6px"></div>
                         <button class="btn w-full" onclick="resetMatrixFilters()">Reset Filters</button>
                         <button class="btn w-full mt-3" onclick="refitMatrix()">Re-fit Graph</button>
+                        <button class="btn w-full mt-3" onclick="parseAllCSVs()">Rebuild from CSV</button>
                     </div>
                 </div>
                 <div class="matrix-center">
@@ -444,38 +529,55 @@
         </section>
 
         <!-- === TAXONOMY TAB === -->
-        <section id="sec-taxonomy" class="section" style="flex-direction:column">
+        <section id="sec-taxonomy" class="section" style="flex-direction:column;position:relative">
             <div style="padding:12px 16px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;gap:10px;flex-shrink:0;background:var(--bg-deep)">
                 <input type="text" id="tax-search" placeholder="Search movements..." oninput="renderTaxonomy()" style="width:240px">
                 <select id="tax-pattern" onchange="renderTaxonomy()" style="width:160px">
                     <option value="all">All Patterns</option>
                 </select>
-                <select id="tax-stage" onchange="renderTaxonomy()" style="width:130px">
+                <select id="tax-stage" onchange="renderTaxonomy()" style="width:220px">
                     <option value="all">All Stages</option>
-                    <option value="0">Stage 0</option>
-                    <option value="1">Stage 1</option>
-                    <option value="2">Stage 2</option>
-                    <option value="3">Stage 3</option>
+                    <option value="0">Stage 0 — Mobility & Preparation</option>
+                    <option value="1">Stage 1 — Creating the Base</option>
+                    <option value="2">Stage 2 — Building the Structure</option>
+                    <option value="3">Stage 3 — Continuous Mastering</option>
                 </select>
                 <select id="tax-type" onchange="renderTaxonomy()" style="width:130px">
                     <option value="all">All Types</option>
                 </select>
+                <select id="tax-discipline" onchange="renderTaxonomy()" style="width:160px">
+                    <option value="all">All Disciplines</option>
+                </select>
                 <span id="tax-count" style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary);margin-left:auto"></span>
             </div>
-            <div class="content" style="flex:1;padding:0">
-                <table class="taxonomy-table">
-                    <thead><tr><th>ID</th><th>Name</th><th>Type</th><th>Pattern</th><th>Stage</th><th>Discipline</th><th>Function</th></tr></thead>
-                    <tbody id="tax-tbody"></tbody>
-                </table>
+            <div style="flex:1;padding:0;position:relative;overflow:hidden">
+                <div style="width:100%;height:100%;overflow-y:auto">
+                    <table class="taxonomy-table">
+                        <thead><tr>
+                            <th style="cursor:pointer" onclick="sortTaxonomy('id')">ID</th>
+                            <th style="cursor:pointer" onclick="sortTaxonomy('name')">Name</th>
+                            <th style="cursor:pointer" onclick="sortTaxonomy('type')">Type</th>
+                            <th style="cursor:pointer" onclick="sortTaxonomy('pattern')">Pattern</th>
+                            <th style="cursor:pointer" onclick="sortTaxonomy('stage')">Stage</th>
+                            <th style="cursor:pointer" onclick="sortTaxonomy('discipline')">Discipline</th>
+                            <th>Function</th>
+                        </tr></thead>
+                        <tbody id="tax-tbody"></tbody>
+                    </table>
+                </div>
+                <div class="context-panel" id="tax-inspector">
+                    <button class="context-panel-close" onclick="closeTaxInspector()">&times;</button>
+                    <div id="tax-inspector-content"></div>
+                </div>
             </div>
         </section>
 
         <!-- === WORKOUT TAB === -->
         <section id="sec-workout" class="section">
             <div class="sidebar sidebar-wide">
-                <div class="sidebar-label">Exercise Library</div>
+                <div class="sidebar-label">Exercise Library <span style="font-size:8px;opacity:0.5" id="ex-count"></span></div>
                 <input type="text" id="ex-search" placeholder="Search exercises..." oninput="filterExercises()" style="margin-bottom:6px">
-                <select id="ex-pattern-filter" onchange="filterExercises()" style="margin-bottom:8px">
+                <select id="ex-pattern-filter" onchange="filterExercises()" style="margin-bottom:4px">
                     <option value="all">All Patterns</option>
                     <option value="Horizontal Push">Horizontal Push</option>
                     <option value="Horizontal Pull">Horizontal Pull</option>
@@ -486,19 +588,46 @@
                     <option value="Hip-Dominant">Hip-Dominant</option>
                     <option value="Core">Core</option>
                     <option value="Mobility">Mobility</option>
+                    <option value="Scapular Control">Scapular Control</option>
                 </select>
-                <div id="ex-library" class="space-y"></div>
+                <select id="ex-stage-filter" onchange="filterExercises()" style="margin-bottom:8px">
+                    <option value="all">All Stages</option>
+                </select>
+                <div id="ex-library" class="space-y" style="overflow-y:auto;flex:1"></div>
+                <div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border-subtle)">
+                    <button class="btn btn-sm w-full" onclick="syncExercisesFromTaxonomy()">Sync from Taxonomy</button>
+                </div>
             </div>
             <div class="content flex-col" style="display:flex">
                 <div class="flex items-center justify-between mb-3">
-                    <input type="text" id="workout-name" value="New Workout" style="background:transparent;border:none;font-size:16px;font-weight:600;color:var(--text-primary);width:300px;padding:0">
-                    <div class="btn-group">
-                        <button class="btn" onclick="exportWorkout()">Export</button>
-                        <button class="btn btn-primary" onclick="saveWorkout()">Save</button>
+                    <input type="text" id="workout-name" value="New Workout" style="background:transparent;border:none;font-size:16px;font-weight:600;color:var(--text-primary);width:250px;padding:0">
+                    <div class="flex items-center gap-2">
+                        <select id="saved-workouts-select" onchange="loadSavedWorkout()" style="width:150px;font-size:10px">
+                            <option value="">— Saved Workouts —</option>
+                        </select>
+                        <select id="wo-template-select" onchange="if(this.value!=='')loadWorkoutTemplate(this.value);this.value='';" style="width:140px;font-size:10px">
+                            <option value="">— Templates —</option>
+                            <option value="0">Full Body Foundation</option>
+                            <option value="1">Push Day</option>
+                            <option value="2">Pull Day</option>
+                            <option value="3">Leg Day</option>
+                            <option value="4">Mobility Flow</option>
+                            <option value="5">Core Circuit</option>
+                        </select>
+                        <div class="btn-group">
+                            <button class="btn" onclick="exportWorkoutTxt()">TXT</button>
+                            <button class="btn" onclick="exportWorkout()">CSV</button>
+                            <button class="btn" onclick="exportWorkoutPDF()">PDF</button>
+                            <button class="btn btn-primary" onclick="saveWorkout()">Save</button>
+                        </div>
                     </div>
                 </div>
-                <div id="workout-builder" style="flex:1;border:1px dashed var(--border-subtle);border-radius:var(--radius-md);padding:12px;min-height:200px" class="space-y">
-                    <div style="color:var(--text-tertiary);font-size:12px;text-align:center;padding:40px">Drag exercises here to build your workout</div>
+                <div id="workout-builder" style="flex:1;border:1px dashed var(--border-subtle);border-radius:var(--radius-md);padding:12px;min-height:200px;overflow-y:auto" class="space-y">
+                    <div style="color:var(--text-tertiary);font-size:12px;text-align:center;padding:40px">Drag exercises here or select a template</div>
+                </div>
+                <!-- O3: Workout analytics bar -->
+                <div id="wo-analytics" style="padding:8px 0;border-top:1px solid var(--border-subtle);margin-top:4px;display:flex;align-items:center;gap:16px;font-size:10px;color:var(--text-tertiary)">
+                    <span>Click Save or add exercises to see analytics</span>
                 </div>
             </div>
         </section>
@@ -508,11 +637,20 @@
             <div style="padding:10px 16px;border-bottom:1px solid var(--border-subtle);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
                 <div class="btn-group">
                     <button class="btn" onclick="addMindmapNode()">+ Node</button>
-                    <button class="btn" onclick="addMindmapConnection()">+ Connection</button>
+                    <button class="btn" onclick="addMindmapNodeShaped()">+ Shaped</button>
+                    <button class="btn" id="mm-connect-btn" onclick="toggleConnectMode()">Connect Mode</button>
                 </div>
-                <div class="btn-group">
-                    <button class="btn" onclick="exportMindmap('json')">Export JSON</button>
-                    <button class="btn" onclick="clearMindmap()">Clear</button>
+                <div class="flex items-center gap-2">
+                    <select id="mm-saved" onchange="loadNamedMindmap()" style="width:130px;font-size:10px">
+                        <option value="">— Current —</option>
+                    </select>
+                    <div class="btn-group">
+                        <button class="btn" onclick="saveNamedMindmap()">Save As</button>
+                        <button class="btn" onclick="exportMindmap('json')">JSON</button>
+                        <button class="btn" onclick="exportMindmapPNG()">PNG</button>
+                        <button class="btn" onclick="exportMindmapSVG()">SVG</button>
+                        <button class="btn" onclick="clearMindmap()">Clear</button>
+                    </div>
                 </div>
             </div>
             <div class="mindmap-canvas" id="mm-canvas">
@@ -543,6 +681,69 @@
             </div>
         </section>
 
+        <!-- === KNOWLEDGE VAULT TAB === -->
+        <section id="sec-vault" class="section">
+            <div class="sidebar sidebar-wide">
+                <div class="sidebar-label">Knowledge Vault</div>
+                <input type="text" id="vault-search" placeholder="Search documents..." oninput="filterVault()" style="margin-bottom:8px">
+                <select id="vault-cat-filter" onchange="filterVault()" style="margin-bottom:8px">
+                    <option value="all">All Categories</option>
+                    <option value="research">Research</option>
+                    <option value="reference">Reference</option>
+                    <option value="notes">Notes</option>
+                    <option value="correspondence">Correspondence</option>
+                    <option value="drafts">Drafts</option>
+                </select>
+                <div id="vault-list" class="space-y" style="overflow-y:auto;flex:1"></div>
+                <button class="btn w-full" style="margin-top:8px" onclick="addVaultDoc()">+ Add Document</button>
+                <button class="btn w-full mt-3" onclick="exportVault()">Export Vault</button>
+            </div>
+            <div class="content flex-col" style="display:flex;flex:1">
+                <div id="vault-viewer" style="flex:1;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);font-size:12px">
+                    Select a document to view
+                </div>
+                <div id="vault-xref" style="display:none;border-top:1px solid var(--border-subtle);padding:12px;max-height:150px;overflow-y:auto">
+                    <div class="sidebar-label" style="margin-bottom:6px">Cross-References</div>
+                    <div id="vault-xref-list"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- === DASHBOARD TAB === -->
+        <section id="sec-dashboard" class="section" style="flex-direction:column">
+            <div class="content" style="flex:1;overflow-y:auto">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <div style="font-size:15px;font-weight:600;color:var(--text-primary)">Dashboard Overview</div>
+                        <div style="font-size:11px;color:var(--text-tertiary)">The Art of Calisthenics — production at a glance</div>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="badge">V3</span>
+                        <button class="btn btn-sm" onclick="initDashboard()">Refresh</button>
+                    </div>
+                </div>
+                <div class="grid grid-3" id="dash-stats" style="margin-bottom:16px"></div>
+                <div class="grid grid-2" style="gap:12px">
+                    <div class="card" style="padding:16px">
+                        <div class="card-header"><span class="card-title">Writing Progress</span></div>
+                        <div id="dash-writing-progress" style="margin-top:8px"></div>
+                    </div>
+                    <div class="card" style="padding:16px">
+                        <div class="card-header"><span class="card-title">Matrix Coverage</span></div>
+                        <div id="dash-matrix-coverage" style="margin-top:8px"></div>
+                    </div>
+                    <div class="card" style="padding:16px">
+                        <div class="card-header"><span class="card-title">Recent Decisions</span></div>
+                        <div id="dash-recent-decisions" style="margin-top:8px"></div>
+                    </div>
+                    <div class="card" style="padding:16px">
+                        <div class="card-header"><span class="card-title">Active Bottlenecks</span></div>
+                        <div id="dash-bottlenecks" style="margin-top:8px"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <!-- === EXPORT TAB === -->
         <section id="sec-export" class="section" style="flex-direction:column">
             <div class="content" style="flex:1">
@@ -556,7 +757,12 @@
                     <div class="export-card">
                         <div class="export-card-title">TOC</div>
                         <div class="export-card-desc">Table of Contents structure</div>
-                        <button class="btn w-full" onclick="exportTOCJson()">Export JSON</button>
+                        <div class="grid grid-2 gap-2">
+                            <button class="btn" onclick="exportTOCJson()">JSON</button>
+                            <button class="btn" onclick="exportTOCMarkdown()">MD</button>
+                            <button class="btn" onclick="exportTOCWord()">Word</button>
+                            <button class="btn" onclick="exportTOCPDF()">PDF</button>
+                        </div>
                     </div>
                     <div class="export-card">
                         <div class="export-card-title">Matrix</div>
@@ -600,6 +806,11 @@
                         <div class="export-card-title">Mindmap</div>
                         <div class="export-card-desc">Mindmap nodes and connections</div>
                         <button class="btn w-full" onclick="exportMindmap('json')">Export JSON</button>
+                    </div>
+                    <div class="export-card" style="border-color:var(--accent-gold);grid-column:1/-1">
+                        <div class="export-card-title" style="color:var(--accent-gold)">Export Bundle</div>
+                        <div class="export-card-desc">Download all exports at once — TOC, Matrix, Research, Writing, State Backup</div>
+                        <button class="btn btn-primary w-full" onclick="exportBundle()">Export All</button>
                     </div>
                 </div>
             </div>
@@ -680,6 +891,31 @@
     </div>
 
     <!-- INTERNAL SECTION MODAL (for S button) -->
+    <!-- EDGE MODAL -->
+    <div class="modal-overlay" id="edge-modal">
+        <div class="modal" style="width:400px">
+            <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:4px">Add Relationship</div>
+            <div style="font-size:10px;color:var(--text-tertiary);margin-bottom:16px">From: <strong id="edge-source-label"></strong></div>
+            <input type="hidden" id="edge-source-id">
+            <div style="margin-bottom:8px">
+                <div class="node-detail-label">Target Node</div>
+                <select id="edge-target" style="width:100%"></select>
+            </div>
+            <div style="margin-bottom:8px">
+                <div class="node-detail-label">Edge Type</div>
+                <select id="edge-type" style="width:100%"></select>
+            </div>
+            <div style="margin-bottom:12px">
+                <div class="node-detail-label">Transfer Scale</div>
+                <select id="edge-scale" style="width:100%"></select>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-primary" style="flex:1" onclick="saveNewEdge()">Create Edge</button>
+                <button class="btn" style="flex:1" onclick="closeEdgeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="internal-modal">
         <div class="modal">
             <div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:16px">Internal Section</div>
@@ -735,11 +971,27 @@
         tocs: { v1: [], v2: [] },
         htmlFiles: [
             { id:1, name:'Saturno Solar System', tag:'Deployed', path:'https://gabosaturno11.github.io/saturno-solar-system/' },
-            { id:2, name:'SATURNO MASTER OS v1', tag:'Reference', path:'' },
-            { id:3, name:'TITAN v1.2', tag:'Reference', path:'' },
-            { id:4, name:'DEPLOYMENT FORGE', tag:'Internal', path:'' },
-            { id:5, name:'LIVING CANVAS V2', tag:'Reference', path:'' },
-            { id:6, name:'UNIFIED OS HUB', tag:'Reference', path:'' },
+            { id:2, name:'Exercise Constellation Builder', tag:'Visual', path:'htmls/exercise_constellation_builder.html' },
+            { id:3, name:'Three Circle Mastery Mandala', tag:'Visual', path:'htmls/three_circle_mastery_mandala.html' },
+            { id:4, name:'Alpha Intelligence Infinity Loop', tag:'Visual', path:'htmls/MORE HTMLS  2/alpha_intelligence_infinity_loop.html' },
+            { id:5, name:'Arc Line Variations', tag:'Visual', path:'htmls/MORE HTMLS  2/arc-line-variations.html' },
+            { id:6, name:'Calisthenics Framework HTML', tag:'Framework', path:'htmls/MORE HTMLS  2/calisthenics_framework_html.html' },
+            { id:7, name:'Calisthenics Framework System', tag:'Framework', path:'htmls/MORE HTMLS  2/calisthenics_framework_system.html' },
+            { id:8, name:'Calisthenics Mastery Map', tag:'Map', path:'htmls/MORE HTMLS  2/calisthenics_mastery_map.html' },
+            { id:9, name:'Complete TOC Visual', tag:'TOC', path:'htmls/MORE HTMLS  2/calisthenics-complete-toc-visual.html' },
+            { id:10, name:'Chapter Card Variations', tag:'Visual', path:'htmls/MORE HTMLS  2/chapter_card_variations.html' },
+            { id:11, name:'Creative Progression Roadmap', tag:'Map', path:'htmls/MORE HTMLS  2/creative-progression-roadmap.html' },
+            { id:12, name:'Handstand Exercise Layout', tag:'Exercise', path:'htmls/MORE HTMLS  2/handstand_exercise_layout.html' },
+            { id:13, name:'Journey Flow Variations', tag:'Visual', path:'htmls/MORE HTMLS  2/journey_flow_variations.html' },
+            { id:14, name:'Mini Heatmap Variations', tag:'Visual', path:'htmls/MORE HTMLS  2/mini-heatmap-variations.html' },
+            { id:15, name:'Movement Galaxy Hub', tag:'Map', path:'htmls/MORE HTMLS  2/movement_galaxy_hub.html' },
+            { id:16, name:'Planetary Progression System', tag:'Map', path:'htmls/MORE HTMLS  2/planetary_progression_system.html' },
+            { id:17, name:'Push-Up Interlocking Gears', tag:'Exercise', path:'htmls/MORE HTMLS  2/pushup_interlocking_gears_complete.html' },
+            { id:18, name:'Push-Up Perfect Series', tag:'Exercise', path:'htmls/MORE HTMLS  2/pushup_perfect_series.html' },
+            { id:19, name:'Ring Orb Variations', tag:'Visual', path:'htmls/MORE HTMLS  2/ring-orb-variations.html' },
+            { id:20, name:'TOC Progress Adaptations', tag:'TOC', path:'htmls/MORE HTMLS  2/toc_progress_adaptations.html' },
+            { id:21, name:'Vertical Lift Variations', tag:'Exercise', path:'htmls/MORE HTMLS  2/vertical-lift-variations.html' },
+            { id:22, name:'Wisdom Boxes Design', tag:'Visual', path:'htmls/MORE HTMLS  2/wisdom-boxes-design.html' },
         ],
         research: [
             { id:1, name:'Movement as First Language', cat:'movement', claim:'The body learns like language: repetition with variation wires fluency', mechanism:'Contextual interference improves differential learning', evidence:'Schmidt & Lee, 2019', placement:'Introduction', used:false, blockA:'', blockB:'', blockC:'', blockD:'' },
@@ -822,6 +1074,8 @@
                 matrix: initMatrix,
                 taxonomy: initTaxonomy,
                 barcode: initBarcode,
+                vault: initVault,
+                dashboard: initDashboard,
                 export: initExport,
                 internal: initInternalTab
             };
@@ -830,7 +1084,7 @@
     });
 
     // TOC
-    function initTOC() { loadTOC('left'); loadTOC('right'); }
+    function initTOC() { if(!S.tocs.v3) S.tocs.v3=[]; loadTOC('left'); loadTOC('right'); updateTOCAnalytics(); }
 
     async function loadExternalTOC() {
         try {
@@ -841,7 +1095,10 @@
                 S.tocs[v] = []; let id = 1;
                 d.tocs[v].parts.forEach(p => {
                     S.tocs[v].push({id:id++, title:p.name, type:'part'});
-                    (p.chapters||[]).forEach(c => S.tocs[v].push({id:id++, title:c.title, type:'chapter'}));
+                    (p.chapters||[]).forEach(c => {
+                        S.tocs[v].push({id:id++, title:c.title, type:'chapter'});
+                        (c.sections||[]).forEach(s => S.tocs[v].push({id:id++, title:s, type:'section'}));
+                    });
                 });
             });
             document.getElementById('k-chapters').textContent = S.tocs.v1.filter(i=>i.type==='chapter').length;
@@ -860,21 +1117,74 @@
         initTOC();
     }
 
+    const defaultStageNames = { 0:'Mobility & Preparation', 1:'Creating the Base', 2:'Building the Structure', 3:'Continuous Mastering' };
+    if (!S.stageNames) S.stageNames = {...defaultStageNames};
+    const stageNames = S.stageNames;
+
+    function editStageName(stageNum) {
+        const current = stageNames[stageNum] || '';
+        const newName = prompt('Stage ' + stageNum + ' name:', current);
+        if (newName !== null && newName !== current) {
+            stageNames[stageNum] = newName;
+            save();
+            // Refresh taxonomy if visible
+            if (S.tab === 'taxonomy') renderTaxonomy();
+        }
+    }
+
     function loadTOC(side) {
         const v = document.getElementById('toc-v-'+side).value;
         const el = document.getElementById('toc-'+side);
         document.getElementById('toc-'+side+'-label').textContent = 'TOC '+v;
+        el.querySelectorAll('.mismatch').forEach(m=>m.classList.remove('mismatch'));
         const items = S.tocs[v] || [];
-        el.innerHTML = items.map(i => `
-            <div class="toc-item ${i.type==='part'?'is-part':''}" data-id="${i.id}">
-                <span class="type-tag">${i.type==='part'?'P':'C'}</span>
-                <span class="title">${i.title}</span>
+        const typeLabel = t => t==='part'?'PART':t==='section'?'Sec':'Ch';
+        // N3: Build movement link map from matrix TOC anchors
+        const movLinks = {};
+        if (S.matrixData && S.matrixData.edges) {
+            S.matrixData.edges.filter(e => e.transfer === 'ANCHORS_TO').forEach(e => {
+                const src = S.matrixData.nodes.find(n => String(n.id) === String(e.source));
+                const tgt = S.matrixData.nodes.find(n => String(n.id) === String(e.target));
+                if (src && src.type === 'TOC' && tgt) {
+                    const key = (src.name||'').toLowerCase();
+                    if (!movLinks[key]) movLinks[key] = [];
+                    movLinks[key].push(tgt.name || tgt.id);
+                }
+            });
+        }
+        el.innerHTML = items.map(i => {
+            const linked = movLinks[(i.title||'').toLowerCase()] || [];
+            const badges = linked.length ? `<div class="movement-badges">${linked.slice(0,3).map(m=>`<span class="movement-badge">${m}</span>`).join('')}${linked.length>3?`<span class="movement-badge">+${linked.length-3}</span>`:''}</div>` : '';
+            return `
+            <div class="toc-item ${i.type==='part'?'is-part':''} ${i.type==='section'?'is-section':''}" data-id="${i.id}">
+                <span class="type-tag">${typeLabel(i.type)}</span>
+                <div style="flex:1;display:flex;flex-direction:column;gap:3px">
+                    <span class="title" ondblclick="editTOCItem(${i.id},'${side}')">${i.title}</span>
+                    ${badges}
+                </div>
                 <div class="btn-group">
                     <button class="btn btn-sm" onclick="editTOCItem(${i.id},'${side}')">Edit</button>
                     <button class="btn btn-sm" onclick="delTOCItem(${i.id},'${side}')" style="color:var(--accent-danger)">x</button>
                 </div>
-            </div>`).join('');
-        new Sortable(el, { animation:150, ghostClass:'ghost', chosenClass:'drag-chosen', onEnd:()=>save() });
+            </div>`;
+        }).join('');
+        new Sortable(el, { animation:150, ghostClass:'ghost', chosenClass:'drag-chosen', onEnd:()=>{reorderTOCFromDOM(side); save();} });
+    }
+
+    function reorderTOCFromDOM(side) {
+        const v = document.getElementById('toc-v-'+side).value;
+        const el = document.getElementById('toc-'+side);
+        const ids = [...el.querySelectorAll('.toc-item')].map(d=>parseInt(d.dataset.id));
+        const reordered = ids.map(id=>S.tocs[v].find(i=>i.id===id)).filter(Boolean);
+        S.tocs[v] = reordered;
+    }
+
+    function syncTOCEverywhere() {
+        const v1 = S.tocs.v1 || [];
+        document.getElementById('k-chapters').textContent = v1.filter(i=>i.type==='chapter').length;
+        document.getElementById('k-parts').textContent = v1.filter(i=>i.type==='part').length;
+        if (S.tab === 'writing' && quill) initWriting();
+        updateTOCAnalytics();
     }
 
     function compareTOCs() {
@@ -891,16 +1201,18 @@
     function addChapter(side) {
         const v=document.getElementById('toc-v-'+side).value, title=prompt('Title:');
         if(!title) return;
-        const type=confirm('Part? (OK=Part, Cancel=Chapter)')?'part':'chapter';
-        S.tocs[v].push({id:Date.now(), title, type}); loadTOC(side); save();
+        const typeChoice = prompt('Type? Enter: part, chapter, or section','chapter');
+        const type = ['part','chapter','section'].includes(typeChoice) ? typeChoice : 'chapter';
+        S.tocs[v].push({id:Date.now(), title, type}); loadTOC(side); syncTOCEverywhere(); save();
     }
     function editTOCItem(id,side) {
         const v=document.getElementById('toc-v-'+side).value, item=S.tocs[v].find(i=>i.id===id);
-        const t=prompt('Edit:',item.title); if(t){item.title=t; loadTOC(side); save();}
+        const t=prompt('Edit title:',item.title); if(t && t!==item.title){item.title=t; loadTOC(side); syncTOCEverywhere(); save();}
     }
     function delTOCItem(id,side) {
+        if(!confirm('Delete this item? This cannot be undone.')) return;
         const v=document.getElementById('toc-v-'+side).value;
-        S.tocs[v]=S.tocs[v].filter(i=>i.id!==id); loadTOC(side); save();
+        S.tocs[v]=S.tocs[v].filter(i=>i.id!==id); loadTOC(side); syncTOCEverywhere(); save();
     }
     function addTOCVersion() {
         const n=prompt('Version (e.g. v3):'); if(!n||S.tocs[n]) return;
@@ -913,17 +1225,196 @@
         dl(`toc-${v}.json`, JSON.stringify(S.tocs[v],null,2), 'application/json');
     }
 
+    function buildTOCText(v) {
+        const items = S.tocs[v] || [];
+        let md = '# THE ART OF CALISTHENICS — TABLE OF CONTENTS\n';
+        md += `# Version: ${v}\n\n`;
+        items.forEach(i => {
+            if (i.type === 'part') md += `\n## ${i.title}\n\n`;
+            else if (i.type === 'chapter') md += `### ${i.title}\n\n`;
+            else if (i.type === 'section') md += `- ${i.title}\n`;
+        });
+        return md;
+    }
+
+    function exportTOCMarkdown() {
+        const v = document.getElementById('toc-v-left').value;
+        dl(`TOC-${v}.md`, buildTOCText(v), 'text/markdown');
+    }
+
+    function exportTOCWord() {
+        const v = document.getElementById('toc-v-left').value;
+        const items = S.tocs[v] || [];
+        let html = '';
+        items.forEach(i => {
+            if (i.type === 'part') html += `<h1 style="color:#333;border-bottom:2px solid #ccc;padding-bottom:8px;margin-top:24px">${i.title}</h1>`;
+            else if (i.type === 'chapter') html += `<h2 style="color:#555;margin-top:16px">${i.title}</h2>`;
+            else if (i.type === 'section') html += `<p style="margin-left:32px;color:#666;font-size:11pt">${i.title}</p>`;
+        });
+        const wordHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>TOC - The Art of Calisthenics (${v})</title><style>body{font-family:Calibri,sans-serif;line-height:1.6;padding:40px}</style></head><body><div style="text-align:center;margin-bottom:40px"><h1 style="font-size:24pt">THE ART OF CALISTHENICS</h1><p style="font-size:14pt;color:#666">Table of Contents — ${v}</p><p style="font-size:10pt;color:#999">Gabo Saturno | Victory Belt Publishing</p></div>${html}</body></html>`;
+        const blob = new Blob(['\ufeff'+wordHtml], {type:'application/msword'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href=url; a.download=`TOC-${v}.doc`; document.body.appendChild(a); a.click();
+        setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
+    }
+
+    function exportTOCPDF() {
+        const v = document.getElementById('toc-v-left').value;
+        const items = S.tocs[v] || [];
+        const content = [
+            { text: 'THE ART OF CALISTHENICS', style: 'bookTitle' },
+            { text: `Table of Contents — ${v}`, style: 'subtitle' },
+            { text: 'Gabo Saturno | Victory Belt Publishing\n\n', style: 'author' }
+        ];
+        items.forEach(i => {
+            if (i.type === 'part') content.push({ text: i.title, style: 'part' });
+            else if (i.type === 'chapter') content.push({ text: i.title, style: 'chapter' });
+            else if (i.type === 'section') content.push({ text: i.title, style: 'section' });
+        });
+        try {
+            pdfMake.createPdf({
+                content: content,
+                styles: {
+                    bookTitle: { fontSize: 22, bold: true, alignment: 'center', margin: [0,0,0,8] },
+                    subtitle: { fontSize: 14, alignment: 'center', color: '#666', margin: [0,0,0,4] },
+                    author: { fontSize: 10, alignment: 'center', color: '#999', margin: [0,0,0,30] },
+                    part: { fontSize: 16, bold: true, margin: [0,20,0,6], color: '#222' },
+                    chapter: { fontSize: 12, bold: true, margin: [16,8,0,3], color: '#444' },
+                    section: { fontSize: 10, margin: [36,2,0,1], color: '#666' }
+                }
+            }).download(`TOC-${v}.pdf`);
+        } catch(e) { alert('PDF export failed'); console.error(e); }
+    }
+
     // WRITING
     let quill=null;
+    const writingModes = {
+        raw:        { color:'#ef4444', desc:'Unfiltered, stream of consciousness' },
+        teacher:    { color:'#22c55e', desc:'Clear, structured, patient' },
+        philosopher:{ color:'#3b82f6', desc:'Deep, reflective, questioning' },
+        prophet:    { color:'#eab308', desc:'Bold, visionary, declarative' },
+        mystic:     { color:'#a855f7', desc:'Poetic, metaphorical, layered' },
+        companion:  { color:'#f97316', desc:'Warm, conversational, supportive' },
+        confessor:  { color:'#6b7280', desc:'Honest, vulnerable, authentic' },
+        rebel:      { color:'#e5e7eb', desc:'Provocative, challenging, sharp' }
+    };
+
     function initWriting() {
         if(!quill) {
             quill=new Quill('#editor',{theme:'snow',modules:{toolbar:[[{'header':[1,2,3,false]}],['bold','italic','underline','strike'],[{'list':'ordered'},{'list':'bullet'}],['link','blockquote','code-block'],['clean']]},placeholder:'Start writing...'});
             const saved=localStorage.getItem('scc_doc'); if(saved) quill.root.innerHTML=saved;
+            quill.on('text-change', updateWordCount);
         }
         const el=document.getElementById('writing-toc'), v=document.getElementById('toc-v-left')?.value||'v1';
-        el.innerHTML=(S.tocs[v]||[]).map(i=>`<div style="font-size:11px;padding:6px 8px;cursor:pointer;border-radius:4px;${i.type==='part'?'color:var(--text-primary);font-weight:600':'color:var(--text-tertiary);padding-left:16px'}" onmouseover="this.style.background='var(--bg-surface)'" onmouseout="this.style.background=''">${i.title}</div>`).join('');
+        el.innerHTML=(S.tocs[v]||[]).map(i=>`<div style="font-size:11px;padding:6px 8px;cursor:pointer;border-radius:4px;${i.type==='part'?'color:var(--text-primary);font-weight:600':i.type==='section'?'color:var(--text-tertiary);padding-left:28px;font-style:italic;font-size:10px':'color:var(--text-tertiary);padding-left:16px'}" onmouseover="this.style.background='var(--bg-surface)'" onmouseout="this.style.background=''" onclick="selectWritingChapter('${i.title.replace(/'/g,"\\'")}')">${i.title}</div>`).join('');
+        // Restore writing mode
+        if (S.currentWritingMode) setWritingMode(S.currentWritingMode, true);
+        updateWordCount();
     }
-    function saveDocument() { localStorage.setItem('scc_doc',quill.root.innerHTML); alert('Saved'); }
+
+    // M1: Writing modes
+    function setWritingMode(mode, silent) {
+        S.currentWritingMode = mode;
+        const m = writingModes[mode];
+        if (!m) return;
+        // Update pills
+        document.querySelectorAll('.wm-pill').forEach(p => {
+            p.classList.toggle('active', p.dataset.mode === mode);
+        });
+        // Subtle editor background tint
+        const editor = document.querySelector('.ql-container');
+        if (editor) editor.style.background = `color-mix(in srgb, ${m.color} 5%, var(--bg-deep))`;
+        // Status text
+        const status = document.getElementById('wm-status');
+        if (status) status.textContent = mode.charAt(0).toUpperCase() + mode.slice(1) + ' — ' + m.desc;
+        if (!silent) save();
+    }
+
+    // M3: Word count
+    function updateWordCount() {
+        if (!quill) return;
+        const text = quill.getText().trim();
+        const wc = text ? text.split(/\s+/).length : 0;
+        const display = document.getElementById('wc-display');
+        if (display) {
+            const target = S._wordTarget || 0;
+            if (target > 0) {
+                const pct = Math.min(Math.round(wc / target * 100), 100);
+                display.textContent = wc.toLocaleString() + ' / ' + target.toLocaleString() + ' words (' + pct + '%)';
+                document.getElementById('wc-progress-wrap').style.display = 'block';
+                document.getElementById('wc-bar').style.width = pct + '%';
+                document.getElementById('wc-target-label').textContent = 'Target: ' + target.toLocaleString() + ' words';
+            } else {
+                display.textContent = wc.toLocaleString() + ' words';
+                document.getElementById('wc-progress-wrap').style.display = 'none';
+            }
+        }
+    }
+    function setWordTarget() {
+        const current = S._wordTarget || 0;
+        const val = prompt('Set word target for this chapter:', current || '3000');
+        if (val !== null) {
+            S._wordTarget = parseInt(val) || 0;
+            save();
+            updateWordCount();
+        }
+    }
+
+    // M2: Writing commands
+    function writingCommand(cmd) {
+        const text = quill ? quill.getText().trim() : '';
+        if (!text) { alert('No text in editor'); return; }
+        const mode = S.currentWritingMode || 'teacher';
+        const prompts = {
+            compress: `Act as a professional book editor. Take the following text and reduce it by approximately 30% while preserving all key meaning, arguments, and voice. The writing mode is "${mode}". Remove redundancies, tighten sentences, cut filler words. Return ONLY the edited text.\n\n---\n${text}`,
+            expand: `Act as a professional book author. Take the following text and expand it by approximately 50% by adding relevant details, examples, and depth. The writing mode is "${mode}". Maintain the same voice and style. Return ONLY the expanded text.\n\n---\n${text}`,
+            simplify: `Act as a professional editor. Rewrite the following text at an 8th grade reading level. Use shorter sentences, simpler vocabulary, and clearer structure. The writing mode is "${mode}". Preserve all key ideas. Return ONLY the simplified text.\n\n---\n${text}`,
+            deepen: `Act as a philosophical author. Take the following text and add philosophical depth — questions, reflections, historical connections, deeper meaning. The writing mode is "${mode}". Return ONLY the deepened text.\n\n---\n${text}`,
+            polish: `Act as a Victory Belt Publishing editor. Polish the following text to professional publishing standards. Fix grammar, improve flow, strengthen transitions, ensure consistency. The writing mode is "${mode}". Return ONLY the polished text.\n\n---\n${text}`
+        };
+        const prompt = prompts[cmd];
+        if (!prompt) return;
+        // Copy to clipboard and show instructions
+        navigator.clipboard.writeText(prompt).then(() => {
+            showToast('Prompt copied! Paste in Claude to apply "' + cmd + '"');
+        }).catch(() => {
+            // Fallback: show in modal
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay open';
+            modal.innerHTML = `<div class="modal" style="width:600px;max-height:80vh;overflow-y:auto"><div style="font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:12px">${cmd.toUpperCase()} Prompt</div><textarea style="width:100%;height:200px;font-size:11px;line-height:1.5" readonly>${prompt}</textarea><button class="btn btn-primary w-full mt-3" onclick="this.closest('.modal-overlay').remove()">Close</button></div>`;
+            document.body.appendChild(modal);
+        });
+    }
+    function togglePreview() {
+        const panel = document.getElementById('preview-panel');
+        const btn = document.getElementById('preview-toggle');
+        if (panel.style.display === 'none') {
+            panel.style.display = 'block';
+            panel.innerHTML = quill ? quill.root.innerHTML : '';
+            btn.textContent = 'Hide Preview';
+            btn.style.color = 'var(--accent-gold)';
+        } else {
+            panel.style.display = 'none';
+            btn.textContent = 'Preview';
+            btn.style.color = '';
+        }
+    }
+
+    function selectWritingChapter(title) {
+        document.getElementById('doc-title').value = title;
+        S._activeChapterTitle = title;
+        // Load saved document for this chapter if any
+        const key = 'scc_doc_' + title.replace(/\s+/g,'_').toLowerCase();
+        const saved = localStorage.getItem(key);
+        if (quill) { quill.root.innerHTML = saved || ''; }
+    }
+    function saveDocument() {
+        const title = document.getElementById('doc-title').value;
+        const key = 'scc_doc_' + title.replace(/\s+/g,'_').toLowerCase();
+        localStorage.setItem(key, quill.root.innerHTML);
+        localStorage.setItem('scc_doc', quill.root.innerHTML);
+        alert('Saved');
+    }
     function exportAs(fmt) {
         if(!quill) initWriting();
         const txt=quill?quill.getText():'', html=quill?quill.root.innerHTML:'', title=document.getElementById('doc-title').value;
@@ -935,7 +1426,8 @@
             const wordHtml = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40"><head><meta charset="utf-8"><title>${title}</title><style>body{font-family:Georgia,serif;line-height:1.8}</style></head><body><h1>${title}</h1>${html}</body></html>`;
             const blob = new Blob(['\ufeff'+wordHtml], {type:'application/msword'});
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href=url; a.download=title+'.doc'; a.click(); URL.revokeObjectURL(url);
+            const a = document.createElement('a'); a.href=url; a.download=title+'.doc'; document.body.appendChild(a); a.click();
+            setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
         }
         if(fmt==='pdf') {
             try {
@@ -960,8 +1452,8 @@
     }
     function previewHTML(id,e) {
         const f=S.htmlFiles.find(x=>x.id===id), panel=e?.shiftKey?2:1, iframe=document.getElementById('html-iframe-'+panel);
-        if(f.path&&f.path.startsWith('http')) iframe.src=f.path;
-        else iframe.srcdoc=`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif"><div style="text-align:center"><h2>${f.name}</h2><p style="font-size:12px;opacity:.6">${f.tag} | ${f.path||'No URL'}</p></div></body></html>`;
+        if(f.path) { iframe.removeAttribute('srcdoc'); iframe.src=f.path; }
+        else iframe.srcdoc=`<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;color:#666;font-family:sans-serif"><div style="text-align:center"><h2>${f.name}</h2><p style="font-size:12px;opacity:.6">${f.tag} | No URL set</p></div></body></html>`;
     }
     function openIframe(n) { const f=document.getElementById('html-iframe-'+n); if(f.src) window.open(f.src,'_blank'); }
     function addHTML() {
@@ -972,43 +1464,33 @@
     }
 
     // RESEARCH
-    const catColors={psychology:'#f59e0b',movement:'#3b82f6',neuroscience:'#8b5cf6',training:'#22c55e',biomechanics:'#00cfff',philosophy:'#ff6b35',pedagogy:'#ff4466'};
+    const catColors={psychology:'#f59e0b',movement:'#3b82f6',neuroscience:'#8b5cf6',training:'#22c55e',biomechanics:'#00cfff',philosophy:'#ff6b35',pedagogy:'#ff4466','Training Science':'#22c55e','Mobility':'#55efc4','Anatomy & Biomechanics':'#00cfff','Training Philosophy':'#a855f7','Philosophy':'#ff6b35','Practical':'#ffeaa7'};
 
     async function loadExternalResearch() {
         try {
             const r = await fetch('data/research.json');
             const d = await r.json();
-            if (Array.isArray(d)) {
-                S.research = d.map((item,i) => ({
+            const mapCard = (item, i) => {
+                const blocks = item.blocks || {};
+                return {
                     id: item.id || i+1,
                     name: item.name || item.title || '',
                     cat: item.cat || item.category || 'movement',
+                    tags: item.tags || [],
                     claim: item.claim || '',
                     mechanism: item.mechanism || '',
                     evidence: item.evidence || '',
                     placement: item.placement || '',
                     used: item.used || false,
-                    blockA: item.blockA || item.core_concept || item.claim || '',
-                    blockB: item.blockB || item.supporting_evidence || item.evidence || '',
-                    blockC: item.blockC || item.application || item.placement || '',
-                    blockD: item.blockD || item.contradictions || ''
-                }));
-            } else if (d.cards) {
-                S.research = d.cards.map((item,i) => ({
-                    id: item.id || i+1,
-                    name: item.name || item.title || '',
-                    cat: item.cat || item.category || 'movement',
-                    claim: item.claim || '',
-                    mechanism: item.mechanism || '',
-                    evidence: item.evidence || '',
-                    placement: item.placement || '',
-                    used: item.used || false,
-                    blockA: item.blockA || item.core_concept || item.claim || '',
-                    blockB: item.blockB || item.supporting_evidence || item.evidence || '',
-                    blockC: item.blockC || item.application || item.placement || '',
-                    blockD: item.blockD || item.contradictions || ''
-                }));
-            }
+                    usedIn: item.usedIn || [],
+                    blockA: blocks.A || item.blockA || item.core_concept || item.claim || '',
+                    blockB: blocks.B || item.blockB || item.supporting_evidence || item.evidence || '',
+                    blockC: blocks.C || item.blockC || item.application || item.placement || '',
+                    blockD: blocks.D || item.blockD || item.contradictions || ''
+                };
+            };
+            if (Array.isArray(d)) S.research = d.map(mapCard);
+            else if (d.cards) S.research = d.cards.map(mapCard);
             populateResearchFilters();
             renderResearch('all');
             save();
@@ -1023,43 +1505,121 @@
 
     function renderResearch(filter) {
         populateResearchFilters();
-        const cards=filter==='all'?S.research:S.research.filter(c=>c.cat===filter);
-        document.getElementById('research-grid').innerHTML=cards.map(c=>{
+        let cards = filter==='all' ? S.research : S.research.filter(c=>c.cat===filter);
+        // I4: Usage filter
+        const uf = document.getElementById('research-usage-filter');
+        if (uf) {
+            const uv = uf.value;
+            if (uv === 'used') cards = cards.filter(c => c.used);
+            else if (uv === 'unused') cards = cards.filter(c => !c.used);
+        }
+        document.getElementById('research-grid').innerHTML = cards.map(c => {
+            const cid = typeof c.id === 'string' ? `'${c.id}'` : c.id;
             const bA = c.blockA || c.claim || '';
             const bB = c.blockB || c.evidence || '';
             const bC = c.blockC || c.placement || '';
             const bD = c.blockD || '';
+            const hasBlocks = bA || bB || bC || bD;
+            const usedIn = (c.usedIn||[]).join(', ');
             return `
-            <div class="research-card ${c.used?'used':''}">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="badge" style="background:${catColors[c.cat]||'#666'}20;color:${catColors[c.cat]||'#666'}">${c.cat}</span>
-                    <button class="btn btn-sm" onclick="toggleUsed(${c.id})" style="${c.used?'color:var(--accent-success)':''}">${c.used?'Used':'Mark Used'}</button>
+            <div class="research-card ${c.used?'used':''}" id="rc-${c.id}">
+                <div class="flex items-center justify-between mb-3" style="cursor:pointer" onclick="toggleResearchExpand('${c.id}')">
+                    <div class="flex items-center gap-2">
+                        <span class="badge" style="background:${catColors[c.cat]||'#666'}20;color:${catColors[c.cat]||'#666'}">${c.cat}</span>
+                        ${c.used ? '<span style="color:var(--accent-success);font-size:14px" title="Used">&#10003;</span>' : ''}
+                    </div>
+                    <div class="flex items-center gap-2">
+                        ${(c.tags||[]).map(t=>`<span style="font-size:8px;color:var(--text-tertiary);border:1px solid var(--border-subtle);padding:1px 4px;border-radius:2px">${t}</span>`).join('')}
+                        <span class="collapsible-arrow" id="rc-arrow-${c.id}">&#9660;</span>
+                    </div>
                 </div>
-                <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:10px">${c.name}</div>
-                ${bA ? `<div class="research-block research-block-a"><div class="research-block-label">A - Core Concept</div>${bA}</div>` : ''}
-                ${bB ? `<div class="research-block research-block-b"><div class="research-block-label">B - Supporting Evidence</div>${bB}</div>` : ''}
-                ${bC ? `<div class="research-block research-block-c"><div class="research-block-label">C - Application</div>${bC}</div>` : ''}
-                ${bD ? `<div class="research-block research-block-d"><div class="research-block-label">D - Contradictions</div>${bD}</div>` : ''}
-                ${(!bA && !bB && !bC && !bD) ? `<div style="font-size:10px;color:var(--text-tertiary);line-height:1.7">
-                    <div><b>Mechanism:</b> ${c.mechanism||''}</div>
-                    <div><b>Evidence:</b> ${c.evidence||''}</div>
-                    <div><b>Placement:</b> ${c.placement||''}</div>
-                </div>` : ''}
-                <button class="btn w-full mt-3" onclick="copyCard(${c.id})">Copy to Clipboard</button>
+                <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:4px">${c.name}</div>
+                ${usedIn ? `<div style="font-size:9px;color:var(--accent-success);margin-bottom:8px">Used in: ${usedIn}</div>` : ''}
+                <div id="rc-body-${c.id}" style="display:none">
+                    ${bA ? `<div class="research-block research-block-a">
+                        <div class="flex items-center justify-between"><div class="research-block-label">A - Core Concept</div><button class="btn btn-sm" onclick="copyBlock(${cid},'A')">Copy A</button></div>
+                        ${bA}</div>` : ''}
+                    ${bB ? `<div class="research-block research-block-b">
+                        <div class="flex items-center justify-between"><div class="research-block-label">B - Supporting Evidence</div><button class="btn btn-sm" onclick="copyBlock(${cid},'B')">Copy B</button></div>
+                        ${bB}</div>` : ''}
+                    ${bC ? `<div class="research-block research-block-c">
+                        <div class="flex items-center justify-between"><div class="research-block-label">C - Application</div><button class="btn btn-sm" onclick="copyBlock(${cid},'C')">Copy C</button></div>
+                        ${bC}</div>` : ''}
+                    ${bD ? `<div class="research-block research-block-d">
+                        <div class="flex items-center justify-between"><div class="research-block-label">D - Contradictions</div><button class="btn btn-sm" onclick="copyBlock(${cid},'D')">Copy D</button></div>
+                        ${bD}</div>` : ''}
+                    ${!hasBlocks ? `<div style="font-size:10px;color:var(--text-tertiary);line-height:1.7">
+                        <div><b>Mechanism:</b> ${c.mechanism||''}</div>
+                        <div><b>Evidence:</b> ${c.evidence||''}</div>
+                        <div><b>Placement:</b> ${c.placement||''}</div>
+                    </div>` : ''}
+                    <div class="flex gap-2 mt-3">
+                        <button class="btn" style="flex:1" onclick="copyCard(${cid})">Copy All</button>
+                        <button class="btn" style="flex:1" onclick="toggleUsed(${cid})">${c.used?'Mark Unused':'Mark Used'}</button>
+                    </div>
+                </div>
             </div>`;
         }).join('');
     }
-    function toggleUsed(id) { const c=S.research.find(x=>x.id===id); c.used=!c.used; renderResearch(document.getElementById('research-filter').value); save(); }
-    function copyCard(id) {
-        const c=S.research.find(x=>x.id===id);
-        const text = `${c.name}\n\nA - Core Concept: ${c.blockA||c.claim||''}\nB - Supporting Evidence: ${c.blockB||c.evidence||''}\nC - Application: ${c.blockC||c.placement||''}\nD - Contradictions: ${c.blockD||''}`;
-        navigator.clipboard.writeText(text);
+
+    function toggleResearchExpand(id) {
+        const body = document.getElementById('rc-body-' + id);
+        const arrow = document.getElementById('rc-arrow-' + id);
+        if (!body) return;
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            if (arrow) arrow.innerHTML = '&#9650;';
+        } else {
+            body.style.display = 'none';
+            if (arrow) arrow.innerHTML = '&#9660;';
+        }
     }
+
+    function toggleUsed(id) {
+        const c = S.research.find(x => x.id === id || String(x.id) === String(id));
+        if (!c) return;
+        c.used = !c.used;
+        if (c.used && !c.usedIn) c.usedIn = [];
+        if (c.used) {
+            const ch = prompt('Used in which chapter? (e.g., Ch1.2)');
+            if (ch) { if (!c.usedIn) c.usedIn = []; c.usedIn.push(ch); }
+        }
+        renderResearch(document.getElementById('research-filter').value);
+        save();
+    }
+
+    function copyBlock(id, block) {
+        const c = S.research.find(x => x.id === id || String(x.id) === String(id));
+        if (!c) return;
+        const blockMap = { A: c.blockA || c.claim || '', B: c.blockB || c.evidence || '', C: c.blockC || c.placement || '', D: c.blockD || '' };
+        navigator.clipboard.writeText(blockMap[block] || '').then(() => showToast('Copied ' + block + ' to clipboard'));
+    }
+
+    function copyCard(id) {
+        const c = S.research.find(x => x.id === id || String(x.id) === String(id));
+        if (!c) return;
+        const text = `${c.name}\n\nA - Core Concept: ${c.blockA||c.claim||''}\nB - Supporting Evidence: ${c.blockB||c.evidence||''}\nC - Application: ${c.blockC||c.placement||''}\nD - Contradictions: ${c.blockD||''}`;
+        navigator.clipboard.writeText(text).then(() => showToast('Copied card to clipboard'));
+    }
+
+    function showToast(msg) {
+        let toast = document.getElementById('toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toast';
+            toast.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--accent-gold);color:#000;padding:8px 16px;border-radius:6px;font-size:11px;font-weight:600;z-index:200;opacity:0;transition:opacity 0.3s';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = msg;
+        toast.style.opacity = '1';
+        setTimeout(() => { toast.style.opacity = '0'; }, 2000);
+    }
+
     function addResearchCard() {
-        const name=prompt('Name:'); if(!name) return;
-        const cat=prompt('Category (psychology/movement/neuroscience/training):')||'movement';
-        const claim=prompt('Core claim (Block A):')||'';
-        S.research.push({id:Date.now(),name,cat,claim,mechanism:'',evidence:'',placement:'',used:false,blockA:claim,blockB:'',blockC:'',blockD:''});
+        const name = prompt('Name:'); if (!name) return;
+        const cat = prompt('Category (Training Science/Mobility/Anatomy & Biomechanics/Training Philosophy/Philosophy/Practical):') || 'Training Science';
+        const claim = prompt('Core claim (Block A):') || '';
+        S.research.push({ id:'RC-'+Date.now(), name, cat, tags:[], claim:'', mechanism:'', evidence:'', placement:'', used:false, usedIn:[], blockA:claim, blockB:'', blockC:'', blockD:'' });
         renderResearch('all'); save();
     }
 
@@ -1075,6 +1635,7 @@
             document.getElementById('k-nodes').textContent = (data.nodes||[]).length;
             buildMatrixFilters(data);
             buildCytoscape(data);
+            buildMatrixNodeList();
             save();
         } catch(e) {
             console.warn('movement_matrix.json not found, matrix will be empty');
@@ -1144,7 +1705,7 @@
 
     function initMatrix() {
         if (!S.matrixData) loadMatrix();
-        else { buildCytoscape(S.matrixData); buildMatrixFilters(S.matrixData); }
+        else { buildCytoscape(S.matrixData); buildMatrixFilters(S.matrixData); buildMatrixNodeList(); }
     }
 
     function showNodeDetail(d) {
@@ -1163,19 +1724,46 @@
             <div style="font-size:16px;font-weight:700;color:var(--text-primary);margin-bottom:4px;margin-top:20px">${d.name}</div>
             <div class="node-detail-label">ID</div><div class="node-detail-value">${d.id}</div>
             <div class="node-detail-label">Type</div><div class="node-detail-value">${d.type||'N/A'}</div>
-            <div class="node-detail-label">Stage</div><div class="node-detail-value"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${d.color};margin-right:6px"></span>Stage ${d.stage}</div>
+            <div class="node-detail-label">Stage</div><div class="node-detail-value"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${d.color};margin-right:6px"></span>Stage ${d.stage}${stageNames[d.stage]?' — '+stageNames[d.stage]:''}</div>
             <div class="node-detail-label">Pattern</div><div class="node-detail-value">${d.pattern||'N/A'}</div>
             <div class="node-detail-label">Discipline</div><div class="node-detail-value">${d.discipline||'N/A'}</div>
             <div class="node-detail-label">Function</div><div class="node-detail-value">${d.func||'N/A'}</div>
             <div class="node-detail-label">Prerequisites</div><div class="node-detail-value">${prereqs||'None'}</div>
             <div class="node-detail-label">Connected Nodes (${connected.length})</div>
             <div class="node-detail-value">${connected.length ? connected.map(c=>`<div style="font-size:10px;padding:3px 0;border-bottom:1px solid var(--border-subtle)">${c}</div>`).join('') : 'None'}</div>
+            <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-subtle)">
+                <button class="btn btn-primary w-full" onclick="openAddEdgeModal('${d.id}')">+ Add Relationship</button>
+                <button class="btn w-full mt-3" onclick="editNodeInCodex('${d.id}')">Edit in Codex</button>
+                <button class="btn w-full mt-3" style="color:var(--accent-danger);border-color:var(--accent-danger)" onclick="deleteMatrixNode('${d.id}')">Delete Node</button>
+            </div>
         `;
         panel.classList.add('open');
     }
 
     function closeNodePanel() {
         document.getElementById('node-detail-panel').classList.remove('open');
+    }
+
+    function editNodeInCodex(id) {
+        // Switch to taxonomy tab and open inspector for this node
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+        document.getElementById('sec-taxonomy').classList.add('active');
+        document.querySelector('[data-tab="taxonomy"]').classList.add('active');
+        S.tab = 'taxonomy';
+        initTaxonomy();
+        setTimeout(() => openTaxInspector(String(id)), 300);
+    }
+
+    function deleteMatrixNode(id) {
+        if (!confirm('Delete this node from the matrix? This cannot be undone.')) return;
+        if (!S.matrixData) return;
+        S.matrixData.nodes = S.matrixData.nodes.filter(n => String(n.id) !== id);
+        S.matrixData.edges = S.matrixData.edges.filter(e => String(e.source) !== id && String(e.target) !== id);
+        closeNodePanel();
+        buildCytoscape(S.matrixData);
+        document.getElementById('k-nodes').textContent = S.matrixData.nodes.length;
+        save();
     }
 
     function applyMatrixFilters() {
@@ -1197,6 +1785,10 @@
             if (edge.source().hasClass('hidden') || edge.target().hasClass('hidden')) edge.addClass('hidden');
             else edge.removeClass('hidden');
         });
+        const visible = cy.nodes().filter(n => !n.hasClass('hidden')).length;
+        const total = cy.nodes().length;
+        const fc = document.getElementById('matrix-filter-count');
+        if (fc) fc.textContent = 'Showing ' + visible + ' of ' + total + ' nodes';
     }
 
     function resetMatrixFilters() {
@@ -1206,6 +1798,148 @@
 
     function refitMatrix() {
         if (cy) cy.fit(50);
+    }
+
+    // G1-G3: CSV Parser — Rebuild matrix from 4 source CSVs
+    async function parseAllCSVs() {
+        if (!confirm('Rebuild matrix from CSV source files? This will replace current matrix data.')) return;
+        try {
+            const parseCSV = text => {
+                const lines = text.trim().split('\n');
+                const headers = lines[0].split(',');
+                return lines.slice(1).map(line => {
+                    const vals = line.split(',');
+                    const obj = {};
+                    headers.forEach((h, i) => obj[h.trim()] = (vals[i]||'').trim());
+                    return obj;
+                });
+            };
+            const [csv1, csv2, csv3, csv4] = await Promise.all([
+                fetch('data/saturno_7_patterns_complete.csv').then(r=>r.text()),
+                fetch('data/saturno_movement_matrix_foundation.csv').then(r=>r.text()),
+                fetch('data/saturno_cross_cutting_categories.csv').then(r=>r.text()),
+                fetch('data/saturno_notes_to_matrix_integration.csv').then(r=>r.text())
+            ]);
+            const nodes = [], edges = [];
+            // Mobility nodes (foundation)
+            parseCSV(csv2).forEach(r => {
+                nodes.push({ id:r.id, name:r.name, type:'MOBILITY', stage:parseInt(r.stage)||0, pattern:r.unlocks_pattern||'', target_area:r.target_area||'', function:r.function||'' });
+            });
+            // Infrastructure nodes (cross-cutting)
+            parseCSV(csv3).forEach(r => {
+                nodes.push({ id:r.id, name:r.name, type:'INFRASTRUCTURE', stage:parseInt(r.stage)||1, pattern:r.category||'', discipline:'', function:r.function||'' });
+                // Prerequisite edges
+                (r.prerequisites||'').split(';').filter(Boolean).forEach(p => {
+                    edges.push({ source:p, target:r.id, transfer:'STRONG_POSITIVE' });
+                });
+            });
+            // Movement nodes (7 patterns)
+            parseCSV(csv1).forEach(r => {
+                nodes.push({ id:r.id, name:r.name, type:'MOVEMENT', stage:parseInt(r.stage)||1, pattern:r.pattern||'', discipline:r.discipline||'', function:'', transfer_value:r.transfer_value||'' });
+                // Prerequisite edges = progression
+                (r.prerequisites||'').split(';').filter(Boolean).forEach(p => {
+                    edges.push({ source:p, target:r.id, transfer:r.transfer_value||'STRONG_POSITIVE' });
+                });
+            });
+            // TOC anchor nodes (chapter-to-movement mappings)
+            parseCSV(csv4).forEach(r => {
+                nodes.push({ id:r.chapter_id, name:r.chapter_title, type:'TOC', stage:-1, pattern:'', discipline:'', function:r.act||'' });
+                (r.linked_movement_ids||'').split(';').filter(Boolean).forEach(mid => {
+                    if (mid !== 'None') edges.push({ source:r.chapter_id, target:mid, transfer:'ANCHORS_TO' });
+                });
+            });
+            S.matrixData = {
+                meta: { title:'Saturno Movement Codex', version:'2.0.0-csv', locked:false, total_nodes:nodes.length, generated:new Date().toISOString().split('T')[0] },
+                enums: S.matrixData?.enums || {},
+                nodes, edges
+            };
+            save();
+            document.getElementById('k-nodes').textContent = nodes.length;
+            alert('Matrix rebuilt from CSV: ' + nodes.length + ' nodes, ' + edges.length + ' edges');
+            if (S.tab === 'matrix') initMatrix();
+            if (S.tab === 'taxonomy') initTaxonomy();
+        } catch(e) { alert('CSV parse failed: ' + e.message); console.error(e); }
+    }
+
+    // H1: Add Edge UI — relationship creation
+    function openAddEdgeModal(sourceId) {
+        if (!S.matrixData) return;
+        const nodes = S.matrixData.nodes.filter(n => String(n.id) !== sourceId);
+        const src = S.matrixData.nodes.find(n => String(n.id) === sourceId);
+        const edgeTypes = ['PROGRESSES_TO','TRANSFERS_TO','REQUIRES','SUPPORTS','ANCHORS_TO'];
+        const scales = ['STRONG_POSITIVE','MODERATE_POSITIVE','WEAK_POSITIVE','CONTEXT_DEPENDENT'];
+        const modal = document.getElementById('edge-modal');
+        if (!modal) return;
+        document.getElementById('edge-source-label').textContent = src ? src.name : sourceId;
+        document.getElementById('edge-source-id').value = sourceId;
+        const tgt = document.getElementById('edge-target');
+        tgt.innerHTML = nodes.map(n => `<option value="${n.id}">${n.name||n.id} (${n.type||''})</option>`).join('');
+        document.getElementById('edge-type').innerHTML = edgeTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+        document.getElementById('edge-scale').innerHTML = scales.map(s => `<option value="${s}">${s}</option>`).join('');
+        modal.classList.add('open');
+    }
+    function closeEdgeModal() { document.getElementById('edge-modal').classList.remove('open'); }
+    function saveNewEdge() {
+        const src = document.getElementById('edge-source-id').value;
+        const tgt = document.getElementById('edge-target').value;
+        const type = document.getElementById('edge-type').value;
+        const scale = document.getElementById('edge-scale').value;
+        if (!src || !tgt) return;
+        if (!S.matrixData) return;
+        S.matrixData.edges.push({ source:src, target:tgt, transfer:scale, type:type });
+        save();
+        closeEdgeModal();
+        if (cy) buildCytoscape(S.matrixData);
+        alert('Edge created: ' + src + ' → ' + tgt);
+    }
+
+    function buildMatrixNodeList() {
+        if (!S.matrixData || !S.matrixData.nodes) return;
+        const list = document.getElementById('matrix-node-list');
+        if (!list) return;
+        const q = (document.getElementById('matrix-node-search')?.value || '').toLowerCase();
+        const nodes = S.matrixData.nodes.filter(n => !q || (n.name||'').toLowerCase().includes(q) || String(n.id).toLowerCase().includes(q));
+        list.innerHTML = nodes.slice(0, 50).map(n => `
+            <div style="font-size:10px;padding:4px 6px;cursor:pointer;border-radius:3px;color:var(--text-secondary);display:flex;align-items:center;gap:4px"
+                 onmouseover="this.style.background='var(--bg-surface)'" onmouseout="this.style.background=''"
+                 onclick="focusMatrixNode('${n.id}')">
+                <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:${stageColors[n.stage]||'#888'};flex-shrink:0"></span>
+                ${n.name||n.id}
+            </div>`).join('');
+    }
+
+    function filterMatrixNodeList(e) {
+        buildMatrixNodeList();
+        // H3: Enter key focuses first matching node in graph
+        if (e && e.key === 'Enter') {
+            const q = (document.getElementById('matrix-node-search')?.value || '').toLowerCase();
+            if (!q || !S.matrixData) return;
+            const match = S.matrixData.nodes.find(n => (n.name||'').toLowerCase().includes(q) || String(n.id).toLowerCase().includes(q));
+            if (match) focusMatrixNode(String(match.id));
+        }
+        // Highlight matching nodes in Cytoscape
+        if (cy && S.matrixData) {
+            const q = (document.getElementById('matrix-node-search')?.value || '').toLowerCase();
+            cy.nodes().forEach(node => {
+                if (q && ((node.data('name')||'').toLowerCase().includes(q) || node.id().toLowerCase().includes(q))) {
+                    node.style('border-width', 4);
+                    node.style('border-color', '#ffaa00');
+                } else {
+                    node.style('border-width', 2);
+                    node.style('border-color', node.data('color') || '#888');
+                }
+            });
+        }
+    }
+
+    function focusMatrixNode(id) {
+        if (!cy) return;
+        const node = cy.getElementById(String(id));
+        if (node.length) {
+            cy.animate({ center: { eles: node }, zoom: 2 }, { duration: 300 });
+            node.select();
+            showNodeDetail(node.data());
+        }
     }
 
     // TAXONOMY
@@ -1228,10 +1962,20 @@
         if (!data) return;
         const patterns = [...new Set((data.nodes||[]).map(n=>n.pattern).filter(Boolean))];
         const types = [...new Set((data.nodes||[]).map(n=>n.type).filter(Boolean))];
+        const disciplines = [...new Set((data.nodes||[]).map(n=>n.discipline).filter(Boolean))];
         const ps = document.getElementById('tax-pattern');
         const ts = document.getElementById('tax-type');
+        const ds = document.getElementById('tax-discipline');
         ps.innerHTML = '<option value="all">All Patterns</option>' + patterns.map(p=>`<option value="${p}">${p}</option>`).join('');
         ts.innerHTML = '<option value="all">All Types</option>' + types.map(t=>`<option value="${t}">${t}</option>`).join('');
+        if (ds) ds.innerHTML = '<option value="all">All Disciplines</option>' + disciplines.map(d=>`<option value="${d}">${d}</option>`).join('');
+    }
+    // P3: Sortable columns
+    let taxSortCol = null, taxSortAsc = true;
+    function sortTaxonomy(col) {
+        if (taxSortCol === col) taxSortAsc = !taxSortAsc;
+        else { taxSortCol = col; taxSortAsc = true; }
+        renderTaxonomy();
     }
 
     function renderTaxonomy() {
@@ -1240,51 +1984,267 @@
         const pf = document.getElementById('tax-pattern').value;
         const sf = document.getElementById('tax-stage').value;
         const tf = document.getElementById('tax-type').value;
-        const nodes = S.matrixData.nodes.filter(n => {
+        const df = document.getElementById('tax-discipline')?.value || 'all';
+        let nodes = S.matrixData.nodes.filter(n => {
             if (q && !(n.name||'').toLowerCase().includes(q) && !String(n.id).includes(q)) return false;
             if (pf !== 'all' && n.pattern !== pf) return false;
             if (sf !== 'all' && String(n.stage) !== sf) return false;
             if (tf !== 'all' && n.type !== tf) return false;
+            if (df !== 'all' && n.discipline !== df) return false;
             return true;
         });
-        document.getElementById('tax-count').textContent = nodes.length + ' / ' + S.matrixData.nodes.length + ' movements';
+        // P3: Sort
+        if (taxSortCol) {
+            nodes.sort((a,b) => {
+                let av = a[taxSortCol]||'', bv = b[taxSortCol]||'';
+                if (taxSortCol === 'stage') { av = a.stage||0; bv = b.stage||0; return taxSortAsc ? av-bv : bv-av; }
+                return taxSortAsc ? String(av).localeCompare(String(bv)) : String(bv).localeCompare(String(av));
+            });
+        }
+        document.getElementById('tax-count').textContent = nodes.length + ' / ' + S.matrixData.nodes.length + ' movements' + (taxSortCol ? ' (sorted: '+taxSortCol+(taxSortAsc?' asc':' desc')+')' : '');
         const stColors = { 0:'#55efc4', 1:'#74b9ff', 2:'#ffeaa7', 3:'#ff7675' };
-        document.getElementById('tax-tbody').innerHTML = nodes.map(n => `
-            <tr>
+        const discColors = { 'Bodybuilding':'#3b82f6', 'Power-Free/Statics':'#8b5cf6', 'Freestyle':'#00ff88', 'Street Lifting':'#ff6b35', 'Hand-Balancing':'#ffaa00', 'Mobility':'#00cfff' };
+        if (nodes.length === 0) {
+            document.getElementById('tax-tbody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-tertiary)">No matching movements found</td></tr>';
+            return;
+        }
+        document.getElementById('tax-tbody').innerHTML = nodes.map(n => {
+            const dc = discColors[n.discipline] || '#888';
+            const discPill = n.discipline ? `<span style="display:inline-block;padding:1px 6px;border-radius:3px;font-size:9px;background:${dc}18;color:${dc};border:1px solid ${dc}30">${n.discipline}</span>` : '';
+            return `
+            <tr style="cursor:pointer" onclick="openTaxInspector('${String(n.id).replace(/'/g,"\\'")}')">
                 <td style="font-family:var(--font-mono);font-size:10px;color:var(--text-tertiary)">${n.id}</td>
                 <td style="color:var(--text-primary);font-weight:500">${n.name||''}</td>
                 <td>${n.type||''}</td>
                 <td>${n.pattern||''}</td>
-                <td><span class="stage-dot" style="background:${stColors[n.stage]||'#888'}"></span>Stage ${n.stage!==undefined?n.stage:'?'}</td>
-                <td>${n.discipline||''}</td>
+                <td><span class="stage-dot" style="background:${stColors[n.stage]||'#888'}"></span>Stage ${n.stage!==undefined?n.stage:'?'}${stageNames[n.stage]?' — '+stageNames[n.stage]:''}</td>
+                <td>${discPill}</td>
                 <td style="font-size:10px">${n.function||n.func||''}</td>
-            </tr>`).join('');
+            </tr>`;
+        }).join('');
+    }
+
+    function openTaxInspector(id) {
+        if (!S.matrixData) return;
+        const n = S.matrixData.nodes.find(x => String(x.id) === id);
+        if (!n) return;
+        const panel = document.getElementById('tax-inspector');
+        const content = document.getElementById('tax-inspector-content');
+        const incoming = (S.matrixData.edges||[]).filter(e => String(e.target) === id).map(e => {
+            const src = S.matrixData.nodes.find(x => String(x.id) === String(e.source));
+            return src ? src.name : e.source;
+        });
+        const outgoing = (S.matrixData.edges||[]).filter(e => String(e.source) === id).map(e => {
+            const tgt = S.matrixData.nodes.find(x => String(x.id) === String(e.target));
+            return tgt ? tgt.name : e.target;
+        });
+        const stColors = { 0:'#55efc4', 1:'#74b9ff', 2:'#ffeaa7', 3:'#ff7675' };
+        const allPatterns = [...new Set((S.matrixData.nodes||[]).map(x=>x.pattern).filter(Boolean))];
+        const allTypes = [...new Set((S.matrixData.nodes||[]).map(x=>x.type).filter(Boolean))];
+        const allDisciplines = [...new Set((S.matrixData.nodes||[]).map(x=>x.discipline).filter(Boolean))];
+        content.innerHTML = `
+            <div style="font-size:14px;font-weight:700;color:var(--accent-gold);margin-top:20px;margin-bottom:4px">EDIT NODE</div>
+            <div class="node-detail-label">ID</div><div class="node-detail-value" style="font-family:var(--font-mono)">${n.id}</div>
+            <div class="node-detail-label">Name</div>
+            <input type="text" id="tax-edit-name" value="${(n.name||'').replace(/"/g,'&quot;')}" style="margin-bottom:6px">
+            <div class="node-detail-label">Type</div>
+            <select id="tax-edit-type" style="margin-bottom:6px">${allTypes.map(t=>`<option value="${t}" ${t===n.type?'selected':''}>${t}</option>`).join('')}</select>
+            <div class="node-detail-label">Stage</div>
+            <select id="tax-edit-stage" style="margin-bottom:6px">${[0,1,2,3].map(s=>`<option value="${s}" ${s===n.stage?'selected':''}>Stage ${s}${stageNames[s]?' — '+stageNames[s]:''}</option>`).join('')}</select>
+            <div class="node-detail-label">Pattern</div>
+            <select id="tax-edit-pattern" style="margin-bottom:6px"><option value="">None</option>${allPatterns.map(p=>`<option value="${p}" ${p===n.pattern?'selected':''}>${p}</option>`).join('')}</select>
+            <div class="node-detail-label">Discipline</div>
+            <select id="tax-edit-discipline" style="margin-bottom:6px"><option value="">None</option>${allDisciplines.map(d=>`<option value="${d}" ${d===n.discipline?'selected':''}>${d}</option>`).join('')}</select>
+            <div class="node-detail-label">Function</div>
+            <input type="text" id="tax-edit-func" value="${(n.function||n.func||'').replace(/"/g,'&quot;')}" style="margin-bottom:6px">
+            <button class="btn btn-primary w-full mt-3" onclick="saveTaxEdit('${id}')">Save Changes</button>
+            <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border-subtle)">
+                <div class="node-detail-label">Prerequisites</div>
+                <div class="node-detail-value">${(n.prerequisites||[]).map(p=>`<span class="prereq-badge">${p}</span>`).join('')||'None'}</div>
+                <div class="node-detail-label">Incoming (${incoming.length})</div>
+                <div class="node-detail-value">${incoming.length ? incoming.map(c=>`<div style="font-size:10px;padding:3px 0;border-bottom:1px solid var(--border-subtle)">${c}</div>`).join('') : 'None'}</div>
+                <div class="node-detail-label">Outgoing (${outgoing.length})</div>
+                <div class="node-detail-value">${outgoing.length ? outgoing.map(c=>`<div style="font-size:10px;padding:3px 0;border-bottom:1px solid var(--border-subtle)">${c}</div>`).join('') : 'None'}</div>
+            </div>
+            <button class="btn w-full mt-3" style="color:var(--accent-danger);border-color:var(--accent-danger)" onclick="if(confirm('Delete this node?')){deleteMatrixNode('${id}');closeTaxInspector();renderTaxonomy();}">Delete Node</button>
+        `;
+        panel.classList.add('open');
+    }
+
+    function saveTaxEdit(id) {
+        if (!S.matrixData) return;
+        const n = S.matrixData.nodes.find(x => String(x.id) === id);
+        if (!n) return;
+        n.name = document.getElementById('tax-edit-name').value;
+        n.type = document.getElementById('tax-edit-type').value;
+        n.stage = parseInt(document.getElementById('tax-edit-stage').value);
+        n.pattern = document.getElementById('tax-edit-pattern').value;
+        n.discipline = document.getElementById('tax-edit-discipline').value;
+        const funcVal = document.getElementById('tax-edit-func').value;
+        n.function = funcVal; n.func = funcVal;
+        renderTaxonomy();
+        save();
+        openTaxInspector(id); // Refresh inspector
+    }
+
+    function closeTaxInspector() {
+        document.getElementById('tax-inspector').classList.remove('open');
     }
 
     // WORKOUT
-    function initWorkout() {
-        filterExercises();
-        const builder=document.getElementById('workout-builder');
-        new Sortable(builder, {animation:150, group:'exercises', ghostClass:'ghost'});
+    const exStageColors = { 0:'#55efc4', 1:'#74b9ff', 2:'#ffeaa7', 3:'#ff7675' };
+    const exStageNames = { 0:'Stage 0 — Mobility', 1:'Stage 1 — Base', 2:'Stage 2 — Structure', 3:'Stage 3 — Mastery' };
+
+    function syncExercisesFromTaxonomy() {
+        if (!S.matrixData || !S.matrixData.nodes) return;
+        // Build exercises from all matrixData nodes (movements, mobility, infrastructure)
+        S.exercises = S.matrixData.nodes.map((n, idx) => ({
+            id: n.id || idx + 1,
+            name: n.name || n.id,
+            pattern: n.pattern || n.category || n.target_area || 'General',
+            stage: n.stage !== undefined ? n.stage : '?',
+            discipline: n.discipline || '',
+            type: n.type || 'MOVEMENT',
+            equip: n.equipment || '',
+            func: n.function || n.func || ''
+        }));
+        save();
     }
+
+    function initWorkout() {
+        // Sync exercises from taxonomy if available
+        if (S.matrixData && S.matrixData.nodes && S.matrixData.nodes.length > S.exercises.length) {
+            syncExercisesFromTaxonomy();
+        }
+        // Populate stage filter
+        const sf = document.getElementById('ex-stage-filter');
+        if (sf && sf.options.length <= 1) {
+            sf.innerHTML = '<option value="all">All Stages</option>' +
+                [0,1,2,3].map(s => `<option value="${s}">${exStageNames[s]||'Stage '+s}</option>`).join('');
+        }
+        // Update exercise count
+        const ec = document.getElementById('ex-count');
+        if (ec) ec.textContent = '(' + S.exercises.length + ')';
+        filterExercises();
+        updateSavedWorkoutsList();
+        const builder = document.getElementById('workout-builder');
+        new Sortable(builder, {
+            animation: 150, group: 'exercises', ghostClass: 'ghost',
+            onAdd: function(evt) {
+                // J3: Transform cloned exercise into workout item with sets/reps/rest
+                const item = evt.item;
+                const name = item.dataset.name || item.querySelector('[style*="color:var(--text-primary)"]')?.textContent?.trim() || item.textContent.trim();
+                item.dataset.name = name;
+                item.innerHTML = `
+                    <div style="display:flex;align-items:center;gap:8px;width:100%">
+                        <span style="flex:1;color:var(--text-primary);font-size:11px">${name}</span>
+                        <input type="number" class="wo-sets" placeholder="Sets" style="width:48px;padding:4px;font-size:10px" value="3">
+                        <input type="number" class="wo-reps" placeholder="Reps" style="width:48px;padding:4px;font-size:10px" value="10">
+                        <input type="number" class="wo-rest" placeholder="Rest(s)" style="width:52px;padding:4px;font-size:10px" value="60">
+                        <button class="btn btn-sm" onclick="this.closest('.exercise-item').remove()" style="color:var(--accent-danger);padding:2px 6px">×</button>
+                    </div>`;
+                item.style.borderLeft = '3px solid var(--accent-gold)';
+            }
+        });
+    }
+
     function filterExercises() {
-        const q=(document.getElementById('ex-search').value||'').toLowerCase();
-        const p=document.getElementById('ex-pattern-filter').value;
-        const filtered=S.exercises.filter(e=>(p==='all'||e.pattern===p)&&(!q||e.name.toLowerCase().includes(q)));
-        const el=document.getElementById('ex-library');
-        el.innerHTML=filtered.map(e=>`
-            <div class="exercise-item" data-id="${e.id}">
-                <div style="color:var(--text-primary)">${e.name}</div>
-                <div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">${e.pattern} | ${e.stage} | ${e.equip}</div>
-            </div>`).join('');
+        const q = (document.getElementById('ex-search').value||'').toLowerCase();
+        const p = document.getElementById('ex-pattern-filter').value;
+        const sf = document.getElementById('ex-stage-filter');
+        const sv = sf ? sf.value : 'all';
+        const filtered = S.exercises.filter(e => {
+            if (p !== 'all' && e.pattern !== p) return false;
+            if (sv !== 'all' && String(e.stage) !== sv) return false;
+            if (q && !(e.name||'').toLowerCase().includes(q)) return false;
+            return true;
+        });
+        const el = document.getElementById('ex-library');
+        el.innerHTML = filtered.map(e => {
+            const sc = exStageColors[e.stage] || '#888';
+            return `<div class="exercise-item" data-id="${e.id}" data-name="${(e.name||'').replace(/"/g,'&quot;')}" style="border-left:3px solid ${sc}">
+                <div style="color:var(--text-primary);display:flex;align-items:center;gap:6px">
+                    <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${sc};flex-shrink:0"></span>
+                    ${e.name||e.id}
+                </div>
+                <div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">${e.pattern||''} ${e.discipline?'| '+e.discipline:''} ${e.type?'| '+e.type:''}</div>
+            </div>`;
+        }).join('');
         new Sortable(el, {animation:150, group:{name:'exercises',pull:'clone',put:false}, sort:false, ghostClass:'ghost'});
     }
+
     function exportWorkout() {
-        const items=[...document.getElementById('workout-builder').children].map(el=>el.textContent.trim()).filter(Boolean);
-        const name=document.getElementById('workout-name').value;
-        dl(name+'.txt', name+'\n'+'='.repeat(name.length)+'\n\n'+items.join('\n'), 'text/plain');
+        const items = [...document.getElementById('workout-builder').children].map(el => {
+            const name = el.dataset.name || el.textContent.trim();
+            const sets = el.querySelector('.wo-sets')?.value || '';
+            const reps = el.querySelector('.wo-reps')?.value || '';
+            const rest = el.querySelector('.wo-rest')?.value || '';
+            return { name, sets, reps, rest };
+        }).filter(i => i.name);
+        const wname = document.getElementById('workout-name').value || 'workout';
+        const csv = 'Exercise,Sets,Reps,Rest\n' + items.map(i => `"${i.name}",${i.sets},${i.reps},${i.rest}`).join('\n');
+        dl(wname + '.csv', csv, 'text/csv');
     }
-    function saveWorkout() { save(); alert('Workout saved'); }
+
+    function exportWorkoutTxt() {
+        const items = [...document.getElementById('workout-builder').children].map(el => {
+            const name = el.dataset.name || el.textContent.trim();
+            const sets = el.querySelector('.wo-sets')?.value || '';
+            const reps = el.querySelector('.wo-reps')?.value || '';
+            const rest = el.querySelector('.wo-rest')?.value || '';
+            return sets ? `${name} — ${sets}x${reps} (${rest}s rest)` : name;
+        }).filter(Boolean);
+        const wname = document.getElementById('workout-name').value || 'workout';
+        dl(wname + '.txt', wname + '\n' + '='.repeat(wname.length) + '\n\n' + items.join('\n'), 'text/plain');
+    }
+
+    function saveWorkout() {
+        const wname = document.getElementById('workout-name').value || 'Workout ' + new Date().toLocaleDateString();
+        const items = [...document.getElementById('workout-builder').children].map(el => ({
+            name: el.dataset.name || el.textContent.trim(),
+            sets: el.querySelector('.wo-sets')?.value || '',
+            reps: el.querySelector('.wo-reps')?.value || '',
+            rest: el.querySelector('.wo-rest')?.value || ''
+        })).filter(i => i.name);
+        if (!S.savedWorkouts) S.savedWorkouts = [];
+        S.savedWorkouts.push({ name: wname, items, date: new Date().toISOString() });
+        save();
+        updateSavedWorkoutsList();
+        updateWorkoutAnalytics();
+        showToast('Workout "' + wname + '" saved');
+    }
+    function updateWorkoutAnalytics() {
+        const el = document.getElementById('wo-analytics');
+        if (!el) return;
+        const a = getWorkoutAnalytics();
+        if (a.exercises === 0) { el.innerHTML = '<span>Add exercises to see analytics</span>'; return; }
+        const pats = Object.entries(a.patterns).map(([p,c]) => `<span style="color:var(--text-primary)">${p}</span>: ${c}`).join(' | ');
+        el.innerHTML = `<span>Exercises: <b style="color:var(--text-primary)">${a.exercises}</b></span><span>Sets: <b style="color:var(--text-primary)">${a.totalSets}</b></span><span>Total Reps: <b style="color:var(--text-primary)">${a.totalReps}</b></span><span>Est. Duration: <b style="color:var(--accent-gold)">${a.estDuration} min</b></span><span style="margin-left:auto;font-size:9px">${pats}</span>`;
+    }
+
+    function updateSavedWorkoutsList() {
+        const sel = document.getElementById('saved-workouts-select');
+        if (!sel) return;
+        sel.innerHTML = '<option value="">— Saved Workouts —</option>' +
+            (S.savedWorkouts||[]).map((w,i) => `<option value="${i}">${w.name}</option>`).join('');
+    }
+
+    function loadSavedWorkout() {
+        const sel = document.getElementById('saved-workouts-select');
+        if (!sel || sel.value === '') return;
+        const w = (S.savedWorkouts||[])[parseInt(sel.value)];
+        if (!w) return;
+        document.getElementById('workout-name').value = w.name;
+        const builder = document.getElementById('workout-builder');
+        builder.innerHTML = w.items.map(i => `
+            <div class="exercise-item" data-name="${(i.name||'').replace(/"/g,'&quot;')}" style="display:flex;align-items:center;gap:8px;padding:8px 10px">
+                <span style="flex:1;color:var(--text-primary)">${i.name}</span>
+                <input type="number" class="wo-sets" value="${i.sets}" placeholder="Sets" style="width:48px;padding:4px;font-size:10px">
+                <input type="number" class="wo-reps" value="${i.reps}" placeholder="Reps" style="width:48px;padding:4px;font-size:10px">
+                <input type="number" class="wo-rest" value="${i.rest}" placeholder="Rest" style="width:48px;padding:4px;font-size:10px">
+                <button class="btn btn-sm" onclick="this.parentElement.remove()" style="color:var(--accent-danger)">×</button>
+            </div>`).join('');
+    }
 
     // MINDMAP
     function renderMindmap() {
@@ -1292,12 +2252,40 @@
         let lines='';
         S.mindmap.edges.forEach(e=>{
             const a=S.mindmap.nodes.find(n=>n.id===e.f), b=S.mindmap.nodes.find(n=>n.id===e.t);
-            if(a&&b) lines+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="rgba(255,255,255,0.08)" stroke-width="2"/>`;
+            if(a&&b) {
+                const style = e.style || 'straight';
+                if (style === 'curved') {
+                    const cx = (a.x+b.x)/2, cy = Math.min(a.y,b.y) - 40;
+                    lines+=`<path d="M${a.x},${a.y} Q${cx},${cy} ${b.x},${b.y}" fill="none" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>`;
+                } else {
+                    lines+=`<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>`;
+                }
+                if (e.bidir) {
+                    lines+=`<circle cx="${a.x}" cy="${a.y}" r="3" fill="rgba(255,170,0,0.5)"/><circle cx="${b.x}" cy="${b.y}" r="3" fill="rgba(255,170,0,0.5)"/>`;
+                }
+                if(e.label) {
+                    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+                    lines+=`<text x="${mx}" y="${my-6}" fill="rgba(255,255,255,0.4)" font-size="9" text-anchor="middle" font-family="var(--font-mono)">${e.label}</text>`;
+                }
+            }
         });
         svg.innerHTML=lines;
-        ns.innerHTML=S.mindmap.nodes.map(n=>`
-            <div class="mindmap-node" style="left:${n.x-50}px;top:${n.y-18}px;color:${n.color};border-color:${n.color}30"
-                 onmousedown="startDragNode(event,${n.id})">${n.text}</div>`).join('');
+        // S1: Shape palette rendering
+        const shapeStyles = {
+            circle: 'border-radius:50%;min-width:80px;text-align:center;padding:20px 12px',
+            diamond: 'transform:rotate(45deg);min-width:70px;text-align:center;padding:18px 10px',
+            hexagon: 'clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);min-width:90px;text-align:center;padding:18px 16px',
+            pill: 'border-radius:50px;padding:10px 20px',
+            rectangle: ''
+        };
+        ns.innerHTML=S.mindmap.nodes.map(n=>{
+            const shape = n.shape || 'rectangle';
+            const extra = shapeStyles[shape] || '';
+            const textStyle = shape === 'diamond' ? 'transform:rotate(-45deg);display:block' : '';
+            return `<div class="mindmap-node" style="left:${n.x-50}px;top:${n.y-18}px;color:${n.color};border-color:${n.color}30;${extra}"
+                 onmousedown="startDragNode(event,${n.id})" onclick="mmNodeClick(${n.id})"><span style="${textStyle}">${n.text}</span></div>`;
+        }).join('');
+        updateMindmapList();
     }
     let dragNode=null, dragOff={x:0,y:0};
     function startDragNode(e,id) {
@@ -1319,6 +2307,32 @@
         S.mindmap.nodes.push({id:Date.now(),x:300+Math.random()*200,y:150+Math.random()*150,text,color:'var(--text-primary)'});
         renderMindmap(); save();
     }
+    // K3: Connect mode
+    let mmConnectMode = false, mmConnectSource = null;
+    function toggleConnectMode() {
+        mmConnectMode = !mmConnectMode;
+        mmConnectSource = null;
+        const btn = document.getElementById('mm-connect-btn');
+        if (btn) {
+            btn.style.color = mmConnectMode ? 'var(--accent-gold)' : '';
+            btn.textContent = mmConnectMode ? 'Connect: Click 2 Nodes' : 'Connect Mode';
+        }
+    }
+    function mmNodeClick(id) {
+        if (!mmConnectMode) return;
+        if (!mmConnectSource) {
+            mmConnectSource = id;
+            document.getElementById('mm-connect-btn').textContent = 'Connect: Select Target';
+        } else {
+            const label = prompt('Connection label (optional):') || '';
+            S.mindmap.edges.push({ f: mmConnectSource, t: id, label: label });
+            mmConnectSource = null;
+            mmConnectMode = false;
+            const btn = document.getElementById('mm-connect-btn');
+            if (btn) { btn.textContent = 'Connect Mode'; btn.style.color = ''; }
+            renderMindmap(); save();
+        }
+    }
     function addMindmapConnection() {
         const list=S.mindmap.nodes.map(n=>`${n.id}: ${n.text}`).join('\n');
         const fid=parseInt(prompt('From node ID:\n'+list)); const tid=parseInt(prompt('To node ID:\n'+list));
@@ -1326,6 +2340,97 @@
     }
     function clearMindmap() { if(confirm('Clear mindmap?')){S.mindmap={nodes:[],edges:[]}; renderMindmap(); save();} }
     function exportMindmap(fmt) { dl('mindmap.json',JSON.stringify(S.mindmap,null,2),'application/json'); }
+
+    // K4: PNG export via canvas
+    function exportMindmapPNG() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const nodes = S.mindmap.nodes || [];
+        const edges = S.mindmap.edges || [];
+        if (nodes.length === 0) { alert('No nodes to export'); return; }
+        const maxX = Math.max(...nodes.map(n=>n.x)) + 100;
+        const maxY = Math.max(...nodes.map(n=>n.y)) + 100;
+        canvas.width = Math.max(maxX, 400);
+        canvas.height = Math.max(maxY, 300);
+        ctx.fillStyle = '#0a0a0c';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        // Draw edges
+        ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+        ctx.lineWidth = 2;
+        edges.forEach(e => {
+            const a = nodes.find(n=>n.id===e.f), b = nodes.find(n=>n.id===e.t);
+            if (a && b) { ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); }
+        });
+        // Draw nodes
+        nodes.forEach(n => {
+            ctx.fillStyle = '#151519';
+            ctx.strokeStyle = n.color || '#444';
+            ctx.lineWidth = 1;
+            const w = ctx.measureText(n.text).width + 28;
+            ctx.beginPath(); ctx.roundRect(n.x - w/2, n.y - 15, w, 30, 6); ctx.fill(); ctx.stroke();
+            ctx.fillStyle = n.color || '#fff';
+            ctx.font = '12px Sora, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(n.text, n.x, n.y);
+        });
+        canvas.toBlob(blob => {
+            const u = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = u; a.download = 'mindmap.png'; document.body.appendChild(a); a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(u); }, 100);
+        });
+    }
+
+    // S4: SVG export
+    function exportMindmapSVG() {
+        const nodes = S.mindmap.nodes || [];
+        const edges = S.mindmap.edges || [];
+        if (nodes.length === 0) { alert('No nodes to export'); return; }
+        const maxX = Math.max(...nodes.map(n=>n.x)) + 120;
+        const maxY = Math.max(...nodes.map(n=>n.y)) + 100;
+        let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${maxX}" height="${maxY}" style="background:#0a0a0c">`;
+        edges.forEach(e => {
+            const a = nodes.find(n=>n.id===e.f), b = nodes.find(n=>n.id===e.t);
+            if (a && b) {
+                svg += `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>`;
+                if (e.label) {
+                    const mx=(a.x+b.x)/2, my=(a.y+b.y)/2;
+                    svg += `<text x="${mx}" y="${my-6}" fill="rgba(255,255,255,0.4)" font-size="9" text-anchor="middle">${e.label}</text>`;
+                }
+            }
+        });
+        nodes.forEach(n => {
+            const w = n.text.length * 8 + 28;
+            svg += `<rect x="${n.x-w/2}" y="${n.y-15}" width="${w}" height="30" rx="6" fill="#151519" stroke="${n.color||'#444'}" stroke-width="1"/>`;
+            svg += `<text x="${n.x}" y="${n.y+4}" fill="${n.color||'#fff'}" font-size="12" text-anchor="middle" font-family="Sora,sans-serif">${n.text}</text>`;
+        });
+        svg += '</svg>';
+        dl('mindmap.svg', svg, 'image/svg+xml');
+    }
+
+    // K5: Named save/load
+    function saveNamedMindmap() {
+        const name = prompt('Save mindmap as:');
+        if (!name) return;
+        if (!S.savedMindmaps) S.savedMindmaps = {};
+        S.savedMindmaps[name] = JSON.parse(JSON.stringify(S.mindmap));
+        save();
+        updateMindmapList();
+        alert('Mindmap "' + name + '" saved');
+    }
+    function loadNamedMindmap() {
+        const sel = document.getElementById('mm-saved');
+        if (!sel || sel.value === '') return;
+        const mm = (S.savedMindmaps||{})[sel.value];
+        if (mm) { S.mindmap = JSON.parse(JSON.stringify(mm)); renderMindmap(); }
+    }
+    function updateMindmapList() {
+        const sel = document.getElementById('mm-saved');
+        if (!sel) return;
+        const names = Object.keys(S.savedMindmaps || {});
+        sel.innerHTML = '<option value="">— Current —</option>' + names.map(n => `<option value="${n}">${n}</option>`).join('');
+    }
 
     // DECISIONS
     function initDecisions() {
@@ -1359,7 +2464,10 @@
         const priority=confirm('High priority?')?'high':'normal';
         S.bottlenecks.push({id:Date.now(),title,priority}); initDecisions(); save();
     }
-    function resolveBottleneck(id) { S.bottlenecks=S.bottlenecks.filter(b=>b.id!==id); initDecisions(); save(); }
+    function resolveBottleneck(id) {
+        if(!confirm('Mark this bottleneck as resolved and remove it?')) return;
+        S.bottlenecks=S.bottlenecks.filter(b=>b.id!==id); initDecisions(); save();
+    }
 
     // BARCODE
     function initBarcode() {
@@ -1400,6 +2508,15 @@
 
     // EXPORT TAB
     function initExport() {}
+
+    function exportBundle() {
+        const delay = (fn, ms) => setTimeout(fn, ms);
+        exportTOCJson();
+        delay(() => exportResearchJson(), 300);
+        delay(() => { if(S.matrixData) exportMatrixJson(); }, 600);
+        delay(() => exportAs('md'), 900);
+        delay(() => exportAllState(), 1200);
+    }
 
     function exportTOCJson() {
         dl('toc-all.json', JSON.stringify(S.tocs, null, 2), 'application/json');
@@ -1492,22 +2609,335 @@
         reader.readAsText(file);
     }
 
+    // N4: TOC Analytics
+    function updateTOCAnalytics() {
+        const el = document.getElementById('toc-analytics');
+        if (!el) return;
+        const v = document.getElementById('toc-v-left')?.value || 'v1';
+        const items = S.tocs[v] || [];
+        const parts = items.filter(i=>i.type==='part').length;
+        const chapters = items.filter(i=>i.type==='chapter').length;
+        const sections = items.filter(i=>i.type==='section').length;
+        // Coverage: chapters with linked movements
+        let linked = 0;
+        if (S.matrixData && S.matrixData.nodes) {
+            const tocNodes = S.matrixData.nodes.filter(n=>n.type==='TOC');
+            linked = tocNodes.length;
+        }
+        const pct = chapters > 0 ? Math.round(linked / chapters * 100) : 0;
+        el.innerHTML = `Parts: <b style="color:var(--accent-gold)">${parts}</b><br>Chapters: <b style="color:var(--text-primary)">${chapters}</b><br>Sections: <b style="color:var(--text-secondary)">${sections}</b><br>Total: <b>${items.length}</b><br>Movement Links: <b style="color:var(--accent-success)">${linked}</b> (${pct}%)`;
+    }
+
+    // O1: Workout templates
+    const workoutTemplates = [
+        { name:'Full Body Foundation', items:[{name:'Push-Up',sets:3,reps:10,rest:60},{name:'Inverted Row',sets:3,reps:10,rest:60},{name:'Squat',sets:3,reps:15,rest:45},{name:'Dip',sets:3,reps:8,rest:60},{name:'Pull-Up',sets:3,reps:6,rest:90},{name:'Hollow Body Hold',sets:3,reps:30,rest:45}] },
+        { name:'Push Day', items:[{name:'Push-Up',sets:4,reps:12,rest:60},{name:'Diamond Push-Up',sets:3,reps:10,rest:60},{name:'Dip',sets:3,reps:10,rest:90},{name:'Pike Push-Up',sets:3,reps:8,rest:60},{name:'Pseudo Planche Push-Up',sets:3,reps:6,rest:90}] },
+        { name:'Pull Day', items:[{name:'Pull-Up',sets:4,reps:8,rest:90},{name:'Inverted Row',sets:3,reps:12,rest:60},{name:'Tuck Front Lever Row',sets:3,reps:6,rest:90},{name:'Muscle-Up',sets:3,reps:3,rest:120}] },
+        { name:'Leg Day', items:[{name:'Squat',sets:4,reps:15,rest:60},{name:'Hip Bridge',sets:3,reps:12,rest:45},{name:'Pistol Squat',sets:3,reps:5,rest:90},{name:'Nordic Curl',sets:3,reps:6,rest:90},{name:'Shrimp Squat',sets:3,reps:5,rest:90}] },
+        { name:'Mobility Flow', items:[{name:'Resting Squat',sets:1,reps:60,rest:30},{name:'Forward Fold',sets:1,reps:60,rest:30},{name:'Bridge',sets:3,reps:30,rest:30},{name:'German Hang',sets:3,reps:30,rest:30},{name:'Pancake',sets:1,reps:60,rest:30}] },
+        { name:'Core Circuit', items:[{name:'Hollow Body Hold',sets:4,reps:30,rest:30},{name:'L-Sit',sets:4,reps:15,rest:45},{name:'Dragon Flag',sets:3,reps:5,rest:60}] }
+    ];
+
+    function loadWorkoutTemplate(idx) {
+        const t = workoutTemplates[idx];
+        if (!t) return;
+        document.getElementById('workout-name').value = t.name;
+        const builder = document.getElementById('workout-builder');
+        builder.innerHTML = t.items.map(i => `
+            <div class="exercise-item wo-card" data-name="${i.name}" style="border-left:3px solid var(--accent-gold)">
+                <div style="display:flex;align-items:center;gap:8px;width:100%">
+                    <span style="flex:1;color:var(--text-primary);font-size:11px;font-weight:500">${i.name}</span>
+                    <input type="number" class="wo-sets" value="${i.sets}" style="width:48px;padding:4px;font-size:10px">
+                    <input type="number" class="wo-reps" value="${i.reps}" style="width:48px;padding:4px;font-size:10px">
+                    <input type="number" class="wo-rest" value="${i.rest}" style="width:52px;padding:4px;font-size:10px">
+                    <button class="btn btn-sm" onclick="this.closest('.exercise-item').remove()" style="color:var(--accent-danger);padding:2px 6px">x</button>
+                </div>
+            </div>`).join('');
+    }
+
+    // O3: Workout analytics
+    function getWorkoutAnalytics() {
+        const items = [...document.getElementById('workout-builder').children].map(el => ({
+            name: el.dataset.name || el.textContent.trim(),
+            sets: parseInt(el.querySelector('.wo-sets')?.value) || 0,
+            reps: parseInt(el.querySelector('.wo-reps')?.value) || 0,
+            rest: parseInt(el.querySelector('.wo-rest')?.value) || 0
+        })).filter(i => i.name && i.sets);
+        const totalSets = items.reduce((s,i) => s + i.sets, 0);
+        const totalReps = items.reduce((s,i) => s + (i.sets * i.reps), 0);
+        const totalRest = items.reduce((s,i) => s + (i.sets * i.rest), 0);
+        const workTime = items.reduce((s,i) => s + (i.sets * i.reps * 3), 0); // ~3s per rep
+        const estDuration = Math.round((workTime + totalRest) / 60);
+        // Pattern coverage
+        const patterns = {};
+        items.forEach(i => {
+            const ex = S.exercises.find(e => e.name === i.name);
+            if (ex && ex.pattern) patterns[ex.pattern] = (patterns[ex.pattern]||0) + 1;
+        });
+        return { exercises: items.length, totalSets, totalReps, estDuration, patterns };
+    }
+
+    // O4: Enhanced workout export (PDF)
+    function exportWorkoutPDF() {
+        const items = [...document.getElementById('workout-builder').children].map(el => ({
+            name: el.dataset.name || el.textContent.trim(),
+            sets: el.querySelector('.wo-sets')?.value || '',
+            reps: el.querySelector('.wo-reps')?.value || '',
+            rest: el.querySelector('.wo-rest')?.value || ''
+        })).filter(i => i.name);
+        const wname = document.getElementById('workout-name').value || 'Workout';
+        try {
+            const content = [
+                { text: wname, style: 'header' },
+                { text: 'The Art of Calisthenics — Workout Sheet\n\n', style: 'sub' },
+                { table: { headerRows:1, widths:['*','auto','auto','auto'], body: [['Exercise','Sets','Reps','Rest(s)'], ...items.map(i=>[i.name,i.sets,i.reps,i.rest])] }, layout:'lightHorizontalLines' }
+            ];
+            pdfMake.createPdf({ content, styles: { header:{fontSize:18,bold:true,margin:[0,0,0,4]}, sub:{fontSize:10,color:'#666',margin:[0,0,0,12]} } }).download(wname+'.pdf');
+        } catch(e) { alert('PDF export failed'); }
+    }
+
+    // P2: Discipline colors for taxonomy
+    const disciplineColors = { 'Bodybuilding':'#3b82f6', 'Power-Free/Statics':'#8b5cf6', 'Freestyle':'#00ff88', 'Street Lifting':'#ff6b35', 'Hand-Balancing':'#ffaa00', 'Mobility':'#00cfff', 'General':'#888' };
+
+    // Q: Knowledge Vault
+    function initVault() {
+        if (!S.vault) S.vault = [];
+        filterVault();
+    }
+    function filterVault() {
+        if (!S.vault) S.vault = [];
+        const q = (document.getElementById('vault-search')?.value||'').toLowerCase();
+        const cat = document.getElementById('vault-cat-filter')?.value || 'all';
+        const docs = S.vault.filter(d => {
+            if (q && !(d.title||'').toLowerCase().includes(q) && !(d.content||'').toLowerCase().includes(q)) return false;
+            if (cat !== 'all' && d.category !== cat) return false;
+            return true;
+        });
+        const list = document.getElementById('vault-list');
+        if (!list) return;
+        const catIcons = {research:'R',reference:'REF',notes:'N',correspondence:'C',drafts:'D'};
+        list.innerHTML = docs.length ? docs.map((d,i) => `
+            <div class="card" style="padding:10px;cursor:pointer" onclick="viewVaultDoc(${i})">
+                <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+                    <span class="badge" style="font-size:7px">${catIcons[d.category]||d.category||'DOC'}</span>
+                    <span style="font-size:12px;color:var(--text-primary);font-weight:500">${d.title||'Untitled'}</span>
+                </div>
+                <div style="font-size:9px;color:var(--text-tertiary)">${(d.content||'').slice(0,80)}...</div>
+                <div style="font-size:8px;color:var(--text-tertiary);margin-top:4px">${d.date||''} ${d.tags?'| '+d.tags.join(', '):''}</div>
+            </div>`).join('') : '<div style="text-align:center;padding:20px;color:var(--text-tertiary);font-size:11px">No documents. Click + to add.</div>';
+    }
+    function addVaultDoc() {
+        const title = prompt('Document title:'); if (!title) return;
+        const category = prompt('Category (research/reference/notes/correspondence/drafts):','notes') || 'notes';
+        const content = prompt('Content (or paste text):') || '';
+        const tags = (prompt('Tags (comma-separated):') || '').split(',').map(t=>t.trim()).filter(Boolean);
+        if (!S.vault) S.vault = [];
+        S.vault.push({ id:'VD-'+Date.now(), title, category, content, tags, date:new Date().toISOString().split('T')[0], xrefs:[] });
+        save(); filterVault();
+    }
+    function viewVaultDoc(idx) {
+        if (!S.vault || !S.vault[idx]) return;
+        const d = S.vault[idx];
+        const viewer = document.getElementById('vault-viewer');
+        viewer.innerHTML = `
+            <div style="padding:24px;width:100%;max-width:700px;margin:0 auto">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                    <div>
+                        <div style="font-size:18px;font-weight:700;color:var(--text-primary)">${d.title}</div>
+                        <div style="font-size:10px;color:var(--text-tertiary);margin-top:4px">${d.category} | ${d.date} ${d.tags?'| '+d.tags.join(', '):''}</div>
+                    </div>
+                    <div class="btn-group">
+                        <button class="btn btn-sm" onclick="editVaultDoc(${idx})">Edit</button>
+                        <button class="btn btn-sm" onclick="copyVaultDoc(${idx})">Copy</button>
+                        <button class="btn btn-sm" style="color:var(--accent-danger)" onclick="deleteVaultDoc(${idx})">Delete</button>
+                    </div>
+                </div>
+                <div style="font-size:13px;line-height:1.8;color:var(--text-secondary);white-space:pre-wrap">${d.content||''}</div>
+            </div>`;
+        // Q3: Cross-references
+        const xrefPanel = document.getElementById('vault-xref');
+        const xrefList = document.getElementById('vault-xref-list');
+        if (xrefPanel && xrefList) {
+            const refs = findXRefs(d);
+            if (refs.length) {
+                xrefPanel.style.display = 'block';
+                xrefList.innerHTML = refs.map(r => `<div style="font-size:10px;padding:4px 0;border-bottom:1px solid var(--border-subtle);color:var(--text-secondary)">${r.type}: <b style="color:var(--text-primary)">${r.name}</b></div>`).join('');
+            } else { xrefPanel.style.display = 'none'; }
+        }
+    }
+    function findXRefs(doc) {
+        const refs = [];
+        const text = (doc.title + ' ' + (doc.content||'')).toLowerCase();
+        // Match against research cards
+        (S.research||[]).forEach(r => { if (text.includes((r.name||'').toLowerCase())) refs.push({type:'Research',name:r.name}); });
+        // Match against TOC chapters
+        (S.tocs.v1||[]).forEach(i => { if (i.type==='chapter' && text.includes(i.title.toLowerCase())) refs.push({type:'TOC',name:i.title}); });
+        // Match against matrix nodes
+        if (S.matrixData) (S.matrixData.nodes||[]).slice(0,30).forEach(n => { if (text.includes((n.name||'').toLowerCase())) refs.push({type:'Movement',name:n.name}); });
+        return refs;
+    }
+    function editVaultDoc(idx) {
+        if (!S.vault || !S.vault[idx]) return;
+        const d = S.vault[idx];
+        const t = prompt('Title:', d.title); if (t !== null) d.title = t;
+        const c = prompt('Content:', d.content); if (c !== null) d.content = c;
+        save(); filterVault(); viewVaultDoc(idx);
+    }
+    function copyVaultDoc(idx) { if (S.vault?.[idx]) navigator.clipboard.writeText(S.vault[idx].content||'').then(()=>showToast('Copied')); }
+    function deleteVaultDoc(idx) {
+        if (!confirm('Delete this document?')) return;
+        S.vault.splice(idx, 1); save(); filterVault();
+        document.getElementById('vault-viewer').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-tertiary);font-size:12px">Select a document to view</div>';
+    }
+    function exportVault() {
+        if (!S.vault || S.vault.length === 0) { alert('Vault is empty'); return; }
+        dl('knowledge-vault.json', JSON.stringify(S.vault, null, 2), 'application/json');
+    }
+
+    // R1: Auto-save version history
+    function saveWithHistory() {
+        if (!S._versions) S._versions = [];
+        S._versions.push({ ts: Date.now(), data: JSON.stringify(S) });
+        if (S._versions.length > 10) S._versions.shift(); // Keep last 10
+    }
+    // Hook into save
+    const _origSave = save;
+    // R2: Session recovery
+    function checkSessionRecovery() {
+        const lastSession = localStorage.getItem('scc3_session');
+        if (lastSession) {
+            try {
+                const info = JSON.parse(lastSession);
+                const diff = Date.now() - info.ts;
+                if (diff < 86400000) { // Within 24h
+                    const el = document.createElement('div');
+                    el.style.cssText = 'position:fixed;bottom:20px;right:20px;background:var(--bg-surface);border:1px solid var(--accent-gold);border-radius:8px;padding:12px 16px;z-index:300;font-size:11px;color:var(--text-secondary);max-width:300px;box-shadow:0 4px 20px rgba(0,0,0,0.5)';
+                    el.innerHTML = `<div style="font-weight:600;color:var(--text-primary);margin-bottom:4px">Session Recovery</div>Last session: ${new Date(info.ts).toLocaleString()}<br>Tab: ${info.tab||'toc'}<div class="flex gap-2 mt-3"><button class="btn btn-sm btn-primary" onclick="this.closest('div').remove()">Dismiss</button></div>`;
+                    document.body.appendChild(el);
+                    setTimeout(() => { if (el.parentNode) el.remove(); }, 8000);
+                }
+            } catch(e) {}
+        }
+        // Save current session
+        localStorage.setItem('scc3_session', JSON.stringify({ ts: Date.now(), tab: S.tab }));
+    }
+
+    // T1: Dashboard
+    function initDashboard() {
+        const stats = document.getElementById('dash-stats');
+        if (!stats) return;
+        const v1 = S.tocs.v1 || [];
+        const chapters = v1.filter(i=>i.type==='chapter').length;
+        const parts = v1.filter(i=>i.type==='part').length;
+        const nodes = S.matrixData ? (S.matrixData.nodes||[]).length : 0;
+        const edges = S.matrixData ? (S.matrixData.edges||[]).length : 0;
+        const researchTotal = S.research.length;
+        const researchUsed = S.research.filter(r=>r.used).length;
+        const decisions = S.decisions.length;
+        const bottlenecks = S.bottlenecks.length;
+        const exercises = S.exercises.length;
+        const vaultDocs = (S.vault||[]).length;
+        stats.innerHTML = [
+            { label:'TOC Chapters', value:chapters, color:'var(--accent-gold)', sub:parts+' parts' },
+            { label:'Matrix Nodes', value:nodes, color:'var(--accent-blue)', sub:edges+' edges' },
+            { label:'Research Cards', value:researchTotal, color:'var(--accent-success)', sub:researchUsed+' used' },
+            { label:'Decisions', value:decisions, color:'var(--accent-purple)', sub:bottlenecks+' bottlenecks' },
+            { label:'Exercises', value:exercises, color:'var(--accent-warning)', sub:'in library' },
+            { label:'Vault Documents', value:vaultDocs, color:'var(--accent-blue)', sub:'in vault' }
+        ].map(s => `
+            <div class="card" style="padding:16px;text-align:center">
+                <div style="font-size:28px;font-weight:700;color:${s.color}">${s.value}</div>
+                <div style="font-size:11px;color:var(--text-primary);margin-top:4px">${s.label}</div>
+                <div style="font-size:9px;color:var(--text-tertiary);margin-top:2px">${s.sub}</div>
+            </div>`).join('');
+        // Writing progress
+        const wp = document.getElementById('dash-writing-progress');
+        if (wp) {
+            const written = [];
+            v1.filter(i=>i.type==='chapter').forEach(ch => {
+                const key = 'scc_doc_' + ch.title.replace(/\s+/g,'_').toLowerCase();
+                const content = localStorage.getItem(key);
+                const wc = content ? content.replace(/<[^>]*>/g,'').trim().split(/\s+/).filter(Boolean).length : 0;
+                written.push({ title: ch.title, wc });
+            });
+            const total = written.reduce((s,w) => s + w.wc, 0);
+            const withContent = written.filter(w => w.wc > 0).length;
+            wp.innerHTML = `<div style="font-size:24px;font-weight:700;color:var(--accent-gold);margin-bottom:4px">${total.toLocaleString()} words</div><div style="font-size:10px;color:var(--text-tertiary);margin-bottom:8px">${withContent}/${written.length} chapters started</div>` +
+                written.slice(0,8).map(w => `<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px"><span style="font-size:10px;color:var(--text-secondary);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${w.title}</span><span style="font-family:var(--font-mono);font-size:9px;color:${w.wc>0?'var(--accent-success)':'var(--text-tertiary)'}">${w.wc}</span></div>`).join('');
+        }
+        // Matrix coverage
+        const mc = document.getElementById('dash-matrix-coverage');
+        if (mc && S.matrixData) {
+            const types = {};
+            (S.matrixData.nodes||[]).forEach(n => { types[n.type||'OTHER'] = (types[n.type||'OTHER']||0) + 1; });
+            mc.innerHTML = Object.entries(types).map(([t,c]) => `<div style="display:flex;justify-content:space-between;padding:4px 0;font-size:11px;border-bottom:1px solid var(--border-subtle)"><span style="color:var(--text-secondary)">${t}</span><span style="font-weight:600;color:var(--text-primary)">${c}</span></div>`).join('');
+        }
+        // Recent decisions
+        const rd = document.getElementById('dash-recent-decisions');
+        if (rd) {
+            rd.innerHTML = S.decisions.slice(-5).reverse().map(d => `<div style="padding:4px 0;border-bottom:1px solid var(--border-subtle);font-size:10px"><span class="badge ${d.status==='resolved'?'badge-green':'badge-orange'}" style="margin-right:6px">${d.status}</span>${d.title}</div>`).join('') || '<div style="font-size:10px;color:var(--text-tertiary)">No decisions yet</div>';
+        }
+        // Bottlenecks
+        const db = document.getElementById('dash-bottlenecks');
+        if (db) {
+            db.innerHTML = S.bottlenecks.map(b => `<div style="padding:4px 0;border-bottom:1px solid var(--border-subtle);font-size:10px"><span class="badge ${b.priority==='high'?'badge-orange':''}" style="margin-right:6px">${b.priority}</span>${b.title}</div>`).join('') || '<div style="font-size:10px;color:var(--accent-success)">No active bottlenecks</div>';
+        }
+    }
+
+    // S1-S4: Enhanced Mindmap
+    const mmShapes = ['rectangle','circle','diamond','hexagon','pill'];
+    function addMindmapNodeShaped() {
+        const text = prompt('Node text:'); if (!text) return;
+        const shape = prompt('Shape (rectangle/circle/diamond/hexagon/pill):', 'rectangle') || 'rectangle';
+        const color = prompt('Color (hex):', '#ffaa00') || 'var(--text-primary)';
+        S.mindmap.nodes.push({ id:Date.now(), x:300+Math.random()*200, y:150+Math.random()*150, text, color, shape: shape });
+        renderMindmap(); save();
+    }
+
     // UTILITIES
     function dl(name,content,type) {
         const b=new Blob([content],{type}), u=URL.createObjectURL(b), a=document.createElement('a');
-        a.href=u; a.download=name; a.click(); URL.revokeObjectURL(u);
+        a.href=u; a.download=name; document.body.appendChild(a); a.click();
+        setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(u); }, 100);
     }
-    function save() { try { localStorage.setItem('scc3',JSON.stringify(S)); } catch(e) { console.warn('Save failed',e); } }
+    function save() { try { localStorage.setItem('scc3',JSON.stringify(S)); } catch(e) { console.warn('Save failed',e); alert('Save failed — localStorage may be full. Export a backup now.'); } }
     function load() { const d=localStorage.getItem('scc3'); if(d) { try { Object.assign(S,JSON.parse(d)); } catch(e) {} } }
     function exportAllState() { dl('command-center-state.json',JSON.stringify(S,null,2),'application/json'); }
+    function resetToLastSaved() {
+        if(!confirm('Reset all changes to the last saved state? Any unsaved work will be lost.')) return;
+        const d=localStorage.getItem('scc3');
+        if(d) { try { const parsed=JSON.parse(d); Object.keys(parsed).forEach(k=>S[k]=parsed[k]); location.reload(); } catch(e) { alert('Reset failed'); } }
+        else { alert('No saved state found'); }
+    }
 
     // INIT
     document.addEventListener('DOMContentLoaded', () => {
         load();
+        // Re-sync stageNames after load (load replaces S.stageNames reference)
+        if (S.stageNames) { for (const k in S.stageNames) stageNames[k] = S.stageNames[k]; }
+        S.stageNames = stageNames;
+        if (!S.tocs.v3) S.tocs.v3 = [];
+        if (!S.vault) S.vault = [];
         if (S.tocs.v1.length === 0) loadExternalTOC().catch(()=>loadDefaultTOC());
         else initTOC();
         loadExternalResearch().catch(()=>{});
         loadMatrix().catch(()=>{});
+        // R2: Session recovery
+        checkSessionRecovery();
+
+        // D2: doc-title change syncs to TOC + writing sidebar
+        const docTitle = document.getElementById('doc-title');
+        if (docTitle) {
+            docTitle.addEventListener('change', function() {
+                // Find matching chapter in v1 by old stored title and update
+                if (S._activeChapterTitle) {
+                    const v1 = S.tocs.v1 || [];
+                    const match = v1.find(i => i.title === S._activeChapterTitle);
+                    if (match) { match.title = this.value; syncTOCEverywhere(); save(); }
+                }
+                S._activeChapterTitle = this.value;
+            });
+        }
     });
     </script>
 </body>

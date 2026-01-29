@@ -1,7 +1,7 @@
 {
   "title": "The Art of Calisthenics",
   "version": "EXPANDED TOC (CORRECTED VERSION)",
-  "lastUpdated": "2026-01-27",
+  "lastUpdated": "2026-01-29",
   "tocs": {
     "v1": {
       "name": "Original (7 Parts)",
@@ -11,23 +11,24 @@
           { "id": "FM2", "title": "Foreword (by Victory Belt)" },
           { "id": "FM3", "title": "Preface (Your Journey to This Book)" },
           { "id": "FM4", "title": "Disclaimer (Medical/Legal)" },
-          { "id": "FM5", "title": "How to Use This Book" },
-          { "id": "FM6", "title": "Movement DNA Index" }
+          { "id": "FM5", "title": "How to Use This Book (Navigation Guide)" },
+          { "id": "FM6", "title": "Movement DNA Index (Cross-Reference System)" }
         ]},
-        { "id": "P0-INTRO", "name": "THE SPARK: INTRODUCTION", "chapters": [
-          { "id": "I1", "title": "The Movement Paradox" },
-          { "id": "I2", "title": "Why Calisthenics?" },
+        { "id": "P0-INTRO", "name": "INTRODUCTION: THE MOVEMENT REVOLUTION", "chapters": [
+          { "id": "I1", "title": "The State of Fitness Today" },
+          { "id": "I2", "title": "Why Calisthenics Now?" },
           { "id": "I3", "title": "Movement as Humanity's First Language" },
-          { "id": "I4", "title": "Your Journey Begins Here" },
-          { "id": "I5", "title": "The Author's Story (2019-2025 Evolution)" },
-          { "id": "I6", "title": "The Movement Ecosystem Universe Explained" }
+          { "id": "I4", "title": "The Philosophy of Bodyweight Mastering" },
+          { "id": "I5", "title": "Your Journey Begins Here" },
+          { "id": "I6", "title": "The Author's Story (2019-2025 Evolution)" },
+          { "id": "I7", "title": "The Movement Ecosystem Universe Explained" }
         ]},
-        { "id": "P1", "name": "I: BEGIN - Start Here", "chapters": [
+        { "id": "P1", "name": "PART 1: BEGIN HERE", "chapters": [
           { "id": "P1C01", "title": "Chapter 1: What, How, Why & Who", "sections": [
             "1.1 Why Do You Move? (The Fundamental Question)",
             "1.2 The Purpose Formula: Survival→Status→Success→Meaning",
             "1.3 What This Book Will Teach You (The Complete Scope)",
-            "1.4 How to Best Approach This Book (System Thinking Research)",
+            "1.4 How to Best Approach This Book (System Thinking)",
             "1.5 Who Is This Book For? (The Three Archetypes)",
             "1.6 Your Starting Point Assessment"
           ]},
@@ -40,7 +41,7 @@
             "2.6 Building Momentum"
           ]}
         ]},
-        { "id": "P2", "name": "II: CRAFT - The Art of Calisthenics", "chapters": [
+        { "id": "P2", "name": "PART 2: BUILD THE ART OF CALISTHENICS", "chapters": [
           { "id": "P2C03", "title": "Chapter 3: What is Calisthenics?", "sections": [
             "3.1 Definition & History",
             "3.2 Advantages Over Traditional Training",
@@ -48,15 +49,59 @@
             "3.4 Foundation For Future Training",
             "3.5 The Movement Ecosystem Concept"
           ]},
-          { "id": "P2C04", "title": "Chapter 4: Calisthenics vs Gymnastics" },
-          { "id": "P2C05", "title": "Chapter 5: Calisthenics Training for the Lower Body" },
-          { "id": "P2C06", "title": "Chapter 6: Calisthenics is for Everyone" },
-          { "id": "P2C07", "title": "Chapter 7: Is Calisthenics Safe?" },
-          { "id": "P2C08", "title": "Chapter 8: What to Expect from Calisthenics?" },
-          { "id": "P2C09", "title": "Chapter 9: Goal Setting" },
-          { "id": "P2C10", "title": "Chapter 10: Equipment Guide" }
+          { "id": "P2C04", "title": "Chapter 4: Calisthenics vs Gymnastics", "sections": [
+            "4.1 Historical Divergence",
+            "4.2 Training Methodology Differences",
+            "4.3 Accessibility Factors",
+            "4.4 Skill Transfer Between Disciplines",
+            "4.5 Choosing Your Path"
+          ]},
+          { "id": "P2C05", "title": "Chapter 5: Calisthenics Training for the Lower Body", "sections": [
+            "5.1 The Lower Body Myth",
+            "5.2 Unilateral Training Superiority",
+            "5.3 Jump Training & Plyometrics",
+            "5.4 Weighted Variations",
+            "5.5 Integration with Upper Body"
+          ]},
+          { "id": "P2C06", "title": "Chapter 6: Calisthenics is for Everyone", "sections": [
+            "6.1 Then & Now: Evolution of the Discipline",
+            "6.2 My Training Philosophy",
+            "6.3 The 3 Archetypes (Seeker, Builder, Practitioner)",
+            "6.4 Age, Gender, and Background Considerations",
+            "6.5 Calisthenics in Sports Performance",
+            "6.6 Adaptive Calisthenics"
+          ]},
+          { "id": "P2C07", "title": "Chapter 7: Is Calisthenics Safe?", "sections": [
+            "7.1 Injury Statistics vs Traditional Training",
+            "7.2 Joint Health Benefits",
+            "7.3 Progressive Overload Principles",
+            "7.4 Risk Management Strategies",
+            "7.5 Long-term Sustainability"
+          ]},
+          { "id": "P2C08", "title": "Chapter 8: What to Expect from Calisthenics?", "sections": [
+            "8.1 Realistic Timeline Expectations",
+            "8.2 Physical Transformations",
+            "8.3 Mental & Emotional Changes",
+            "8.4 Life Demands and Sacrifices",
+            "8.5 The Compound Effect"
+          ]},
+          { "id": "P2C09", "title": "Chapter 9: Goal Setting", "sections": [
+            "9.1 SMART Goals Adapted for Calisthenics",
+            "9.2 Process vs Outcome Goals",
+            "9.3 Milestone Mapping",
+            "9.4 Tracking Progress",
+            "9.5 Adjusting Expectations"
+          ]},
+          { "id": "P2C10", "title": "Chapter 10: Equipment Guide", "sections": [
+            "10.1 Minimal vs Optimal Equipment Philosophy",
+            "10.2 Essential Equipment (Pull-up Bar, Parallettes)",
+            "10.3 Optional Equipment (Rings, Resistance Bands)",
+            "10.4 Home Gym Setup Guide",
+            "10.5 Weighted Calisthenics Tools",
+            "10.6 Integration with Free Weights"
+          ]}
         ]},
-        { "id": "P3", "name": "PART 3: DEEPEN - The Mastering Process", "chapters": [
+        { "id": "P3", "name": "PART 3: DEEPEN — THE MASTERING PROCESS", "chapters": [
           { "id": "P3C11", "title": "Chapter 11: Excellence Technique Paradigm", "sections": [
             "11.1 Injuries (Learning from Pain)",
             "11.2 Effectiveness (Results Measurement)",
@@ -66,21 +111,75 @@
             "11.6 Aesthetics (Form & Function)",
             "11.7 Excellence vs. Perfection"
           ]},
-          { "id": "P3C12", "title": "Chapter 12: The Calisthenics Journey" },
+          { "id": "P3C12", "title": "Chapter 12: The Calisthenics Journey", "sections": [
+            "12.1 The Growth Mindset",
+            "12.2 The Beginner's Mind",
+            "12.3 The Approach Philosophy",
+            "12.4 The Warm-Up Ritual",
+            "12.5 Mental Models for Progress"
+          ]},
           { "id": "P3C13", "title": "Chapter 13: The Three Stages", "sections": [
             "13.1 Stage 1: Creating the Base (Foundation)",
+            "13.1.1 Movement Literacy Development",
+            "13.1.2 Scapular Control Mastering",
+            "13.1.3 Fundamental Static Positions",
+            "13.1.4 Core Movement Patterns",
             "13.2 Stage 2: Building the Structure (Development)",
+            "13.2.1 Strength Integration Phase",
+            "13.2.2 The Big Seven Skills Introduction",
+            "13.2.3 Power Development",
             "13.3 Stage 3: Continuous Mastering (Specialization)",
+            "13.3.1 Advanced Skill Development",
+            "13.3.2 Power-Free Movements",
+            "13.3.3 Dynamic Skill Integration",
+            "13.3.4 Personal Style Development",
             "13.4 Transition Protocols",
             "13.5 Stage Assessment Criteria"
           ]}
         ]},
-        { "id": "P4", "name": "PART 4: CHOOSE - Your Unique Odyssey", "chapters": [
-          { "id": "P4C14", "title": "Chapter 14: Bodybuilding" },
-          { "id": "P4C15", "title": "Chapter 15: Power Free" },
-          { "id": "P4C16", "title": "Chapter 16: Freestyle Calisthenics" },
-          { "id": "P4C17", "title": "Chapter 17: Street Lifting" },
-          { "id": "P4C18", "title": "Chapter 18: Hand-Balancing" },
+        { "id": "P4", "name": "PART 4: CHOOSE — YOUR UNIQUE ODYSSEY", "chapters": [
+          { "id": "P4C14", "title": "Chapter 14: Bodybuilding", "sections": [
+            "14.1 Aesthetics Philosophy",
+            "14.2 Hypertrophy Fundamentals",
+            "14.3 Volume Prescription",
+            "14.4 Effort & Intensity Management",
+            "14.5 Nutrition for Muscle Building",
+            "14.6 Sample Programs"
+          ]},
+          { "id": "P4C15", "title": "Chapter 15: Power Free", "sections": [
+            "15.1 Static Strength Science",
+            "15.2 Handstand Push-Up Progression",
+            "15.3 90-Degree Handstand Push-Up",
+            "15.4 Planche Development",
+            "15.5 Front Lever Mastering",
+            "15.6 One-Arm Pull-Up Journey",
+            "15.7 Combining Static Skills"
+          ]},
+          { "id": "P4C16", "title": "Chapter 16: Freestyle Calisthenics", "sections": [
+            "16.1 Competition Standards",
+            "16.2 Risk vs. Reward Analysis",
+            "16.3 Flow State Development",
+            "16.4 Fear Management",
+            "16.5 Creative Expression",
+            "16.6 Building Combinations"
+          ]},
+          { "id": "P4C17", "title": "Chapter 17: Street Lifting", "sections": [
+            "17.1 Understanding Maximal Strength",
+            "17.2 Competition Rules & Standards",
+            "17.3 The Weighted Dip",
+            "17.4 The Weighted Pull-Up",
+            "17.5 The Weighted Muscle-Up",
+            "17.6 The Squat"
+          ]},
+          { "id": "P4C18", "title": "Chapter 18: Hand-Balancing", "sections": [
+            "18.1 The Endless Journey Philosophy",
+            "18.2 Strength Requirements",
+            "18.3 Balance Development",
+            "18.4 Alignment Principles",
+            "18.5 Mobility Prerequisites",
+            "18.6 Entry Variations",
+            "18.7 Training on Different Surfaces"
+          ]},
           { "id": "P4C19", "title": "Chapter 19: Mobility Skills", "sections": [
             "19.1 Mobility vs. Flexibility Distinction",
             "19.2 Strength Through Length",
@@ -91,20 +190,78 @@
             "19.7 The Bridge",
             "19.8 The German Hang"
           ]},
-          { "id": "P4C20", "title": "Chapter 20: Hybrid Paths" }
+          { "id": "P4C20", "title": "Chapter 20: Hybrid Paths", "sections": [
+            "20.1 The 'Well-Rounded' Athlete Myth",
+            "20.2 Conflicting vs. Complementary Goals",
+            "20.3 Double Session Strategies",
+            "20.4 Bodybuilding + Power Free",
+            "20.5 Bodybuilding + Street Lifting",
+            "20.6 Power Free + Street Lifting",
+            "20.7 Adding Handstands to Any Path",
+            "20.8 Can You Have It All?"
+          ]}
         ]},
-        { "id": "P5", "name": "PART 5: DESIGN - Building Your Own Program", "chapters": [
-          { "id": "P5C21", "title": "Chapter 21: Program Templates" },
-          { "id": "P5C22", "title": "Chapter 22: Constructing Your Routine" }
+        { "id": "P5", "name": "PART 5: DESIGN — BUILDING YOUR OWN PROGRAM", "chapters": [
+          { "id": "P5C21", "title": "Chapter 21: Program Templates", "sections": [
+            "21.1 Template Selection Criteria",
+            "21.2 Bodybuilding Templates",
+            "21.3 Power Free Templates",
+            "21.4 Freestyle Templates",
+            "21.5 Street Lifting Templates",
+            "21.6 Hand-Balancing Templates",
+            "21.7 Mobility Templates",
+            "21.8 Hybrid Templates"
+          ]},
+          { "id": "P5C22", "title": "Chapter 22: Constructing Your Routine", "sections": [
+            "22.1 Volume Calculations",
+            "22.2 Frequency Optimization",
+            "22.3 Intensity Management",
+            "22.4 Exercise Selection",
+            "22.5 Workout Split Options",
+            "22.6 Periodization Models",
+            "22.7 Deload Protocols",
+            "22.8 Custom Program Examples"
+          ]}
         ]},
-        { "id": "P6", "name": "PART 6: ENDURE - The Endless Journey", "chapters": [
-          { "id": "P6C23", "title": "Chapter 23: Working Around Injuries" },
-          { "id": "P6C24", "title": "Chapter 24: Patience is a Virtue" }
+        { "id": "P6", "name": "PART 6: ENDURE — THE ENDLESS JOURNEY", "chapters": [
+          { "id": "P6C23", "title": "Chapter 23: Working Around Injuries", "sections": [
+            "23.1 Accepting the Risk",
+            "23.2 Pain Beyond The Body",
+            "23.3 Knowing is Overrated",
+            "23.4 Recovery Protocols",
+            "23.5 Rehabilitation Strategies",
+            "23.6 Do Not Miss the Lesson",
+            "23.7 Coming Back Stronger"
+          ]},
+          { "id": "P6C24", "title": "Chapter 24: Patience is a Virtue", "sections": [
+            "24.1 Do Not Rush (The Slow Cook)",
+            "24.2 Enjoy the Process",
+            "24.3 Celebrate Small Wins",
+            "24.4 You Are One Workout Away",
+            "24.5 Comparison is the Thief of Joy",
+            "24.6 Discipline vs. Motivation",
+            "24.7 The Long Game"
+          ]}
         ]},
-        { "id": "P7", "name": "PART 7: LEGACY - The Endless Mastering Journey", "chapters": [
-          { "id": "P7C25", "title": "Chapter 25: What is Next?" },
-          { "id": "P7C26", "title": "Chapter 26: Passing The Torch" },
-          { "id": "P7C27", "title": "Chapter 27: Living the Practice" }
+        { "id": "P7", "name": "PART 7: BECOME — THE ENDLESS MASTERING JOURNEY", "chapters": [
+          { "id": "P7C25", "title": "Chapter 25: What is Next?", "sections": [
+            "25.1 Play The Long Game",
+            "25.2 Remember Why You Started",
+            "25.3 The Never-Ending Journey",
+            "25.4 Evolution of Practice"
+          ]},
+          { "id": "P7C26", "title": "Chapter 26: Passing The Torch", "sections": [
+            "26.1 Teaching Others (Pull Request Philosophy)",
+            "26.2 Building Community",
+            "26.3 The Next Generation",
+            "26.4 Creating Your Legacy"
+          ]},
+          { "id": "P7C27", "title": "Chapter 27: Living the Practice", "sections": [
+            "27.1 Embodying The Practice",
+            "27.2 Move Beyond Your Limits",
+            "27.3 The Eternal Student",
+            "27.4 Final Wisdom"
+          ]}
         ]},
         { "id": "BM", "name": "BACK MATTER", "chapters": [
           { "id": "BM1", "title": "Appendices" },
@@ -123,12 +280,43 @@
           { "id": "P1C01", "title": "What, How, Why & Who" },
           { "id": "P1C02", "title": "Getting Started" }
         ]},
-        { "id": "P2", "name": "The Art of Calisthenics", "chapters": [] },
-        { "id": "P3", "name": "Mastering Calisthenics", "chapters": [] },
-        { "id": "P4", "name": "Road to Mastery", "chapters": [] },
-        { "id": "P5", "name": "Building Your Own Program", "chapters": [] },
-        { "id": "P6", "name": "The Endless Journey", "chapters": [] },
-        { "id": "P7", "name": "You Are Now a Master", "chapters": [] }
+        { "id": "P2", "name": "The Art of Calisthenics", "chapters": [
+          { "id": "P2C03", "title": "What is Calisthenics?" },
+          { "id": "P2C04", "title": "Calisthenics vs Gymnastics" },
+          { "id": "P2C05", "title": "Calisthenics Training for the Lower Body" },
+          { "id": "P2C06", "title": "Calisthenics is for Everyone" },
+          { "id": "P2C07", "title": "Is Calisthenics Safe?" },
+          { "id": "P2C08", "title": "What to Expect from Calisthenics?" },
+          { "id": "P2C09", "title": "Goal Setting" },
+          { "id": "P2C10", "title": "Equipment Guide" }
+        ]},
+        { "id": "P3", "name": "Mastering Calisthenics", "chapters": [
+          { "id": "P3C11", "title": "Excellence Technique Paradigm" },
+          { "id": "P3C12", "title": "The Calisthenics Journey" },
+          { "id": "P3C13", "title": "The Three Stages" }
+        ]},
+        { "id": "P4", "name": "Your Unique Odyssey", "chapters": [
+          { "id": "P4C14", "title": "Bodybuilding" },
+          { "id": "P4C15", "title": "Power Free" },
+          { "id": "P4C16", "title": "Freestyle Calisthenics" },
+          { "id": "P4C17", "title": "Street Lifting" },
+          { "id": "P4C18", "title": "Hand-Balancing" },
+          { "id": "P4C19", "title": "Mobility Skills" },
+          { "id": "P4C20", "title": "Hybrid Paths" }
+        ]},
+        { "id": "P5", "name": "Building Your Own Program", "chapters": [
+          { "id": "P5C21", "title": "Program Templates" },
+          { "id": "P5C22", "title": "Constructing Your Routine" }
+        ]},
+        { "id": "P6", "name": "The Endless Journey", "chapters": [
+          { "id": "P6C23", "title": "Working Around Injuries" },
+          { "id": "P6C24", "title": "Patience is a Virtue" }
+        ]},
+        { "id": "P7", "name": "The Endless Mastering Journey", "chapters": [
+          { "id": "P7C25", "title": "What is Next?" },
+          { "id": "P7C26", "title": "Passing The Torch" },
+          { "id": "P7C27", "title": "Living the Practice" }
+        ]}
       ]
     }
   },
@@ -160,8 +348,9 @@
       "Mobility"
     ],
     "threeStages": [
+      { "stage": 0, "name": "Mobility & Preparation", "focus": "Big 7 Mobility Positions" },
       { "stage": 1, "name": "Creating the Base", "focus": "Foundation" },
-      { "stage": 2, "name": "Building the Structure", "focus": "Big Seven" },
+      { "stage": 2, "name": "Building the Structure", "focus": "Big Seven Skills" },
       { "stage": 3, "name": "Continuous Mastering", "focus": "Specialization" }
     ]
   },
@@ -172,6 +361,7 @@
     "Movement as First Language: Elevated to Introduction",
     "Technique Paradigm: Changed from 'Perfect' to 'Excellence'",
     "Equipment Philosophy: Clarified minimal vs optimal approach",
-    "Three Archetypes: Changed 'Master' to 'Practitioner'"
+    "Three Archetypes: Changed 'Master' to 'Practitioner'",
+    "All sections and subsections added to every chapter (Jan 29, 2026)"
   ]
 }
