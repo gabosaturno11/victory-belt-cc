@@ -1114,7 +1114,7 @@
                                 Version: <span style="color:var(--text-primary)">V3.0</span><br>
                                 Engine: <span style="color:var(--text-primary)">TITAN Design</span><br>
                                 Libraries: <span style="color:var(--text-primary)">Quill, Sortable, Cytoscape, pdfmake, kjua</span><br>
-                                State Key: <span style="color:var(--text-primary)">scc3</span><br>
+                                State Key: <span style="color:var(--text-primary)">vbcc1</span><br>
                                 Build Date: <span style="color:var(--text-primary)" id="build-date"></span>
                             </div>
                         </div>
@@ -4231,7 +4231,7 @@
     const _origSave = save;
     // R2: Session recovery
     function checkSessionRecovery() {
-        const lastSession = localStorage.getItem('scc3_session');
+        const lastSession = localStorage.getItem('vbcc1_session');
         if (lastSession) {
             try {
                 const info = JSON.parse(lastSession);
@@ -4246,7 +4246,7 @@
             } catch(e) {}
         }
         // Save current session
-        localStorage.setItem('scc3_session', JSON.stringify({ ts: Date.now(), tab: S.tab }));
+        localStorage.setItem('vbcc1_session', JSON.stringify({ ts: Date.now(), tab: S.tab }));
     }
 
     // T1: Dashboard
@@ -4583,12 +4583,12 @@
         a.href=u; a.download=name; document.body.appendChild(a); a.click();
         setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(u); }, 100);
     }
-    function save() { try { localStorage.setItem('scc3',JSON.stringify(S)); } catch(e) { console.warn('Save failed',e); alert('Save failed — localStorage may be full. Export a backup now.'); } }
-    function load() { const d=localStorage.getItem('scc3'); if(d) { try { Object.assign(S,JSON.parse(d)); } catch(e) {} } }
+    function save() { try { localStorage.setItem('vbcc1',JSON.stringify(S)); } catch(e) { console.warn('Save failed',e); alert('Save failed — localStorage may be full. Export a backup now.'); } }
+    function load() { const d=localStorage.getItem('vbcc1'); if(d) { try { Object.assign(S,JSON.parse(d)); } catch(e) {} } }
     function exportAllState() { dl('command-center-state.json',JSON.stringify(S,null,2),'application/json'); }
     function resetToLastSaved() {
         if(!confirm('Reset all changes to the last saved state? Any unsaved work will be lost.')) return;
-        const d=localStorage.getItem('scc3');
+        const d=localStorage.getItem('vbcc1');
         if(d) { try { const parsed=JSON.parse(d); Object.keys(parsed).forEach(k=>S[k]=parsed[k]); location.reload(); } catch(e) { alert('Reset failed'); } }
         else { alert('No saved state found'); }
     }
