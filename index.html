@@ -922,6 +922,11 @@
                     <option value="correspondence">Correspondence</option>
                     <option value="drafts">Drafts</option>
                 </select>
+                <div id="vault-dropzone" ondragover="event.preventDefault();this.style.borderColor='var(--accent-gold)';this.style.background='rgba(255,170,0,0.05)'" ondragleave="this.style.borderColor='var(--border-subtle)';this.style.background='transparent'" ondrop="handleVaultDrop(event)" style="border:1px dashed var(--border-subtle);border-radius:6px;padding:12px;text-align:center;margin-bottom:8px;cursor:pointer;transition:all 0.2s" onclick="document.getElementById('vault-file-input').click()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin:0 auto 4px;display:block;opacity:0.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <div style="font-size:9px;color:var(--text-tertiary)">Drop files here</div>
+                    <input type="file" id="vault-file-input" accept=".md,.txt,.docx,.pdf" multiple style="display:none" onchange="handleVaultFiles(this.files)">
+                </div>
                 <div id="vault-list" class="space-y" style="overflow-y:auto;flex:1"></div>
                 <button class="btn w-full" style="margin-top:8px" onclick="addVaultDoc()">+ Add Document</button>
                 <button class="btn w-full mt-3" onclick="exportVault()">Export Vault</button>
@@ -4219,6 +4224,60 @@
     function exportVault() {
         if (!S.vault || S.vault.length === 0) { alert('Vault is empty'); return; }
         dl('knowledge-vault.json', JSON.stringify(S.vault, null, 2), 'application/json');
+    }
+
+    // Vault drag-drop upload
+    function handleVaultDrop(e) {
+        e.preventDefault();
+        const dz = document.getElementById('vault-dropzone');
+        dz.style.borderColor = 'var(--border-subtle)';
+        dz.style.background = 'transparent';
+        if (e.dataTransfer.files.length) handleVaultFiles(e.dataTransfer.files);
+    }
+    function handleVaultFiles(files) {
+        if (!files || !files.length) return;
+        if (!S.vault) S.vault = [];
+        Array.from(files).forEach(file => {
+            const ext = file.name.split('.').pop().toLowerCase();
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                let content = ev.target.result;
+                let category = 'notes';
+                if (ext === 'md') category = 'drafts';
+                else if (file.name.toLowerCase().includes('research')) category = 'research';
+                else if (file.name.toLowerCase().includes('ref')) category = 'reference';
+                S.vault.push({
+                    id: 'VD-' + Date.now() + '-' + Math.random().toString(36).substr(2,5),
+                    title: file.name.replace(/\.[^/.]+$/, ''),
+                    category: category,
+                    content: content,
+                    tags: [ext.toUpperCase()],
+                    date: new Date().toISOString().split('T')[0],
+                    fileName: file.name,
+                    fileSize: file.size
+                });
+                save();
+                filterVault();
+                showToast('Added: ' + file.name);
+            };
+            if (ext === 'docx') {
+                // For docx, just store the filename - content needs special handling
+                S.vault.push({
+                    id: 'VD-' + Date.now() + '-' + Math.random().toString(36).substr(2,5),
+                    title: file.name.replace(/\.[^/.]+$/, ''),
+                    category: 'drafts',
+                    content: '[DOCX file - ' + file.name + ']\n\nOpen in Word to view full content.',
+                    tags: ['DOCX'],
+                    date: new Date().toISOString().split('T')[0],
+                    fileName: file.name,
+                    fileSize: file.size
+                });
+                save(); filterVault();
+                showToast('Added: ' + file.name);
+            } else {
+                reader.readAsText(file);
+            }
+        });
     }
 
     // R1: Auto-save version history
