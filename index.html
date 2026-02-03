@@ -4305,14 +4305,22 @@
         if (!S.vault || !S.vault[idx]) return;
         const d = S.vault[idx];
         S._editingVaultIdx = idx;
+        S._pendingVaultContent = d.content || '';
         const cleanTitle = (d.title || 'Untitled').replace(/\.(md|txt)$/, '');
-        document.getElementById('doc-title').value = cleanTitle;
-        switchTab('writing');
+        S._pendingVaultTitle = cleanTitle;
+        // Click the writing tab
+        const writingTab = document.querySelector('[data-tab="writing"]');
+        if (writingTab) writingTab.click();
+        // After tab switch and init, load the content
         setTimeout(() => {
-            if (!quill) initWriting();
-            if (quill) quill.setText(d.content || '');
-            showToast('Editing: ' + cleanTitle);
-        }, 100);
+            document.getElementById('doc-title').value = S._pendingVaultTitle;
+            if (quill) {
+                quill.setText(S._pendingVaultContent);
+            }
+            showToast('Editing: ' + S._pendingVaultTitle);
+            S._pendingVaultContent = null;
+            S._pendingVaultTitle = null;
+        }, 150);
     }
 
     // Vault drag-drop upload
